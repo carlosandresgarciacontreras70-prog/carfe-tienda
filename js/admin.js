@@ -60,36 +60,83 @@ try {
   });
 } catch(e) {}
 
-let salesData = [
-  { id:'V-009', client:'Camila Torres',   product:'Air Runner Pro',      qty:1, cost:110000, total:219900, profit:109900, status:'entregado',  payMethod:'tarjeta',       date:'2026-11-12', email:'camila@mail.com' },
-  { id:'V-007', client:'Pedro Ramírez',   product:'Classic Oxford',      qty:1, cost:125000, total:249000, profit:124000, status:'procesando', payMethod:'transferencia', date:'2026-11-12', email:'pedro@mail.com' },
-  { id:'V-005', client:'Luis Rodríguez',  product:'Terra Boot Explorer', qty:1, cost:145000, total:289000, profit:144000, status:'pendiente',  payMethod:'efectivo',      date:'2026-11-12', email:'luis@mail.com' },
-  { id:'V-010', client:'Diego Sánchez',   product:'Street Vibe Sneaker', qty:2, cost:156000, total:319800, profit:163800, status:'entregado',  payMethod:'tarjeta',       date:'2026-11-12', email:'diego@mail.com' },
-  { id:'V-003', client:'Carlos López',    product:'Derby Executive',     qty:1, cost:138000, total:279000, profit:141000, status:'enviado',    payMethod:'transferencia', date:'2026-11-11', email:'carlos@mail.com' },
-  { id:'V-002', client:'María García',    product:'Elegance Heel',       qty:2, cost:184000, total:378000, profit:194000, status:'procesando', payMethod:'efectivo',      date:'2026-11-11', email:'maria@mail.com' },
-  { id:'V-001', client:'Juan Pérez',      product:'Air Runner Pro',      qty:1, cost:110000, total:219900, profit:109900, status:'entregado',  payMethod:'tarjeta',       date:'2026-11-10', email:'juan@mail.com' },
-  { id:'V-004', client:'Ana Martínez',    product:'Mule Suede Chic',     qty:1, cost:72000,  total:149000, profit:77000,  status:'entregado',  payMethod:'tarjeta',       date:'2026-11-09', email:'ana@mail.com' },
-  { id:'V-006', client:'Sofía Torres',    product:'Slide Wave Comfort',  qty:2, cost:84000,  total:178000, profit:94000,  status:'entregado',  payMethod:'tarjeta',       date:'2026-11-08', email:'sofia@mail.com' },
-  { id:'V-008', client:'Lucía Flores',    product:'High Top Street',     qty:3, cost:249000, total:509700, profit:260700, status:'enviado',    payMethod:'tarjeta',       date:'2026-11-07', email:'lucia@mail.com' },
+// ───────── BASE DE DATOS OPERACIONAL (CARFE® PRODUCCIÓN) ─────────
+let salesData = [];
+let filteredSales = [];
+let invoicesData = [];
+let filteredInvoices = [];
+let expensesData = [];
+
+function saveSalesToStorage() {
+  try { localStorage.setItem('carfe_sales_data', JSON.stringify(salesData)); } catch(e) {}
+}
+function saveInvoicesToStorage() {
+  try { localStorage.setItem('carfe_invoices_data', JSON.stringify(invoicesData)); } catch(e) {}
+}
+function saveCarteraToStorage() {
+  try { localStorage.setItem('carfe_cartera_data', JSON.stringify(carteraData)); } catch(e) {}
+}
+function saveExpensesToStorage() {
+  try { localStorage.setItem('carfe_expenses', JSON.stringify(expensesData)); } catch(e) {}
+}
+
+const DEMO_CLIENT_NAMES = [
+  'camila torres', 'pedro ramírez', 'luis rodríguez', 'diego sánchez',
+  'carlos lópez', 'maría garcía', 'juan pérez', 'ana martínez',
+  'sofía torres', 'lucía flores', 'roberto méndez', 'carlos mendoza'
 ];
 
-let invoicesData = [
-  { id:'F-001', client:'Juan Pérez',     product:'Air Runner Pro',  qty:1, subtotal:219900, tax:41781,  total:261681, date:'2026-11-10', status:'pagada', email:'juan@mail.com', payMethod:'tarjeta' },
-  { id:'F-002', client:'Ana Martínez',   product:'Mule Suede Chic', qty:1, subtotal:149000, tax:28310,  total:177310, date:'2026-11-09', status:'pagada', email:'ana@mail.com', payMethod:'tarjeta' },
-  { id:'F-003', client:'Sofía Torres',   product:'Slide Wave',      qty:2, subtotal:178000, tax:33820,  total:211820, date:'2026-11-08', status:'pagada', email:'sofia@mail.com', payMethod:'tarjeta' },
-  { id:'F-004', client:'Lucía Flores',   product:'High Top Street', qty:3, subtotal:509700, tax:96843,  total:606543, date:'2026-11-07', status:'pagada', email:'lucia@mail.com', payMethod:'tarjeta' },
-  { id:'F-005', client:'Carlos López',   product:'Derby Executive', qty:1, subtotal:279000, tax:53010,  total:332010, date:'2026-11-11', status:'pendiente', email:'carlos@mail.com', payMethod:'transferencia' },
-  { id:'F-006', client:'Pedro Ramírez',  product:'Classic Oxford',  qty:1, subtotal:249000, tax:47310,  total:296310, date:'2026-11-12', status:'pendiente', email:'pedro@mail.com', payMethod:'transferencia' },
-];
+function purgeAllDemoData() {
+  try {
+    const rawSales = localStorage.getItem('carfe_sales_data');
+    if (rawSales) {
+      salesData = JSON.parse(rawSales).filter(s => s && s.client && !DEMO_CLIENT_NAMES.includes(s.client.toLowerCase().trim()));
+    } else {
+      salesData = [];
+    }
+  } catch(e) { salesData = []; }
 
-let expensesData = [
-  { id:'EXP-001', date:'2026-11-16', category:'publicidad', desc:'Campaña TikTok Shop & Spark Ads Calzado Carfe®', amount:180000, payMethod:'Bancolombia', status:'pagado' },
-  { id:'EXP-002', date:'2026-11-15', category:'fletes',     desc:'Fletes de envíos nacionales (Coordinadora / Interrapidísimo)', amount:145000, payMethod:'Nequi', status:'pagado' },
-  { id:'EXP-003', date:'2026-11-14', category:'empaques',   desc:'Lote de cajas de calzado y bolsas de lujo Carfe®', amount:320000, payMethod:'Transferencia', status:'pagado' },
-  { id:'EXP-004', date:'2026-11-10', category:'arriendo',   desc:'Arriendo bodega y local de almacenamiento mes Noviembre', amount:850000, payMethod:'Bancolombia', status:'pagado' },
-  { id:'EXP-005', date:'2026-11-08', category:'servicios',  desc:'Internet fibra óptica y energía local comercial', amount:160000, payMethod:'Daviplata', status:'pagado' },
-  { id:'EXP-006', date:'2026-11-05', category:'nomina',     desc:'Pago operario maestro artesano en cuero (Quincena)', amount:650000, payMethod:'Bancolombia', status:'pagado' },
-];
+  try {
+    const rawInvoices = localStorage.getItem('carfe_invoices_data');
+    if (rawInvoices) {
+      invoicesData = JSON.parse(rawInvoices).filter(f => f && f.client && !DEMO_CLIENT_NAMES.includes(f.client.toLowerCase().trim()));
+    } else {
+      invoicesData = [];
+    }
+  } catch(e) { invoicesData = []; }
+
+  try {
+    const rawCartera = localStorage.getItem('carfe_cartera_data');
+    if (rawCartera) {
+      carteraData = JSON.parse(rawCartera).filter(c => c && c.client && !DEMO_CLIENT_NAMES.includes(c.client.toLowerCase().trim()));
+    } else {
+      carteraData = [];
+    }
+  } catch(e) { carteraData = []; }
+
+  try {
+    const rawCrm = localStorage.getItem('carfe_crm_clients');
+    if (rawCrm) {
+      crmClientsData = JSON.parse(rawCrm).filter(c => c && c.name && !DEMO_CLIENT_NAMES.includes(c.name.toLowerCase().trim()));
+    } else {
+      crmClientsData = [];
+    }
+  } catch(e) { crmClientsData = []; }
+
+  try {
+    let pending = JSON.parse(localStorage.getItem('ss_pending_orders') || '[]');
+    pending = pending.filter(p => p && p.client && !DEMO_CLIENT_NAMES.includes(p.client.toLowerCase().trim()));
+    localStorage.setItem('ss_pending_orders', JSON.stringify(pending));
+  } catch(e) {}
+
+  saveSalesToStorage();
+  saveInvoicesToStorage();
+  saveCarteraToStorage();
+  saveCrmToStorage();
+
+  filteredSales = [...salesData];
+  filteredInvoices = [...invoicesData];
+}
 
 try {
   const savedExpenses = localStorage.getItem('carfe_expenses');
@@ -903,10 +950,12 @@ function checkPendingOrders() {
         addNotification('🛍️', '¡Nuevo Pedido Recibido!', `${o.client} — ${o.product || 'Calzado'} — ${totalFmt}`, 'order', orderData);
         toast('🛍️', '¡Nuevo Pedido!', `${o.client} ordenó ${o.product || 'calzado'} (${totalFmt})`);
         
-        // Agregar a ventas
-        salesData.unshift({
+        // Agregar a ventas con teléfono y dirección para trazabilidad DMS
+        const newSale = {
           id: 'V-' + String(salesData.length + 1).padStart(3, '0'),
           client: o.client,
+          phone: o.phone || orderData.phone || '+57 323 269 2578',
+          address: o.address || 'Confirmada por WhatsApp',
           product: o.product || 'Pedido WhatsApp',
           qty: 1,
           cost: unitCost,
@@ -917,7 +966,9 @@ function checkPendingOrders() {
           date: o.date ? o.date.split('T')[0] : new Date().toISOString().split('T')[0],
           email: o.email || 'cliente@whatsapp.com',
           photo: o.photo || null
-        });
+        };
+        salesData.unshift(newSale);
+        saveSalesToStorage();
 
         // Si compró a 2 cuotas, ingresar automáticamente a la cartera
         if (o.payMethod === 'cuotas') {
@@ -925,7 +976,7 @@ function checkPendingOrders() {
           const estDate = new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0];
           carteraData.unshift({
             id: 'CRT-' + String(carteraData.length + 1).padStart(3, '0'),
-            saleId: 'V-' + String(salesData.length).padStart(3, '0'),
+            saleId: newSale.id,
             client: o.client,
             phone: o.phone || '+57 323 269 2578',
             email: o.email || '',
@@ -941,15 +992,88 @@ function checkPendingOrders() {
             lastNotice: null,
             notes: 'Compra web a 2 cuotas. Cuota 1 cobrada. Cuota 2 estimada: ' + estDate
           });
+          saveCarteraToStorage();
           updateCarteraKPIs();
         }
+
+        // Sincronizar automáticamente con el CRM en tiempo real
+        syncOrderToCRM({
+          client: o.client,
+          phone: o.phone || orderData.phone,
+          address: o.address,
+          email: o.email,
+          product: o.product,
+          total: totalNum,
+          date: o.date,
+          payMethod: o.payMethod
+        });
 
         salesDirty = true;
         invoicesDirty = true;
       }
     });
     updatePendingOrdersCounter();
+    filteredSales = [...salesData];
+    renderSalesTable();
+    initDashboard();
   } catch (e) { /* ignore */ }
+}
+
+/* Sincronización automática de órdenes entrantes al CRM */
+function syncOrderToCRM(order) {
+  if (!order || !order.client) return;
+  const clientName = (order.client || '').trim();
+  if (!clientName || DEMO_CLIENT_NAMES.includes(clientName.toLowerCase())) return;
+
+  const rawPhone = order.phone || '';
+  let cleanPhone = rawPhone.replace(/\D/g, '');
+  if (cleanPhone.length === 10 && cleanPhone.startsWith('3')) {
+    cleanPhone = '+57 ' + cleanPhone;
+  } else if (rawPhone) {
+    cleanPhone = rawPhone;
+  } else {
+    cleanPhone = '+57 323 269 2578';
+  }
+
+  const existingIdx = crmClientsData.findIndex(c => 
+    (c.name && c.name.toLowerCase().trim() === clientName.toLowerCase().trim()) ||
+    (c.phone && cleanPhone && c.phone.replace(/\D/g, '') === cleanPhone.replace(/\D/g, ''))
+  );
+
+  const orderTotal = Number(order.total) || 0;
+  const todayStr = order.date ? order.date.split('T')[0] : new Date().toISOString().split('T')[0];
+  const orderProduct = order.product || 'Calzado Carfe®';
+
+  if (existingIdx >= 0) {
+    const c = crmClientsData[existingIdx];
+    c.ordersCount = (c.ordersCount || 1) + 1;
+    c.totalPurchased = (c.totalPurchased || 0) + orderTotal;
+    c.lastOrderDate = todayStr;
+    if (order.address && !c.address) c.address = order.address;
+    if (order.email && !c.email) c.email = order.email;
+    c.phone = cleanPhone;
+    c.tag = (c.ordersCount >= 3 || c.totalPurchased > 500000) ? 'vip' : (c.tag || 'aldia');
+    c.notes = `${c.notes || ''} | Nuevo pedido (${todayStr}): ${orderProduct} (${formatCOP(orderTotal)})`.trim();
+  } else {
+    crmClientsData.unshift({
+      id: 'CLI-' + String(crmClientsData.length + 1).padStart(3, '0'),
+      name: clientName,
+      phone: cleanPhone,
+      email: order.email || '',
+      city: order.city || (order.address ? order.address.split(',').pop()?.trim() : 'Colombia') || 'Colombia',
+      address: order.address || 'Confirmada por WhatsApp',
+      tag: 'nuevo',
+      ordersCount: 1,
+      totalPurchased: orderTotal,
+      lastOrderDate: todayStr,
+      notes: `Primer pedido registrado (${todayStr}): ${orderProduct} (${formatCOP(orderTotal)}).`,
+      createdAt: todayStr
+    });
+  }
+
+  saveCrmToStorage();
+  updateCrmKPIs();
+  renderCrmTable();
 }
 
 /* Cerrar dropdowns al hacer click fuera */
@@ -975,19 +1099,16 @@ function initDashboard() {
     todayLabel.textContent = new Date().toLocaleDateString('es-ES', opts);
   }
 
-  // Filtrar ventas de hoy (o recientes si es un día nuevo en pruebas)
+  // Filtrar ventas de hoy
   let todaySales = salesData.filter(v => v.date === todayStr);
-  if (todaySales.length === 0) {
-    todaySales = salesData.slice(0, 4);
-  }
 
-  const todayRev = todaySales.reduce((s, v) => s + v.total, 0);
+  const todayRev = todaySales.reduce((s, v) => s + (Number(v.total) || 0), 0);
   const todayCost = todaySales.reduce((s, v) => s + (v.cost || (v.total * 0.5)), 0);
   const todayProfit = todayRev - todayCost;
   const todayMargin = todayRev > 0 ? ((todayProfit / todayRev) * 100).toFixed(1) : '0.0';
   const todayPairs = todaySales.reduce((s, v) => s + (v.qty || 1), 0);
-  const avgTicket = todaySales.length > 0 ? todayRev / todaySales.length : 0;
-  const pendingOrders = todaySales.filter(v => v.status === 'pendiente' || v.status === 'procesando').length;
+  const avgTicket = todaySales.length > 0 ? Math.round(todayRev / todaySales.length) : 0;
+  const pendingOrders = salesData.filter(v => v.status === 'pendiente' || v.status === 'procesando').length;
 
   // Actualizar los 8 Indicadores Clave Inmediatos (Móvil y Desktop)
   safeText('dashTodayRevenue', formatCOPSimple(todayRev));
@@ -1011,7 +1132,7 @@ function initDashboard() {
   safeText('dashLowStockCount', lowStock);
 
   // Mensajes de WhatsApp pendientes
-  const waPending = notifications.filter(n => (n.category === 'whatsapp' || n.type === 'whatsapp') && !n.read).length || 3;
+  const waPending = notifications.filter(n => (n.category === 'whatsapp' || n.type === 'whatsapp') && !n.read).length;
   safeText('dashPendingMessagesCount', waPending);
 
   // Operaciones que requieren atención (Críticas = pedidos + morosos + stock crítico)
@@ -1219,9 +1340,35 @@ let filteredSales = [...salesData];
 
 function renderSalesTable() {
   const tbody = document.getElementById('salesTableBody');
+  
+  // Actualizar KPIs de Ventas en tiempo real
+  const todayStr = new Date().toISOString().split('T')[0];
+  const todaySalesList = salesData.filter(s => s.date === todayStr);
+  const totalSalesVal = todaySalesList.length > 0 
+    ? todaySalesList.reduce((acc, s) => acc + (Number(s.total) || 0), 0)
+    : salesData.reduce((acc, s) => acc + (Number(s.total) || 0), 0);
+  const totalOrdersCount = todaySalesList.length > 0 ? todaySalesList.length : salesData.length;
+  const avgTicketVal = totalOrdersCount > 0 ? Math.round(totalSalesVal / totalOrdersCount) : 0;
+
+  safeText('todaySales', formatCOP(totalSalesVal));
+  safeText('todayOrders', totalOrdersCount);
+  safeText('salesAvgTicket', formatCOP(avgTicketVal));
+
   if (!tbody) return;
   if (filteredSales.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#9ca3af;padding:30px">No hay ventas que coincidan</td></tr>';
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" class="p-8 text-center text-gray-400">
+          <div class="flex flex-col items-center justify-center">
+            <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl mb-2">
+              <i class="fas fa-receipt"></i>
+            </div>
+            <div class="font-bold text-gray-800 text-sm">No hay ventas registradas aún</div>
+            <div class="text-xs text-gray-500 mt-0.5">Los pedidos de tus clientes por WhatsApp o tienda online se registrarán aquí automáticamente.</div>
+          </div>
+        </td>
+      </tr>
+    `;
     return;
   }
   tbody.innerHTML = filteredSales.map(s => `
@@ -1297,6 +1444,13 @@ function registerSale() {
 /* ───────── PERFIL DMS LOGÍSTICO (DELIVERY MANAGEMENT SYSTEM) ───────── */
 let currentDmsSale = null;
 
+function onDmsCustomerPhoneChange(val) {
+  if (currentDmsSale) {
+    currentDmsSale.phone = val.trim();
+    salesDirty = true;
+  }
+}
+
 function openDmsModal(id) {
   const s = salesData.find(x => x.id === id);
   if (!s) return;
@@ -1308,8 +1462,14 @@ function openDmsModal(id) {
   if (!s.address) {
     s.address = 'Carrera 7 # 115-60, Bogotá D.C., Colombia';
   }
+  if (!s.phone) {
+    const crmMatch = (typeof crmClientsData !== 'undefined' && Array.isArray(crmClientsData)) 
+      ? crmClientsData.find(c => c.name && c.name.toLowerCase() === (s.client || '').toLowerCase())
+      : null;
+    s.phone = (crmMatch && crmMatch.phone) ? crmMatch.phone : '+57 323 269 2578';
+  }
   if (!s.courier) {
-    s.courier = 'Repartidor Local Carfe® Express';
+    s.courier = 'Repartidor Local Carfe® (Motorizado)';
   }
   if (!s.driver) {
     s.driver = 'Carlos Méndez (Moto 04)';
@@ -1322,10 +1482,10 @@ function openDmsModal(id) {
       { time: s.date + ' 09:15', title: 'Pedido Ingresado y Confirmado', desc: 'Validación de pago exitosa por ' + s.payMethod }
     ];
     if (s.status === 'procesando' || s.status === 'enviado' || s.status === 'entregado') {
-      s.dmsLogs.push({ time: s.date + ' 11:30', title: 'Empacado en Bodega Central', desc: 'Control de calidad verificado. Zapatos embalados en caja Carfe®.' });
+      s.dmsLogs.push({ time: s.date + ' 11:30', title: 'Empacado en Bodega Central', desc: 'Control de calidad verificado. Calzado embalado en caja de lujo Carfe®.' });
     }
     if (s.status === 'enviado' || s.status === 'entregado') {
-      s.dmsLogs.push({ time: s.date + ' 13:45', title: 'Despachado en Ruta', desc: 'Paquete entregado a ' + s.driver + ' para reparto a domicilio.' });
+      s.dmsLogs.push({ time: s.date + ' 13:45', title: 'Despachado en Ruta', desc: 'Paquete entregado a ' + s.driver + ' para despacho prioritario.' });
     }
     if (s.status === 'entregado') {
       s.dmsLogs.push({ time: s.date + ' 16:20', title: 'Entregado con Éxito (POD)', desc: 'Recibido a conformidad en destino por el cliente.' });
@@ -1342,13 +1502,18 @@ function openDmsModal(id) {
   safeText('dmsTotalAmount', formatCOP(s.total));
   safeText('dmsPaymentMethod', `${getPayIcon(s.payMethod)} ${s.payMethod.toUpperCase()}`);
 
+  const phoneInput = document.getElementById('dmsCustomerPhone');
+  if (phoneInput) {
+    phoneInput.value = s.phone || '';
+  }
+
   const emojiEl = document.getElementById('dmsShoeEmoji');
   if (emojiEl) emojiEl.innerHTML = '<i class="fas fa-shoe-prints text-indigo-600"></i>';
 
   const driverInput = document.getElementById('dmsDriverName');
   if (driverInput) driverInput.value = s.driver;
-  const phoneInput = document.getElementById('dmsDriverPhone');
-  if (phoneInput) phoneInput.value = s.driverPhone;
+  const driverPhoneInput = document.getElementById('dmsDriverPhone');
+  if (driverPhoneInput) driverPhoneInput.value = s.driverPhone;
 
   updateDmsStepper(s.status);
   renderDmsAuditLogs(s.dmsLogs);
@@ -1425,8 +1590,12 @@ function setDmsStatus(newStatus) {
   if (!currentDmsSale) return;
   currentDmsSale.status = newStatus;
 
+  const phoneVal = document.getElementById('dmsCustomerPhone')?.value;
+  if (phoneVal) currentDmsSale.phone = phoneVal.trim();
   const driverVal = document.getElementById('dmsDriverName')?.value;
   if (driverVal) currentDmsSale.driver = driverVal;
+  const driverPhoneVal = document.getElementById('dmsDriverPhone')?.value;
+  if (driverPhoneVal) currentDmsSale.driverPhone = driverPhoneVal;
   const courierVal = document.getElementById('dmsCourierSelect')?.value;
   if (courierVal) currentDmsSale.courier = courierVal;
 
@@ -1460,28 +1629,80 @@ function setDmsStatus(newStatus) {
 function sendDmsTrackingWhatsApp() {
   if (!currentDmsSale) return;
   const s = currentDmsSale;
+
+  const phoneInput = document.getElementById('dmsCustomerPhone');
+  let rawPhone = (phoneInput ? phoneInput.value.trim() : '') || (s.phone || '');
+  if (!rawPhone) {
+    rawPhone = prompt(`Ingresa el número de WhatsApp de ${s.client} para enviarle la trazabilidad del pedido:`, '3232692578');
+    if (!rawPhone) {
+      toast('⚠️', 'Falta Teléfono', 'Debes ingresar el número de WhatsApp del cliente para enviar la notificación.');
+      return;
+    }
+    if (phoneInput) phoneInput.value = rawPhone;
+  }
+  s.phone = rawPhone;
+
+  let cleanPhone = rawPhone.replace(/\D/g, '');
+  if (cleanPhone.length === 10 && cleanPhone.startsWith('3')) {
+    cleanPhone = '57' + cleanPhone;
+  } else if (cleanPhone.length === 11 && cleanPhone.startsWith('03')) {
+    cleanPhone = '57' + cleanPhone.substring(1);
+  }
+
   const statusTexts = {
-    pendiente:  '⏳ Recibido y por confirmar empaque',
-    procesando: '📦 En Bodega Central (Empacando calzado Carfe®)',
-    enviado:    '🚚 EN RUTA con repartidor hacia tu dirección',
-    entregado:  '✅ ENTREGADO con éxito en tu domicilio',
-    cancelado:  '❌ Cancelado / Devuelto'
+    pendiente:  '⏳ Recibido y en confirmación de empaque',
+    procesando: '📦 En Bodega Central (Picking & Packing completado en caja Carfe®)',
+    enviado:    '🚚 Despachado y EN RUTA con repartidor hacia tu domicilio',
+    entregado:  '✅ ENTREGADO con éxito a satisfacción en tu dirección',
+    cancelado:  '❌ Cancelado / Devuelto a bodega'
   };
   const statusDesc = statusTexts[s.status] || s.status;
 
-  const msg = `📦 *Actualización de Entrega — Carfe® Logística*\n\n` +
-              `Hola *${s.client}*! 👋 Te compartimos el estado de tu pedido:\n\n` +
-              `📦 *Pedido:* ${s.id}\n` +
-              `🏷️ *Producto:* ${s.product} (×${s.qty || 1})\n` +
-              `📍 *Estado Actual:* ${statusDesc}\n` +
-              `🚚 *Guía de Rastreo DMS:* ${s.trackingNumber}\n` +
-              `🛵 *Repartidor Asignado:* ${s.driver || 'Courier Local'}\n\n` +
-              `Tu calzado está siendo gestionado con la mayor seguridad. ¡Gracias por confiar en Carfe®! 🌟\n\n` +
-              `_carfe.com_`;
+  const driverVal = document.getElementById('dmsDriverName')?.value || s.driver || 'Repartidor Local Carfe®';
+  const driverPhoneVal = document.getElementById('dmsDriverPhone')?.value || s.driverPhone || '+57 300 492 1823';
+  const courierSelect = document.getElementById('dmsCourierSelect');
+  const courierVal = courierSelect ? courierSelect.options[courierSelect.selectedIndex]?.text : (s.courier || 'Carfe® Logistics');
 
-  const phone = s.phone ? s.phone.replace(/\D/g, '') : '5215500000000';
-  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-  toast('📲', 'WhatsApp de Trazabilidad', 'Mensaje con guía DMS listo para enviar al cliente.');
+  // Historial de trazabilidad paso a paso
+  let logsList = '';
+  if (s.dmsLogs && s.dmsLogs.length) {
+    logsList = s.dmsLogs.slice(0, 5).map(l => `  • [${l.time}] *${l.title}*\n    _${l.desc}_`).join('\n');
+  }
+
+  const msg = 
+`👟 *CARFE® Calzado — Trazabilidad Oficial de tu Pedido*
+━━━━━━━━━━━━━━━━━━━━
+Hola *${s.client}*! 👋 Te informamos el avance y trazabilidad de tu compra:
+
+📦 *Pedido:* ${s.id}
+🏷️ *Calzado:* ${s.product} (×${s.qty || 1})
+📍 *Estado Actual:* *${statusDesc}*
+🚚 *Guía de Rastreo:* ${s.trackingNumber}
+🛵 *Courier / Repartidor:* ${courierVal} — ${driverVal} (${driverPhoneVal})
+🏠 *Dirección de Entrega:* ${s.address || 'Confirmada con asesor'}
+━━━━━━━━━━━━━━━━━━━━
+📋 *HISTORIAL Y TRAZABILIDAD EN VIVO:*
+${logsList}
+━━━━━━━━━━━━━━━━━━━━
+🔗 *Seguimiento en línea:*
+https://carlosandresgarciacontreras70-prog.github.io/carfe-tienda/
+
+Tu calzado se encuentra protegido bajo nuestra garantía de cuero legítimo y confort Carfe®. Si requieres soporte adicional, estamos para atenderte en nuestra línea directa WhatsApp: +57 323 269 2578.
+
+¡Gracias por confiar en *Carfe®*! 🌟🇨🇴`;
+
+  const nowTime = new Date().toLocaleDateString('es-ES', { month:'short', day:'numeric' }) + ' ' + new Date().toLocaleTimeString('es-ES', { hour:'2-digit', minute:'2-digit' });
+  s.dmsLogs.unshift({
+    time: nowTime,
+    title: `📲 Notificación WhatsApp enviada al cliente (+${cleanPhone})`,
+    desc: `Estado reportado: "${s.status.toUpperCase()}". Mensaje generado con trazabilidad completa.`
+  });
+  renderDmsAuditLogs(s.dmsLogs);
+  salesDirty = true;
+
+  const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
+  window.open(waUrl, '_blank');
+  toast('📲', 'WhatsApp de Trazabilidad', `Notificación enviada al WhatsApp del cliente (+${cleanPhone})`);
 }
 
 function printDmsShippingLabel() {
@@ -1569,99 +1790,7 @@ function viewSaleInvoice(id) {
 }
 
 /* ───────── CARTERA DE PAGO A 2 CUOTAS & COBRANZA (BNPL CARFE®) ───────── */
-let carteraData = [
-  {
-    id: 'CRT-001',
-    saleId: 'V-009',
-    client: 'Camila Torres',
-    phone: '+57 300 492 1849',
-    email: 'camila@mail.com',
-    product: 'Air Runner Pro (Talla 38)',
-    total: 219900,
-    quota1: 109950,
-    quota1Paid: true,
-    quota1Date: '2026-11-12',
-    quota2: 109950,
-    quota2Paid: false,
-    estimatedDate: '2026-11-27',
-    status: 'aldia',
-    lastNotice: null,
-    notes: 'Pago inicial con tarjeta. Segunda cuota programada.'
-  },
-  {
-    id: 'CRT-002',
-    saleId: 'V-007',
-    client: 'Pedro Ramírez',
-    phone: '+57 311 839 2104',
-    email: 'pedro@mail.com',
-    product: 'Classic Oxford (Talla 42)',
-    total: 249000,
-    quota1: 124500,
-    quota1Paid: true,
-    quota1Date: '2026-11-12',
-    quota2: 124500,
-    quota2Paid: false,
-    estimatedDate: '2026-11-14',
-    status: 'proximo',
-    lastNotice: 'Aviso WhatsApp enviado hoy 09:30 AM',
-    notes: 'Cliente acordó liquidar por transferencia.'
-  },
-  {
-    id: 'CRT-003',
-    saleId: 'V-002',
-    client: 'María García',
-    phone: '+57 315 192 8374',
-    email: 'maria@mail.com',
-    product: 'Elegance Heel (Talla 37)',
-    total: 189000,
-    quota1: 94500,
-    quota1Paid: true,
-    quota1Date: '2026-10-27',
-    quota2: 94500,
-    quota2Paid: false,
-    estimatedDate: '2026-11-11',
-    status: 'vencido',
-    lastNotice: 'Recordatorio enviado ayer',
-    notes: 'Fecha vencida hace 1 día. Requiere aviso prioritario.'
-  },
-  {
-    id: 'CRT-004',
-    saleId: 'V-003',
-    client: 'Carlos López',
-    phone: '+57 320 930 1827',
-    email: 'carlos@mail.com',
-    product: 'Derby Executive (Talla 43)',
-    total: 279000,
-    quota1: 139500,
-    quota1Paid: true,
-    quota1Date: '2026-10-25',
-    quota2: 139500,
-    quota2Paid: true,
-    estimatedDate: '2026-11-09',
-    status: 'liquidado',
-    lastNotice: 'Liquidado con éxito',
-    notes: 'Liquidó cuota 2 por transferencia bancaria.'
-  },
-  {
-    id: 'CRT-005',
-    saleId: 'V-008',
-    client: 'Lucía Flores',
-    phone: '+57 318 647 3829',
-    email: 'lucia@mail.com',
-    product: 'High Top Street (Talla 39)',
-    total: 169900,
-    quota1: 84950,
-    quota1Paid: true,
-    quota1Date: '2026-11-07',
-    quota2: 84950,
-    quota2Paid: false,
-    estimatedDate: '2026-11-15',
-    status: 'proximo',
-    lastNotice: null,
-    notes: 'Vencimiento en 3 días.'
-  }
-];
-
+let carteraData = [];
 let selectedQuotaCredit = null;
 
 function initCartera() {
@@ -1670,11 +1799,11 @@ function initCartera() {
 }
 
 function updateCarteraKPIs() {
-  const totalFinanced = carteraData.reduce((s, c) => s + c.total, 0);
-  const totalCollected = carteraData.reduce((s, c) => s + c.quota1 + (c.quota2Paid ? c.quota2 : 0), 0);
-  const totalPending = carteraData.reduce((s, c) => s + (c.quota2Paid ? 0 : c.quota2), 0);
+  const totalFinanced = carteraData.reduce((s, c) => s + (Number(c.total) || 0), 0);
+  const totalCollected = carteraData.reduce((s, c) => s + (Number(c.quota1) || 0) + (c.quota2Paid ? (Number(c.quota2) || 0) : 0), 0);
+  const totalPending = carteraData.reduce((s, c) => s + (c.quota2Paid ? 0 : (Number(c.quota2) || 0)), 0);
   
-  const today = new Date('2026-11-12');
+  const today = new Date();
   let dueAlerts = 0;
 
   carteraData.forEach(c => {
@@ -1696,11 +1825,11 @@ function updateCarteraKPIs() {
   });
 
   safeText('carteraTotal', formatCOP(totalFinanced));
-  safeText('carteraTotalCredits', `${carteraData.length} créditos registrados`);
+  safeText('carteraTotalCredits', `${carteraData.length} crédito${carteraData.length !== 1 ? 's' : ''} registrado${carteraData.length !== 1 ? 's' : ''}`);
   safeText('carteraCollected', formatCOP(totalCollected));
   safeText('carteraPending', formatCOP(totalPending));
   safeText('carteraDueAlerts', dueAlerts);
-  safeText('carteraDueSubtext', `${dueAlerts} cuotas requieren aviso de pago`);
+  safeText('carteraDueSubtext', `${dueAlerts} cuota${dueAlerts !== 1 ? 's' : ''} por cobrar`);
 
   const navBadge = document.getElementById('carteraNavBadge');
   if (navBadge) {
@@ -1721,10 +1850,27 @@ function renderCarteraTable() {
   const filter = document.getElementById('carteraFilterStatus')?.value || 'todos';
 
   const rows = carteraData.filter(c => {
-    const matchQ = !q || c.client.toLowerCase().includes(q) || c.product.toLowerCase().includes(q) || c.phone.includes(q) || c.id.toLowerCase().includes(q);
+    const matchQ = !q || (c.client && c.client.toLowerCase().includes(q)) || (c.product && c.product.toLowerCase().includes(q)) || (c.phone && c.phone.includes(q)) || (c.id && c.id.toLowerCase().includes(q));
     const matchF = filter === 'todos' || c.status === filter;
     return matchQ && matchF;
   });
+
+  if (rows.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="p-8 text-center text-gray-400">
+          <div class="flex flex-col items-center justify-center">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl mb-2">
+              <i class="fas fa-hand-holding-dollar"></i>
+            </div>
+            <div class="font-bold text-gray-800 text-sm">Sin créditos ni cuotas pendientes</div>
+            <div class="text-xs text-gray-500 mt-0.5">Cuando vendas calzado a 2 cuotas o registres un crédito, aparecerá aquí con recordatorios automáticos por WhatsApp.</div>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
 
   safeText('carteraCountText', rows.length);
 
@@ -3183,6 +3329,21 @@ function submitQuickBilling() {
   invoicesData.unshift(newInvoice);
   filteredInvoices = [...invoicesData];
 
+  saveSalesToStorage();
+  saveInvoicesToStorage();
+
+  // Sincronizar cliente inmediatamente con el CRM
+  syncOrderToCRM({
+    client: clientName,
+    phone: phone,
+    address: address,
+    doc: doc,
+    product: prodName,
+    total: subtotal,
+    date: todayStr,
+    payMethod: payMethodText
+  });
+
   // 3. Descontar Inventario
   const invProd = inventoryData.find(x => x.id === prodId || x.name === prodName);
   if (invProd && invProd.stock > 0) {
@@ -3221,7 +3382,19 @@ function renderInvoicesTable() {
   const tbody = document.getElementById('invoicesTableBody');
   if (!tbody) return;
   if (filteredInvoices.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#9ca3af;padding:30px">No hay facturas registradas</td></tr>';
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="9" class="p-8 text-center text-gray-400">
+          <div class="flex flex-col items-center justify-center">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl mb-2">
+              <i class="fas fa-file-invoice"></i>
+            </div>
+            <div class="font-bold text-gray-800 text-sm">No hay facturas emitidas aún</div>
+            <div class="text-xs text-gray-500 mt-0.5">Usa el botón "+ Facturar / Nueva Venta" o confirma pedidos para emitir comprobantes oficiales.</div>
+          </div>
+        </td>
+      </tr>
+    `;
     return;
   }
   tbody.innerHTML = filteredInvoices.map(f => {
@@ -7104,7 +7277,7 @@ function updateAdminVideoPreviewFromUrl(url) {
 function resetDefaultHeroVideo() {
   const vid = document.getElementById('inp_heroVideoUrl');
   if (vid) {
-    vid.value = 'https://assets.mixkit.co/videos/preview/mixkit-hands-holding-a-pair-of-white-sneakers-41584-large.mp4';
+    vid.value = 'assets/hero-video.mp4';
     updateAdminVideoPreviewFromUrl(vid.value);
     toast('📹', 'Video Restablecido', 'Se restableció el video oficial de calzado en portada.');
   }
@@ -7125,8 +7298,42 @@ document.addEventListener('keydown', e => {
   }
 });
 
+/* ───────── LIMPIEZA TOTAL PARA PRODUCCIÓN CON PERSONAS REALES ───────── */
+function clearAllSystemData() {
+  if (!confirm('¿Estás seguro de que deseas vaciar TODOS los pedidos, ventas, facturas, cartera y CRM de prueba para comenzar 100% limpio con clientes reales?')) return;
+  
+  salesData = [];
+  filteredSales = [];
+  invoicesData = [];
+  filteredInvoices = [];
+  carteraData = [];
+  crmClientsData = [];
+  expensesData = [];
+  notifications = [];
+
+  localStorage.setItem('carfe_sales_data', JSON.stringify([]));
+  localStorage.setItem('carfe_invoices_data', JSON.stringify([]));
+  localStorage.setItem('carfe_cartera_data', JSON.stringify([]));
+  localStorage.setItem('carfe_crm_clients', JSON.stringify([]));
+  localStorage.setItem('carfe_expenses', JSON.stringify([]));
+  localStorage.setItem('ss_pending_orders', JSON.stringify([]));
+
+  updatePendingOrdersCounter();
+  renderSalesTable();
+  renderInvoicesTable();
+  renderCarteraTable();
+  renderCrmTable();
+  updateCarteraKPIs();
+  updateCrmKPIs();
+  initDashboard();
+  renderNotifList();
+
+  toast('🧹', 'Sistema Limpio', 'Se han eliminado los datos demo. Listo para recibir y registrar pedidos de clientes reales.');
+}
+
 /* ───────── INIT ───────── */
 document.addEventListener('DOMContentLoaded', () => {
+  purgeAllDemoData();
   checkAuth();
   updateHeaderDate();
   updateHeaderWAIndicator();
@@ -7134,11 +7341,16 @@ document.addEventListener('DOMContentLoaded', () => {
   loadFooterSettingsInAdmin();
   loadBase44SettingsInAdmin();
   updatePendingOrdersCounter();
-  syncCrmWithCarteraAndSales();
+  updateCarteraKPIs();
   updateCrmKPIs();
+  renderSalesTable();
+  renderInvoicesTable();
+  renderCarteraTable();
+  renderCrmTable();
+  initDashboard();
 
-  // Revisar pedidos reales realizados por clientes desde la tienda cada 15 segundos
-  setInterval(checkPendingOrders, 15000);
+  // Revisar pedidos reales de clientes desde la tienda o WhatsApp en tiempo real
+  setInterval(checkPendingOrders, 5000);
 });
 
 /* ───────── NAVEGACIÓN MÓVIL PWA & BOTTOM SHEET "MÁS" ───────── */

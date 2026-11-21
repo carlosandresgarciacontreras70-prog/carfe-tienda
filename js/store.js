@@ -497,7 +497,7 @@ async function loadHeroPresentationVideo() {
 
   // Fallback al video oficial o configurado por URL
   const cfg = (typeof getStoreThemeConfig === 'function') ? getStoreThemeConfig() : {};
-  const defaultUrl = 'https://assets.mixkit.co/videos/preview/mixkit-hands-holding-a-pair-of-white-sneakers-41584-large.mp4';
+  const defaultUrl = 'assets/hero-video.mp4';
   const targetUrl = cfg.heroVideoUrl || defaultUrl;
   if (!video.src || (!video.src.includes(targetUrl) && !video.src.startsWith('blob:'))) {
     video.src = targetUrl;
@@ -537,27 +537,27 @@ async function loadHeroBannerMedia() {
   const vidEl = document.getElementById('heroBannerBgVideo');
   const overlayEl = document.getElementById('heroOverlayEl');
 
-  // 1. Configurar Tinte / Overlay Deportivo (Estilo Reebok "La Roja")
+  // 1. Configurar Tinte / Overlay Deportivo (Estilo Reebok "La Roja" con transparencia elegante para video)
   if (overlayEl) {
     const overlayType = cfg.heroBannerOverlay || 'red';
     if (overlayType === 'red') {
-      overlayEl.style.background = 'linear-gradient(to right, rgba(69, 10, 10, 0.92) 0%, rgba(0, 0, 0, 0.80) 50%, rgba(69, 10, 10, 0.88) 100%)';
+      overlayEl.style.background = 'linear-gradient(to right, rgba(60, 5, 5, 0.75) 0%, rgba(0, 0, 0, 0.55) 50%, rgba(60, 5, 5, 0.72) 100%)';
     } else if (overlayType === 'dark') {
-      overlayEl.style.background = 'linear-gradient(to right, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.75) 50%, rgba(0, 0, 0, 0.90) 100%)';
+      overlayEl.style.background = 'linear-gradient(to right, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.60) 50%, rgba(0, 0, 0, 0.80) 100%)';
     } else if (overlayType === 'blue') {
-      overlayEl.style.background = 'linear-gradient(to right, rgba(15, 23, 42, 0.92) 0%, rgba(30, 58, 138, 0.75) 50%, rgba(15, 23, 42, 0.90) 100%)';
+      overlayEl.style.background = 'linear-gradient(to right, rgba(15, 23, 42, 0.82) 0%, rgba(30, 58, 138, 0.60) 50%, rgba(15, 23, 42, 0.78) 100%)';
     } else if (overlayType === 'purple') {
-      overlayEl.style.background = 'linear-gradient(to right, rgba(59, 7, 100, 0.92) 0%, rgba(107, 33, 168, 0.75) 50%, rgba(219, 39, 119, 0.85) 100%)';
+      overlayEl.style.background = 'linear-gradient(to right, rgba(59, 7, 100, 0.82) 0%, rgba(107, 33, 168, 0.60) 50%, rgba(219, 39, 119, 0.75) 100%)';
     } else if (overlayType === 'none') {
       overlayEl.style.background = 'rgba(0, 0, 0, 0.25)';
     }
   }
 
-  // 2. Tipo de Fondo (Video en bucle vs Imagen)
-  const bgType = cfg.heroBackgroundType || 'image';
+  // 2. Tipo de Fondo (Video en bucle oficial en portada de fondo)
+  const bgType = cfg.heroBackgroundType || 'video';
   if (bgType === 'video' && vidEl) {
     vidEl.classList.remove('hidden');
-    if (imgEl) imgEl.classList.add('opacity-30');
+    if (imgEl) imgEl.classList.add('opacity-20');
     try {
       const blob = await CarfeMediaDB.getVideo();
       if (blob) {
@@ -567,8 +567,8 @@ async function loadHeroBannerMedia() {
           vidEl.play().catch(()=>{});
         }
       } else {
-        const fallbackUrl = cfg.heroVideoUrl || 'https://assets.mixkit.co/videos/preview/mixkit-hands-holding-a-pair-of-white-sneakers-41584-large.mp4';
-        if (vidEl.src !== fallbackUrl) {
+        const fallbackUrl = cfg.heroVideoUrl || 'assets/hero-video.mp4';
+        if (!vidEl.src || (!vidEl.src.includes('assets/hero-video.mp4') && !vidEl.src.includes(fallbackUrl))) {
           vidEl.src = fallbackUrl;
           vidEl.load();
           vidEl.play().catch(()=>{});
@@ -900,10 +900,14 @@ function processPay() {
     btn.disabled = false;
 
     // Notify admin via localStorage
+    const phoneVal = document.getElementById('cPhone')?.value.trim() || '';
+    const addressVal = document.getElementById('cAddress')?.value.trim() || '';
     const orderData = {
       id: orderNum,
-      client: `${name} ${document.getElementById('cLastName')?.value||''}`,
+      client: `${name} ${document.getElementById('cLastName')?.value||''}`.trim(),
       email,
+      phone: phoneVal,
+      address: addressVal,
       total: totalVal,
       date: new Date().toISOString(),
       payMethod: pm
@@ -912,6 +916,46 @@ function processPay() {
       const existing = JSON.parse(localStorage.getItem('ss_pending_orders') || '[]');
       existing.unshift(orderData);
       localStorage.setItem('ss_pending_orders', JSON.stringify(existing.slice(0,50)));
+    } catch(e) {}
+
+    // Auto-registrar cliente en CRM
+    try {
+      let crmList = JSON.parse(localStorage.getItem('carfe_crm_clients') || '[]');
+      const clientFullName = orderData.client;
+      const cleanPh = (phoneVal || '').replace(/\D/g, '');
+      const clientIdx = crmList.findIndex(c => 
+        (c.name && c.name.toLowerCase().trim() === clientFullName.toLowerCase().trim()) ||
+        (c.phone && cleanPh && c.phone.replace(/\D/g, '') === cleanPh)
+      );
+      const todayStr = new Date().toISOString().split('T')[0];
+      const formattedPh = cleanPh.length === 10 && cleanPh.startsWith('3') ? `+57 ${cleanPh}` : (phoneVal || '+57 323 269 2578');
+
+      if (clientIdx >= 0) {
+        const c = crmList[clientIdx];
+        c.ordersCount = (c.ordersCount || 1) + 1;
+        c.totalPurchased = (c.totalPurchased || 0) + totalVal;
+        c.lastOrderDate = todayStr;
+        if (addressVal) c.address = addressVal;
+        if (formattedPh) c.phone = formattedPh;
+        if (email) c.email = email;
+        c.notes = `${c.notes || ''} | Pedido Tienda Web #${orderNum} (${todayStr}): ${formatCOP(totalVal)}`.trim();
+      } else {
+        crmList.unshift({
+          id: 'CLI-' + String(crmList.length + 1).padStart(3, '0'),
+          name: clientFullName,
+          phone: formattedPh,
+          email: email,
+          city: addressVal.split(',').pop()?.trim() || 'Colombia',
+          address: addressVal,
+          tag: 'nuevo',
+          ordersCount: 1,
+          totalPurchased: totalVal,
+          lastOrderDate: todayStr,
+          notes: `Primer pedido en Tienda Web #${orderNum} (${todayStr}): ${formatCOP(totalVal)}`,
+          createdAt: todayStr
+        });
+      }
+      localStorage.setItem('carfe_crm_clients', JSON.stringify(crmList));
     } catch(e) {}
   }, 1500);
 }
@@ -1067,6 +1111,7 @@ function submitWAOrder() {
   if (!currentWAProduct) return;
   const p = currentWAProduct;
   const name = document.getElementById('waOrderName')?.value.trim();
+  const customerPhone = document.getElementById('waOrderPhone')?.value.trim();
   const size = document.getElementById('waOrderSize')?.value || (p.sizes ? p.sizes[0] : '40');
   const color = document.getElementById('waOrderColor')?.value || (p.colors ? p.colors[0] : 'Negro');
   const address = document.getElementById('waOrderAddress')?.value.trim();
@@ -1075,6 +1120,11 @@ function submitWAOrder() {
   if (!name) {
     toast('info', 'Falta tu nombre', 'Por favor ingresa tu nombre completo');
     document.getElementById('waOrderName')?.focus();
+    return;
+  }
+  if (!customerPhone) {
+    toast('info', 'Falta tu WhatsApp', 'Ingresa tu número de WhatsApp para confirmar tu pedido y coordinar la entrega');
+    document.getElementById('waOrderPhone')?.focus();
     return;
   }
   if (!address) {
@@ -1098,18 +1148,20 @@ function submitWAOrder() {
 ━━━━━━━━━━━━━━━━━━━━
 📋 *DATOS DE ENTREGA Y PAGO:*
 👤 *Cliente:* ${name}
+📱 *WhatsApp del Cliente:* ${customerPhone}
 📍 *Dirección y Ciudad:* ${address}
 💳 *Forma de Pago Elegida:* ${payment}
 🔖 *Código de Pedido:* ${orderId}
 ━━━━━━━━━━━━━━━━━━━━
 Por favor confírmenme el pedido y facilítenme los datos de cuenta (Nequi / Daviplata / Bancolombia) para transferir y finalizar la compra. ¡Muchas gracias! 🙌✨`;
 
-  // Guardar en pedidos pendientes para notificación inmediata en el panel admin y DMS logístico
+  // 1. Guardar en pedidos pendientes para notificación inmediata en el panel admin y DMS logístico
   try {
     const pending = JSON.parse(localStorage.getItem('ss_pending_orders') || '[]');
     pending.unshift({
       id: orderId,
       client: name,
+      phone: customerPhone,
       product: `${p.name} (Talla ${size}, ${color})`,
       photo: photoUrl,
       total: p.price,
@@ -1125,6 +1177,7 @@ Por favor confírmenme el pedido y facilítenme los datos de cuenta (Nequi / Dav
       Base44Client.pushOrder({
         orderNumber: orderId,
         clientName: name,
+        clientPhone: customerPhone,
         clientAddress: address,
         product: `${p.name} (Talla ${size}, ${color})`,
         talla: String(size),
@@ -1137,11 +1190,50 @@ Por favor confírmenme el pedido y facilítenme los datos de cuenta (Nequi / Dav
     }
   } catch(e) {}
 
+  // 2. Actualizar automáticamente el CRM en tiempo real
+  try {
+    let crmList = JSON.parse(localStorage.getItem('carfe_crm_clients') || '[]');
+    const cleanPh = customerPhone.replace(/\D/g, '');
+    const clientIdx = crmList.findIndex(c => 
+      (c.name && c.name.toLowerCase().trim() === name.toLowerCase().trim()) ||
+      (c.phone && cleanPh && c.phone.replace(/\D/g, '') === cleanPh)
+    );
+    const todayStr = new Date().toISOString().split('T')[0];
+    const formattedPh = cleanPh.length === 10 && cleanPh.startsWith('3') ? `+57 ${cleanPh}` : customerPhone;
+
+    if (clientIdx >= 0) {
+      const c = crmList[clientIdx];
+      c.ordersCount = (c.ordersCount || 1) + 1;
+      c.totalPurchased = (c.totalPurchased || 0) + p.price;
+      c.lastOrderDate = todayStr;
+      if (address) c.address = address;
+      if (formattedPh) c.phone = formattedPh;
+      c.tag = (c.ordersCount >= 3 || c.totalPurchased > 500000) ? 'vip' : 'aldia';
+      c.notes = `${c.notes || ''} | Pedido WhatsApp (${todayStr}): ${p.name} Talla ${size}`.trim();
+    } else {
+      crmList.unshift({
+        id: 'CLI-' + String(crmList.length + 1).padStart(3, '0'),
+        name: name,
+        phone: formattedPh,
+        email: '',
+        city: address.split(',').pop()?.trim() || 'Colombia',
+        address: address,
+        tag: 'nuevo',
+        ordersCount: 1,
+        totalPurchased: p.price,
+        lastOrderDate: todayStr,
+        notes: `Primer pedido por WhatsApp: ${p.name} (Talla ${size}, ${color}).`,
+        createdAt: todayStr
+      });
+    }
+    localStorage.setItem('carfe_crm_clients', JSON.stringify(crmList));
+  } catch(e) {}
+
   closeWAOrderModal();
   closeProductModal();
 
-  const phone = getStoreWAPhone();
-  const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(waMsg)}`;
+  const storePhone = getStoreWAPhone();
+  const waUrl = `https://wa.me/${storePhone}?text=${encodeURIComponent(waMsg)}`;
   window.open(waUrl, '_blank');
 
   toast('bag', '¡Pedido WhatsApp Iniciado!', 'Se abrió WhatsApp con la foto y datos de tu calzado.');
