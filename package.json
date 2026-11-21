@@ -1,0 +1,28 @@
+{
+  "name": "carfe-ecommerce-suite",
+  "version": "2.0.0",
+  "description": "Plataforma E-commerce y Suite Administrativa ERP/CRM para Calzado CARFE® unificada con Base44",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8080",
+    "base44:dev": "npx base44 dev",
+    "base44:deploy": "npx base44 deploy",
+    "base44:push": "npx base44 entities push"
+  },
+  "keywords": [
+    "carfe",
+    "ecommerce",
+    "base44",
+    "crm",
+    "erp",
+    "pwa"
+  ],
+  "author": "CARFE® Calzado",
+  "license": "MIT",
+  "dependencies": {
+    "@base44/sdk": "latest"
+  },
+  "devDependencies": {
+    "base44": "latest"
+  }
+}

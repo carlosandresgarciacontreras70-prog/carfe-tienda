@@ -1,0 +1,74 @@
+{
+  "name": "Order",
+  "type": "object",
+  "properties": {
+    "orderNumber": {
+      "type": "string",
+      "description": "Código de pedido (ej: CRF-7821)"
+    },
+    "clientName": {
+      "type": "string",
+      "description": "Nombre completo del comprador"
+    },
+    "clientPhone": {
+      "type": "string",
+      "description": "Teléfono / WhatsApp de contacto"
+    },
+    "clientAddress": {
+      "type": "string",
+      "description": "Dirección completa y ciudad de entrega"
+    },
+    "product": {
+      "type": "string",
+      "description": "Nombre del calzado o lista resumida de productos"
+    },
+    "talla": {
+      "type": "string",
+      "description": "Talla elegida por el cliente"
+    },
+    "color": {
+      "type": "string",
+      "description": "Color seleccionado"
+    },
+    "qty": {
+      "type": "integer",
+      "default": 1,
+      "description": "Cantidad de pares"
+    },
+    "total": {
+      "type": "number",
+      "description": "Valor total a pagar en COP"
+    },
+    "payMethod": {
+      "type": "string",
+      "description": "Medio de pago (WhatsApp, Nequi, Tarjeta, Crédito 2 Cuotas, etc.)"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["nuevo", "confirmado", "pendiente", "pagado", "en_preparacion", "despachado", "entregado", "cancelado", "devuelto"],
+      "default": "pendiente",
+      "description": "Estado actual del pedido"
+    },
+    "channel": {
+      "type": "string",
+      "enum": ["whatsapp", "web", "tiktok", "instagram", "presencial"],
+      "default": "whatsapp",
+      "description": "Canal de origen de la venta"
+    },
+    "trackingGuide": {
+      "type": "string",
+      "description": "Número de guía con transportadora oficial (Coordinadora, Servientrega)"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Observaciones o instrucciones de entrega"
+    }
+  },
+  "required": ["clientName", "total", "status"],
+  "rls": {
+    "create": true,
+    "read": { "user_condition": { "role": "admin" } },
+    "update": { "user_condition": { "role": "admin" } },
+    "delete": { "user_condition": { "role": "admin" } }
+  }
+}

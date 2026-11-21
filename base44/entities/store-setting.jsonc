@@ -1,0 +1,25 @@
+{
+  "name": "StoreSetting",
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "description": "Identificador de la configuración (ej: footer_info, wa_phone, tiktok_config)"
+    },
+    "value": {
+      "type": "string",
+      "description": "Contenido JSON o valor de la configuración"
+    },
+    "updatedAt": {
+      "type": "string",
+      "description": "Fecha y hora de última modificación"
+    }
+  },
+  "required": ["key", "value"],
+  "rls": {
+    "read": true,
+    "create": { "user_condition": { "role": "admin" } },
+    "update": { "user_condition": { "role": "admin" } },
+    "delete": { "user_condition": { "role": "admin" } }
+  }
+}

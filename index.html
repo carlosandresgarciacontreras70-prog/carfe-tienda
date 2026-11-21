@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carfe® — Drop 2026 // Streetwear & Calzado Premium</title>
+  <link rel="icon" type="image/jpeg" href="assets/logo.jpg">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0A0A0C">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CARFE">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    .badge { position:absolute; top:12px; left:12px; padding:3.5px 10px; border-radius:6px; font-size:10px; font-weight:800; font-family:'JetBrains Mono', monospace; letter-spacing:0.06em; text-transform:uppercase; z-index:15; }
+    .badge-new { background:#D4FF00; color:#000; border:1px solid #D4FF00; box-shadow:0 0 10px rgba(212,255,0,0.35); }
+    .badge-sale { background:#FF1E40; color:#fff; }
+    .badge-hot { background:#FF6B00; color:#fff; }
+    .badge-tiktok { background:#0A0A0C; color:#D4FF00; border:1px solid #27272A; }
+    .wishlist-btn { position:absolute; top:12px; right:12px; width:36px; height:36px; background:rgba(15,15,18,0.85); backdrop-filter:blur(8px); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,.4); border:1px solid #27272A; cursor:pointer; transition:all .2s; font-size:14px; color:#A1A1AA; z-index:15; }
+    .wishlist-btn:hover, .wishlist-btn.liked { color:#FF1E40; border-color:#FF1E40; transform:scale(1.1); }
+    .wishlist-btn.liked { background:rgba(255,30,64,0.15); }
+    .cat-btn { background:#121215; color:#A1A1AA; border:1.5px solid #27272A; border-radius:999px; padding:10px 22px; font-family:'JetBrains Mono', monospace; font-weight:700; font-size:12px; cursor:pointer; white-space:nowrap; transition:all .2s; letter-spacing:0.04em; }
+    .cat-btn:hover { border-color:#D4FF00; color:#D4FF00; }
+    .cat-btn.active { background:#D4FF00; color:#000; border-color:#D4FF00; box-shadow:0 0 18px rgba(212,255,0,0.35); font-weight:800; }
+    .add-btn { width:100%; background:#18181D; color:#F4F3EF; border:1.5px solid #2A2A32; padding:11px; font-weight:800; font-size:13px; cursor:pointer; transition:all .2s; border-radius:12px; letter-spacing:0.02em; }
+    .add-btn:hover { background:#D4FF00; color:#000; border-color:#D4FF00; box-shadow:0 0 16px rgba(212,255,0,0.35); transform:translateY(-1px); }
+    #toast { animation:slideUp .3s ease; }
+    @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+    ::-webkit-scrollbar { width:6px; height:6px; }
+    ::-webkit-scrollbar-track { background:#0A0A0C; }
+    ::-webkit-scrollbar-thumb { background:#27272A; border-radius:999px; }
+    ::-webkit-scrollbar-thumb:hover { background:#D4FF00; }
+    .scrollbar-hide::-webkit-scrollbar { display:none; }
+    .scrollbar-hide { -ms-overflow-style:none; scrollbar-width:none; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    .fade-in { animation:fadeIn .35s ease; }
+    @keyframes floatHeroShowcase { 0%,100%{transform:translateY(0) rotate3d(1,1,0,0deg)} 50%{transform:translateY(-12px) rotate3d(1,1,0,1.5deg)} }
+  </style>
+</head>
+<body class="bg-[#0A0A0C] text-[#F4F3EF]">
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="bg-[#0A0A0C]/90 backdrop-blur-xl border-b border-[#222227] fixed top-0 w-full z-50">
+    <!-- Top Announcement Bar (Estilo Streetwear / Industrial Ticker) -->
+    <div id="topAnnouncementBar" class="bg-[#050507] border-b border-[#1C1C20] text-[#A1A1AA] text-[11px] font-mono py-2 px-4 tracking-[0.08em] flex items-center justify-between uppercase">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-[#D4FF00] shadow-[0_0_8px_#D4FF00] animate-pulse"></span>
+        <span id="announcementText" class="text-white font-bold">DROP 2026 // EDICIÓN LIMITADA</span>
+        <span class="hidden sm:inline text-[#52525B]">• ENVÍOS A TODA COLOMBIA</span>
+      </div>
+      <div class="flex items-center gap-3 text-[10px] text-[#71717A]">
+        <span>PAGOS SEGUROS // NEQUI - BANCOLOMBIA</span>
+        <span class="text-[#D4FF00] font-black">• VERIFICADO</span>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 py-3.5 flex items-center justify-between">
+      <!-- Logo Oficial Carfe.® -->
+      <div class="flex items-center gap-3 cursor-pointer select-none" onclick="filterCat('all')">
+        <img id="storeNavLogo" src="assets/logo-white.png" alt="Carfe®" class="h-10 sm:h-12 w-auto object-contain transition-transform hover:scale-105">
+      </div>
+
+      <!-- Search bar (desktop) -->
+      <div class="hidden md:flex flex-1 max-w-md mx-6 items-center bg-[#141418] border border-[#27272A] rounded-full px-4 py-2.5 gap-2 focus-within:border-[#D4FF00] transition-colors">
+        <i class="fas fa-search text-gray-500 text-sm"></i>
+        <input id="searchInput" type="text" placeholder="Buscar silueta, ref, talla..." oninput="searchProducts()"
+          class="bg-transparent text-sm outline-none flex-1 text-white placeholder-gray-500">
+      </div>
+
+      <!-- Right buttons -->
+      <div class="flex items-center gap-3">
+        <!-- Mobile search toggle -->
+        <button onclick="toggleMobileSearch()" class="md:hidden text-gray-400 hover:text-[#D4FF00] text-lg"><i class="fas fa-search"></i></button>
+        <!-- Wishlist -->
+        <button onclick="toggleWishlistPanel()" class="relative text-gray-400 hover:text-white text-xl transition-colors">
+          <i class="fas fa-heart"></i>
+          <span id="wishCount" class="hidden absolute -top-2 -right-2 bg-[#FF1E40] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
+        </button>
+        <!-- Cart -->
+        <button onclick="openCart()" class="relative text-gray-400 hover:text-[#D4FF00] text-xl transition-colors">
+          <i class="fas fa-shopping-bag"></i>
+          <span id="cartCount" class="hidden absolute -top-2 -right-2 bg-[#D4FF00] text-black text-xs w-5 h-5 rounded-full flex items-center justify-center font-black">0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile search bar -->
+    <div id="mobileSearch" class="hidden md:hidden px-4 pb-3">
+      <div class="flex items-center bg-[#141418] border border-[#27272A] rounded-full px-4 py-2 gap-2">
+        <i class="fas fa-search text-gray-500 text-sm"></i>
+        <input type="text" placeholder="Buscar zapatos..." oninput="searchProducts(this.value)"
+          class="bg-transparent text-sm outline-none flex-1 text-white placeholder-gray-500">
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== HERO SECTION (MODALIDAD DUAL: BANNER CAMPANA CANVA / LA ROJA Ó SPLIT SHOWCASE) ===== -->
+  <section id="heroSection" class="relative bg-black text-white overflow-hidden pt-28 md:pt-36 pb-12 md:pb-16 min-h-[580px] flex flex-col justify-between">
+    
+    <!-- 1. Capa de Fondo: Imagen de Banner (Canva / Campaña de Alta Definición) -->
+    <img id="heroBannerBgImg" src="https://images.unsplash.com/photo-1511556532299-8f662fc26c06?w=1920&auto=format&fit=crop&q=85" alt="Banner Oficial" class="absolute inset-0 w-full h-full object-cover pointer-events-none select-none transition-opacity duration-700">
+
+    <!-- 2. Capa de Fondo: Video de Portada en Bucle (Opcional) -->
+    <video id="heroBannerBgVideo" autoplay loop muted playsinline class="hidden absolute inset-0 w-full h-full object-cover pointer-events-none select-none"></video>
+
+    <!-- 3. Capa de Superposición de Color / Tinte Deportivo (Estilo Reebok "La Roja" / Oscuro / Púrpura) -->
+    <div id="heroOverlayEl" class="absolute inset-0 bg-gradient-to-r from-red-950/90 via-black/80 to-red-950/85 pointer-events-none transition-all duration-700"></div>
+
+    <!-- =================================================================== -->
+    <!-- MODO A: BANNER PROMOCIONAL DE CAMPAÑA (ESTILO REEBOK / CANVA "LA ROJA") -->
+    <!-- =================================================================== -->
+    <div id="heroBannerModeContainer" class="relative z-10 max-w-7xl mx-auto px-4 py-8 md:py-14 w-full flex-1 flex flex-col justify-between">
+      <!-- Cintillo Superior de Ofertas -->
+      <div class="mb-4">
+        <span id="heroTopPromoText" class="inline-block text-xs md:text-sm font-black tracking-[0.3em] text-white/95 uppercase drop-shadow-md">
+          OFERTAS ESPECIALES
+        </span>
+      </div>
+
+      <!-- Cuadrícula Principal de Impacto (Tipografía Monumental) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center my-auto">
+        <!-- Columna Izquierda: Gran Descuento y Precios Destacados -->
+        <div class="lg:col-span-7 space-y-4">
+          <div id="heroBigPromoSubText" class="text-xl sm:text-2xl md:text-3xl font-black text-white uppercase tracking-wider drop-shadow-sm">
+            DESCUENTOS DE
+          </div>
+          
+          <!-- Titular 30% OFF en estilo gigante outlined y sólido -->
+          <div class="flex items-baseline gap-3 flex-wrap">
+            <div id="heroBigPromoNumber" class="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-none text-white drop-shadow-[0_10px_25px_rgba(0,0,0,0.8)]" style="-webkit-text-stroke: 2px white;">
+              30%
+            </div>
+            <div id="heroBigPromoWord" class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-none text-red-500 drop-shadow-[0_6px_15px_rgba(239,68,68,0.6)]">
+              OFF
+            </div>
+          </div>
+
+          <!-- Precios Destacados de Entrada -->
+          <div class="grid grid-cols-2 gap-4 max-w-md pt-3">
+            <div class="border-t border-white/30 pt-2.5">
+              <div id="heroPriceTag1El" class="text-[11px] sm:text-xs uppercase font-extrabold text-gray-300 tracking-wider">ROPA / ACCESORIOS DESDE</div>
+              <div id="heroPriceVal1El" class="text-xl sm:text-2xl font-black text-white tracking-tight tabular-nums">$69.900</div>
+            </div>
+            <div class="border-t border-white/30 pt-2.5">
+              <div id="heroPriceTag2El" class="text-[11px] sm:text-xs uppercase font-extrabold text-gray-300 tracking-wider">TENIS DESDE</div>
+              <div id="heroPriceVal2El" class="text-xl sm:text-2xl font-black text-white tracking-tight tabular-nums">$188.930</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Titular Secundario, Descripción & Botón [ COMPRAR YA ] -->
+        <div class="lg:col-span-5 space-y-5 bg-black/40 backdrop-blur-md p-6 sm:p-8 rounded-3xl border border-white/20 shadow-2xl">
+          <h2 id="heroPromoHeadlineText" class="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
+            MÁS ESTILO, MEJOR PRECIO
+          </h2>
+          <p id="heroPromoDescText" class="text-sm sm:text-base text-gray-200 font-medium leading-relaxed">
+            Aprovecha nuestros descuentos y precios especiales en calzado premium.
+          </p>
+          <div class="flex items-center gap-3 flex-wrap">
+            <button onclick="document.getElementById('catalogo').scrollIntoView({behavior:'smooth'})" id="heroPromoCtaBtn" class="bg-white hover:bg-gray-100 text-gray-950 font-black text-sm sm:text-base px-8 sm:px-10 py-4 rounded-2xl tracking-wider uppercase shadow-2xl hover:scale-105 active:scale-95 transition-all inline-flex items-center gap-3">
+              <span id="heroPromoCtaBtnText">COMPRAR YA</span>
+              <i class="fas fa-arrow-right text-xs"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Indicadores de Carrusel Inferior -->
+      <div class="flex items-center justify-center gap-2 pt-6">
+        <span class="w-8 h-1 rounded-full bg-white shadow-sm"></span>
+        <span class="w-8 h-1 rounded-full bg-white/40"></span>
+        <span class="w-8 h-1 rounded-full bg-white/40"></span>
+      </div>
+
+      <!-- Insignia Flotante Lateral de Descuento (Estilo Reebok "20% DE DESCUENTO") -->
+      <div id="heroFloatingSideBadge" class="hidden md:flex fixed right-0 top-1/2 -translate-y-1/2 z-40 bg-red-600 hover:bg-red-700 text-white font-black text-xs px-2.5 py-4 rounded-l-2xl shadow-2xl cursor-pointer items-center gap-2 uppercase tracking-widest [writing-mode:vertical-lr] rotate-180 border-l border-y border-red-400/50 transition-all hover:pr-4" onclick="document.getElementById('catalogo').scrollIntoView({behavior:'smooth'})">
+        <span id="heroFloatingSideBadgeText">20% DE DESCUENTO</span>
+      </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- MODO B: SPLIT SHOWCASE CON TARJETA DE VIDEO (MODO CLÁSICO ALTERNATIVO) -->
+    <!-- =================================================================== -->
+    <div id="heroSplitModeContainer" class="hidden relative z-10 max-w-7xl mx-auto px-4 py-8 md:py-14 flex flex-col md:flex-row items-center justify-between gap-8 w-full flex-1">
+      <div class="max-w-lg text-center md:text-left">
+        <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md border border-white/20 rounded-full px-4 py-2 mb-6 text-xs md:text-sm font-semibold tracking-wide text-white/95 shadow-sm">
+          <img id="heroBadgeLogo" src="assets/logo.jpg" alt="Carfe®" class="w-5 h-5 rounded-full object-cover shadow-sm">
+          <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span> <span id="heroBadgeText">Colección Oficial Carfe® 2026</span>
+        </div>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08] mb-4">
+          <span id="heroTitleLine1" class="block pb-1 text-white/95">Zapatos que</span>
+          <span id="heroTitleLine2" class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-200 to-pink-300 inline-block py-0.5">Definen tu Estilo</span>
+        </h1>
+        <p id="heroSubtitle" class="text-purple-100/90 mb-8 text-base md:text-lg max-w-xl font-normal leading-relaxed">La colección más exclusiva de calzado premium. Envíos a todo el país.</p>
+        <div class="flex gap-4 justify-center md:justify-start flex-wrap">
+          <button id="heroBtnPrimary" onclick="document.getElementById('catalogo').scrollIntoView({behavior:'smooth'})"
+            class="bg-white text-purple-700 px-8 py-4 rounded-2xl font-black text-sm tracking-tight hover:shadow-2xl hover:scale-105 active:scale-95 transition-all">
+            <span id="heroPrimaryText">Ver Colección</span> <i class="fas fa-arrow-right ml-2 text-xs"></i>
+          </button>
+          <div id="heroBtnSecondary" class="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/25 px-6 py-4 rounded-2xl text-xs md:text-sm font-bold tracking-tight">
+            <i class="fab fa-tiktok text-pink-300"></i> <span id="heroSecondaryText">Live todos los viernes</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjeta Flotante con Video de Calzado -->
+      <div class="w-full max-w-sm md:w-80 lg:w-[410px] mx-auto md:mx-0">
+        <div class="relative rounded-3xl bg-black/45 backdrop-blur-2xl border-2 border-white/25 shadow-[0_25px_60px_rgba(0,0,0,0.5)] p-3.5 overflow-hidden group will-change-transform" style="animation:floatHeroShowcase 5s ease-in-out infinite">
+          
+          <div id="heroCardBadge" class="absolute -top-1 -right-1 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-300 text-gray-950 rounded-2xl px-3.5 py-1.5 font-black text-xs tracking-wider rotate-12 shadow-2xl z-30 flex items-center gap-1.5 border border-yellow-200">
+            <i class="fas fa-fire text-orange-600 text-xs"></i> NUEVA TEMPORADA
+          </div>
+
+          <div class="flex items-center justify-between px-2 pt-1 pb-2.5 relative z-20">
+            <span class="inline-flex items-center gap-1.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-black text-[10px] tracking-wider uppercase px-3 py-1 rounded-full shadow-md">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> VIDEO OFICIAL
+            </span>
+            <div class="flex items-center gap-1.5">
+              <span class="bg-white/15 backdrop-blur-md text-white/90 text-[10px] font-bold px-2.5 py-1 rounded-lg border border-white/20">
+                <i class="fas fa-film text-pink-300 mr-1"></i>Presentación
+              </span>
+            </div>
+          </div>
+
+          <div id="heroVideoContainer" class="relative rounded-2xl overflow-hidden bg-black aspect-[4/3] flex items-center justify-center border border-white/20 shadow-inner group/video">
+            <video id="heroShoeVideo" autoplay loop muted playsinline class="w-full h-full object-cover">
+              <source id="heroShoeVideoSource" src="https://assets.mixkit.co/videos/preview/mixkit-hands-holding-a-pair-of-white-sneakers-41584-large.mp4" type="video/mp4">
+            </video>
+
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 opacity-0 group-hover/video:opacity-100 transition-opacity flex flex-col justify-between p-3.5 pointer-events-none">
+              <div class="flex justify-between items-center">
+                <span class="bg-black/70 backdrop-blur-md text-white/90 text-[9px] font-mono font-bold px-2.5 py-1 rounded-full border border-white/20">
+                  <i class="fas fa-circle text-red-500 text-[6px] mr-1.5 animate-pulse"></i>HD PRESENTACIÓN
+                </span>
+                <button type="button" onclick="toggleHeroVideoAudio()" id="heroVideoAudioBtn" class="pointer-events-auto w-8 h-8 rounded-full bg-black/80 backdrop-blur-md text-white flex items-center justify-center text-xs hover:bg-black transition-all shadow-md" title="Activar/Silenciar sonido">
+                  <i class="fas fa-volume-mute"></i>
+                </button>
+              </div>
+
+              <div class="flex items-center justify-center">
+                <button type="button" onclick="toggleHeroVideoPlay()" id="heroVideoPlayBtn" class="pointer-events-auto w-14 h-14 rounded-full bg-white/30 hover:bg-white/50 backdrop-blur-md text-white flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all border border-white/40">
+                  <i class="fas fa-pause text-base"></i>
+                </button>
+              </div>
+
+              <div class="text-[10px] text-white/80 text-center font-medium drop-shadow-sm">
+                Toca para reproducir / pausar el video
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3.5 pt-2.5 border-t border-white/15 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <img id="heroCardLogo" src="assets/logo.jpg" alt="Carfe®" class="w-10 h-10 rounded-xl object-cover shadow-md border border-white/30">
+              <div>
+                <div id="heroCardSeason" class="text-[10px] uppercase tracking-wider text-purple-200 font-extrabold">Colección 2026</div>
+                <div id="heroCardBrand" class="text-xs font-black text-white leading-tight">Carfe® Calzado</div>
+              </div>
+            </div>
+            <button onclick="document.getElementById('catalogo').scrollIntoView({behavior:'smooth'})" class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-extrabold text-xs px-4 py-2 rounded-xl shadow-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5">
+              <span>Explorar Zapatos</span> <i class="fas fa-arrow-right text-[10px]"></i>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Barra de Estadísticas Inferior -->
+    <div class="relative z-10 border-t border-white/20 bg-black/40 backdrop-blur-md">
+      <div class="max-w-7xl mx-auto px-4 py-3.5 grid grid-cols-3 text-center text-white gap-4">
+        <div><div id="heroStat1Num" class="font-black text-2xl md:text-3xl tracking-tight tabular-nums">2,500+</div><div id="heroStat1Lbl" class="text-gray-300 text-xs md:text-sm font-medium tracking-wide uppercase mt-0.5">Clientes</div></div>
+        <div><div id="heroStat2Num" class="font-black text-2xl md:text-3xl tracking-tight tabular-nums">150+</div><div id="heroStat2Lbl" class="text-gray-300 text-xs md:text-sm font-medium tracking-wide uppercase mt-0.5">Modelos</div></div>
+        <div><div id="heroStat3Num" class="font-black text-2xl md:text-3xl tracking-tight tabular-nums">4.9★</div><div id="heroStat3Lbl" class="text-gray-300 text-xs md:text-sm font-medium tracking-wide uppercase mt-0.5">Calificación</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TRUST BADGES ===== -->
+  <div class="bg-[#0E0E12] border-y border-[#202025]">
+    <div class="max-w-7xl mx-auto px-4 py-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-xs font-mono font-bold text-gray-300 tracking-wider uppercase">
+      <div class="flex items-center justify-center gap-2.5"><i class="fas fa-bolt text-[#D4FF00] text-sm"></i> Despacho Rápido 24H</div>
+      <div class="flex items-center justify-center gap-2.5"><i class="fas fa-shield-alt text-[#D4FF00] text-sm"></i> Calzado 100% Original</div>
+      <div class="flex items-center justify-center gap-2.5"><i class="fas fa-mobile-alt text-[#D4FF00] text-sm"></i> Nequi / Bancolombia</div>
+      <div class="flex items-center justify-center gap-2.5"><i class="fab fa-whatsapp text-[#D4FF00] text-sm"></i> Asesoría WhatsApp</div>
+    </div>
+  </div>
+
+  <!-- ===== CATALOG ===== -->
+  <section id="catalogo" class="max-w-7xl mx-auto px-4 py-12">
+
+    <!-- Category filters -->
+    <div class="flex gap-3 overflow-x-auto pb-3 scrollbar-hide mb-8">
+      <button onclick="filterCat('all', this)" class="cat-btn active">TODOS // ALL</button>
+      <button onclick="filterCat('hombre', this)" class="cat-btn">HOMBRE // MEN</button>
+      <button onclick="filterCat('mujer', this)" class="cat-btn">MUJER // WOMEN</button>
+    </div>
+
+    <!-- Sort + Count -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
+      <div>
+        <div class="text-[11px] font-mono font-extrabold uppercase tracking-[0.25em] text-[#D4FF00] mb-1">ARCHIVE // DROP 2026</div>
+        <h2 class="text-2xl md:text-3xl font-black text-white tracking-tight flex items-center gap-3">
+          <span id="sectionTitle">Catálogo Oficial</span>
+          <span id="productCount" class="text-xs font-mono text-black font-extrabold bg-[#D4FF00] px-2.5 py-0.5 rounded-full"></span>
+        </h2>
+      </div>
+      <div class="flex items-center gap-2 self-end sm:self-auto">
+        <label class="text-xs font-mono font-bold text-gray-500 uppercase tracking-wider hidden sm:block">FILTRAR:</label>
+        <select onchange="sortProds(this.value)" class="border border-[#27272A] bg-[#141418] text-white rounded-xl px-4 py-2.5 text-xs font-mono font-bold outline-none cursor-pointer hover:border-[#D4FF00] transition-colors">
+          <option value="">Destacados</option>
+          <option value="low">Precio: Menor a Mayor</option>
+          <option value="high">Precio: Mayor a Menor</option>
+          <option value="az">Nombre A–Z</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div id="productsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 fade-in"></div>
+
+    <!-- Empty state -->
+    <div id="emptyState" class="hidden text-center py-24">
+      <div class="w-16 h-16 rounded-2xl bg-[#18181D] border border-[#27272A] text-[#D4FF00] flex items-center justify-center mx-auto text-2xl mb-4"><i class="fas fa-search"></i></div>
+      <div class="text-xl font-bold text-white mb-2">No encontramos siluetas</div>
+      <div class="text-gray-400 mb-6 text-sm">Intenta con otra búsqueda o categoría</div>
+      <button onclick="filterCat('all')" class="bg-[#D4FF00] text-black px-8 py-3 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#E5FF4D]">Ver todo el drop</button>
+    </div>
+  </section>
+
+  <!-- ===== TIKTOK BANNER ===== -->
+  <section class="bg-gradient-to-r from-black via-gray-900 to-black text-white py-16 my-8">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <i class="fab fa-tiktok text-5xl mb-4 text-pink-400"></i>
+      <h2 class="text-3xl font-black mb-3">¡Síguenos en TikTok Live!</h2>
+      <p class="text-gray-300 mb-6 text-lg">En vivo con lanzamientos exclusivos, descuentos especiales para seguidores y probador de calzado</p>
+      <div class="flex gap-4 justify-center flex-wrap">
+        <a id="storeTikTokLink" href="https://www.tiktok.com/@carfe_oficial" target="_blank" class="bg-gradient-to-r from-pink-500 to-red-500 px-8 py-4 rounded-xl font-bold hover:shadow-lg hover:scale-105 transition-all inline-flex items-center gap-2">
+          <i class="fab fa-tiktok text-xl"></i> <span id="storeTikTokUser">@carfe_oficial</span>
+        </a>
+        <div class="bg-white/10 border border-white/20 px-8 py-4 rounded-xl font-semibold flex items-center gap-2" id="storeNextLiveBox">
+          <span class="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse"></span> <span id="storeNextLiveText">Próximo live: Viernes 7PM</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="bg-gray-900 text-white pt-12 pb-6">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="grid md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <div class="flex items-center gap-3 mb-4">
+            <img id="footerLogo" src="assets/logo-white.png" alt="Carfe®" class="h-9 sm:h-11 w-auto object-contain">
+          </div>
+          <p id="footerDesc" class="text-gray-400 text-sm mb-4">Tu tienda oficial de calzado premium Carfe® con los mejores diseños, confort y envíos a todo el país.</p>
+          <div class="flex gap-3">
+            <a id="footerInstagramLink" href="https://instagram.com/carfe_calzado" target="_blank" class="w-9 h-9 bg-white/10 hover:bg-purple-600 rounded-xl flex items-center justify-center transition-colors" title="Instagram"><i class="fab fa-instagram text-sm"></i></a>
+            <a id="footerTikTokLink" href="https://www.tiktok.com/@carfe_oficial" target="_blank" class="w-9 h-9 bg-white/10 hover:bg-pink-500 rounded-xl flex items-center justify-center transition-colors" title="TikTok"><i class="fab fa-tiktok text-sm"></i></a>
+            <a id="footerWaSocialLink" href="javascript:void(0)" onclick="openStoreWA()" class="w-9 h-9 bg-white/10 hover:bg-green-600 rounded-xl flex items-center justify-center transition-colors" title="WhatsApp"><i class="fab fa-whatsapp text-sm"></i></a>
+            <a id="footerFacebookLink" href="https://facebook.com" target="_blank" class="w-9 h-9 bg-white/10 hover:bg-blue-600 rounded-xl flex items-center justify-center transition-colors" title="Facebook"><i class="fab fa-facebook text-sm"></i></a>
+          </div>
+        </div>
+        <div>
+          <h4 class="font-bold mb-4 text-gray-200">Categorías</h4>
+          <div class="space-y-2 text-sm text-gray-400">
+            <div class="hover:text-white cursor-pointer" onclick="filterCat('hombre')">Hombre</div>
+            <div class="hover:text-white cursor-pointer" onclick="filterCat('mujer')">Mujer</div>
+          </div>
+        </div>
+        <div>
+          <h4 class="font-bold mb-4 text-gray-200">Ayuda</h4>
+          <div class="space-y-2 text-sm text-gray-400">
+            <div class="hover:text-white cursor-pointer transition-colors" onclick="openHelpModal('tracking')">📦 Seguimiento de pedido</div>
+            <div class="hover:text-white cursor-pointer transition-colors" onclick="openHelpModal('returns')">🔄 Cambios y devoluciones</div>
+            <div class="hover:text-white cursor-pointer transition-colors" onclick="openHelpModal('sizes')">📏 Guía de tallas</div>
+            <div class="hover:text-white cursor-pointer transition-colors" onclick="openHelpModal('faq')">❓ Preguntas frecuentes</div>
+            <div class="hover:text-white cursor-pointer transition-colors" onclick="openHelpModal('contact')">📞 Contáctanos</div>
+          </div>
+        </div>
+        <div>
+          <h4 class="font-bold mb-4 text-gray-200">Contacto</h4>
+          <div class="space-y-3 text-sm text-gray-400">
+            <div class="flex items-center gap-2" id="footerWaRow"><i class="fab fa-whatsapp text-emerald-400 w-4"></i> <span id="footerWaText">+57 300 123 4567</span></div>
+            <div class="flex items-center gap-2"><i class="fas fa-envelope text-red-400 w-4"></i> <span id="footerEmailText">contacto@carfe.com.co</span></div>
+            <div class="flex items-center gap-2"><i class="fas fa-clock text-amber-400 w-4"></i> <span id="footerScheduleText">Lun–Sáb 9AM–7PM</span></div>
+            <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-red-500 w-4"></i> <span id="footerCityText">Bucaramanga, Colombia</span></div>
+          </div>
+          <!-- WhatsApp float -->
+          <button onclick="openStoreWA('Hola Carfe®, quiero información sobre su calzado')"
+            class="mt-4 flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-colors cursor-pointer shadow-md">
+            <i class="fab fa-whatsapp text-base"></i> Escríbenos ahora
+          </button>
+        </div>
+      </div>
+      <div class="border-t border-gray-800 pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
+        <div>© 2026 Carfe®. Todos los derechos reservados.</div>
+        <div class="flex items-center gap-4">
+          <span>Pagos seguros:</span>
+          <span class="text-2xl">💳</span><span class="text-2xl">🅿️</span><span class="text-2xl">🏦</span>
+        </div>
+        <a href="admin.html" class="text-gray-700 hover:text-gray-500 text-xs transition-colors">⚙ Administrador</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- WhatsApp float button -->
+  <button onclick="openStoreWA('Hola Carfe®, quiero ver el catálogo oficial de zapatos')"
+    class="fixed bottom-24 right-6 w-14 h-14 bg-emerald-600 hover:bg-emerald-700 rounded-full flex items-center justify-center shadow-2xl z-40 hover:scale-110 active:scale-95 transition-all cursor-pointer" title="Chatear por WhatsApp">
+    <i class="fab fa-whatsapp text-white text-2xl"></i>
+  </button>
+
+  <!-- ===== HELP / AYUDA MODAL ===== -->
+  <div id="helpModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] hidden items-center justify-center p-4" onclick="if(event.target===this) closeHelpModal()">
+    <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden text-gray-900 border border-gray-100 animate-fadeIn max-h-[90vh] flex flex-col">
+      <div class="bg-[#0A0A0C] text-white p-5 border-b border-zinc-800 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-red-600/20 text-red-500 flex items-center justify-center text-lg">
+            <i id="helpModalIcon" class="fas fa-info-circle"></i>
+          </div>
+          <div>
+            <h3 id="helpModalTitle" class="font-black text-base leading-tight">Centro de Ayuda CARFE®</h3>
+            <p id="helpModalSubtitle" class="text-xs text-zinc-400">Información oficial para clientes</p>
+          </div>
+        </div>
+        <button onclick="closeHelpModal()" class="text-zinc-400 hover:text-white text-lg"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="helpModalBody" class="p-6 overflow-y-auto space-y-4 text-sm text-gray-700 leading-relaxed"></div>
+      <div class="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+        <button onclick="openStoreWA('Hola Carfe®, tengo una pregunta sobre mi compra o despacho'); closeHelpModal();" class="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1.5">
+          <i class="fab fa-whatsapp text-sm"></i> Chatear con Asesor
+        </button>
+        <button onclick="closeHelpModal()" class="px-5 py-2.5 bg-gray-900 text-white rounded-xl font-bold text-xs hover:bg-gray-800">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CART DRAWER ===== -->
+  <div id="cartOverlay" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-[65] hidden transition-opacity duration-300" onclick="closeCart()"></div>
+  <div id="cartDrawer" class="drawer-panel is-closed bg-[#121215] text-[#F4F3EF] border-l border-[#27272A]" style="display: none; transform: translateX(100%); visibility: hidden;">
+    <div class="bg-[#18181D] p-5 text-white flex items-center justify-between border-b border-[#27272A]">
+      <h2 class="font-black text-xl flex items-center gap-2"><i class="fas fa-shopping-bag text-[#D4FF00]"></i>Mi Bolsa // Cart</h2>
+      <button onclick="closeCart()" class="w-9 h-9 rounded-full bg-[#27272A] hover:bg-[#323238] text-white flex items-center justify-center text-sm transition-all" title="Cerrar bolsa"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="cartItems" class="flex-1 overflow-y-auto p-4 space-y-3 bg-[#121215]"></div>
+    <div class="p-5 border-t border-[#27272A] bg-[#16161B]">
+      <div class="flex justify-between mb-2 text-sm text-gray-400 font-mono"><span>SUBTOTAL</span><span id="cartSubtotal" class="font-bold text-white">$0</span></div>
+      <div class="flex justify-between mb-4 text-sm text-gray-400 font-mono"><span>ENVÍO</span><span class="font-bold text-[#D4FF00]">GRATIS</span></div>
+      <div class="flex justify-between mb-5 font-black text-2xl font-mono text-white"><span>TOTAL</span><span id="cartTotal" class="text-[#D4FF00]">$0</span></div>
+      <button onclick="startCheckout()" class="w-full bg-[#D4FF00] hover:bg-[#E5FF4D] text-black py-3.5 rounded-xl font-black text-base shadow-lg shadow-[#D4FF00]/20 hover:scale-[1.02] transition-all mb-2.5 uppercase tracking-wide">
+        <i class="fas fa-credit-card mr-2"></i>Pagar en Línea
+      </button>
+      <button onclick="orderCartWhatsApp()" class="w-full bg-[#10B981] hover:bg-[#059669] text-black py-3.5 rounded-xl font-black text-base shadow-md shadow-emerald-500/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 uppercase tracking-wide">
+        <i class="fab fa-whatsapp text-xl"></i>Comprar por WhatsApp
+      </button>
+      <p class="text-center text-xs text-gray-500 font-mono mt-3"><i class="fas fa-shield-alt mr-1"></i>DESPACHO DIRECTO CARFE® COLOMBIA</p>
+    </div>
+  </div>
+
+  <!-- ===== WISHLIST DRAWER ===== -->
+  <div id="wishOverlay" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-[65] hidden transition-opacity duration-300" onclick="closeWishlistPanel()"></div>
+  <div id="wishDrawer" class="drawer-panel is-closed bg-[#121215] text-[#F4F3EF] border-l border-[#27272A]" style="display: none; transform: translateX(100%); visibility: hidden;">
+    <div class="bg-[#18181D] p-5 text-white flex items-center justify-between border-b border-[#27272A]">
+      <h2 class="font-black text-xl flex items-center gap-2"><i class="fas fa-heart text-[#FF1E40]"></i>Mis Favoritos</h2>
+      <button onclick="closeWishlistPanel()" class="w-9 h-9 rounded-full bg-[#27272A] hover:bg-[#323238] text-white flex items-center justify-center text-sm transition-all" title="Cerrar favoritos"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="wishItems" class="flex-1 overflow-y-auto p-4 space-y-3 bg-[#121215]"></div>
+  </div>
+
+  <!-- ===== PRODUCT DETAIL MODAL ===== -->
+  <div id="productModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[80] hidden items-center justify-center p-4" onclick="if(event.target===this) closeProductModal()">
+    <div class="bg-[#121215] border border-[#27272A] rounded-2xl w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div id="productModalContent"></div>
+    </div>
+  </div>
+
+  <!-- ===== WHATSAPP ORDER MODAL ===== -->
+  <div id="waOrderModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[95] hidden items-center justify-center p-4" onclick="if(event.target===this) closeWAOrderModal()">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden text-gray-900 border border-gray-100 animate-fadeIn">
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-emerald-600 to-teal-700 p-5 text-white flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center text-xl shadow-inner">
+            <i class="fab fa-whatsapp"></i>
+          </div>
+          <div>
+            <h3 class="font-black text-lg leading-tight">Pedir por WhatsApp</h3>
+            <p class="text-xs text-emerald-100 font-medium">Carfe® Oficial • Atención Inmediata</p>
+          </div>
+        </div>
+        <button onclick="closeWAOrderModal()" class="text-white/80 hover:text-white text-xl p-1"><i class="fas fa-times"></i></button>
+      </div>
+
+      <!-- Product Summary Card with Photo -->
+      <div class="p-4 border-b border-gray-100 bg-gray-50 flex items-center gap-4">
+        <div id="waProdImgContainer" class="w-20 h-20 rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm flex-shrink-0 flex items-center justify-center"></div>
+        <div class="flex-1 min-w-0">
+          <div id="waProdCategory" class="text-[10.5px] font-extrabold text-red-600 uppercase tracking-wide"></div>
+          <h4 id="waProdTitle" class="font-black text-gray-900 text-sm truncate"></h4>
+          <div id="waProdPrice" class="font-black text-emerald-600 text-base"></div>
+          <div class="text-[11px] text-gray-500 font-medium mt-0.5">Envío seguro a toda Colombia 🇨🇴</div>
+        </div>
+      </div>
+
+      <!-- Order Form Fields con visibilidad 100% garantizada -->
+      <div class="p-5 space-y-3.5 max-h-[55vh] overflow-y-auto bg-white">
+        <div>
+          <label class="block text-xs font-black text-gray-800 mb-1.5 uppercase tracking-wide">Tu Nombre Completo *</label>
+          <input id="waOrderName" type="text" placeholder="Ej: Carlos Rodríguez"
+            style="color:#111827 !important; -webkit-text-fill-color:#111827 !important; background-color:#ffffff !important; font-weight:700 !important;"
+            class="w-full border-2 border-gray-200 focus:border-emerald-600 rounded-xl px-4 py-2.5 text-sm outline-none transition-colors font-bold text-gray-900 bg-white">
+        </div>
+        
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-black text-gray-800 mb-1.5 uppercase tracking-wide">Talla</label>
+            <select id="waOrderSize"
+              style="color:#111827 !important; -webkit-text-fill-color:#111827 !important; background-color:#ffffff !important; font-weight:700 !important;"
+              class="w-full border-2 border-gray-200 focus:border-emerald-600 rounded-xl px-3 py-2.5 text-sm outline-none bg-white font-bold text-gray-900 cursor-pointer"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-black text-gray-800 mb-1.5 uppercase tracking-wide">Color</label>
+            <select id="waOrderColor"
+              style="color:#111827 !important; -webkit-text-fill-color:#111827 !important; background-color:#ffffff !important; font-weight:700 !important;"
+              class="w-full border-2 border-gray-200 focus:border-emerald-600 rounded-xl px-3 py-2.5 text-sm outline-none bg-white font-bold text-gray-900 cursor-pointer"></select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-black text-gray-800 mb-1.5 uppercase tracking-wide">Ciudad y Dirección de Envío *</label>
+          <input id="waOrderAddress" type="text" placeholder="Ej: Cra 15 # 85-30, Bucaramanga"
+            style="color:#111827 !important; -webkit-text-fill-color:#111827 !important; background-color:#ffffff !important; font-weight:700 !important;"
+            class="w-full border-2 border-gray-200 focus:border-emerald-600 rounded-xl px-4 py-2.5 text-sm outline-none transition-colors font-bold text-gray-900 bg-white">
+        </div>
+
+        <div>
+          <label class="block text-xs font-black text-gray-800 mb-1.5 uppercase tracking-wide">Forma de Pago Preferida</label>
+          <select id="waOrderPayment"
+            style="color:#111827 !important; -webkit-text-fill-color:#111827 !important; background-color:#ffffff !important; font-weight:700 !important;"
+            class="w-full border-2 border-gray-200 focus:border-emerald-600 rounded-xl px-3 py-2.5 text-sm outline-none bg-white font-bold text-gray-900 cursor-pointer">
+            <option value="Transferencia Bancolombia / Nequi / Daviplata" selected style="color:#111827;background:#fff;">📲 Transferencia Nequi / Bancolombia / Daviplata</option>
+            <option value="Tarjeta Débito / Crédito / PSE" style="color:#111827;background:#fff;">💳 Tarjeta Débito / Crédito / PSE</option>
+          </select>
+        </div>
+
+        <div class="p-3 bg-emerald-50 rounded-2xl border border-emerald-100 text-xs text-emerald-900 flex items-start gap-2.5">
+          <i class="fas fa-camera text-emerald-600 mt-0.5 text-sm"></i>
+          <span>Se enviará a WhatsApp el mensaje con la <b>foto oficial del calzado</b>, talla elegida y tu dirección para despacho prioritario.</span>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <div class="p-4 bg-gray-50 border-t border-gray-100 flex flex-col gap-2.5">
+        <div class="flex gap-2.5">
+          <button onclick="closeWAOrderModal()" class="px-4 py-3 rounded-xl border border-gray-300 font-bold text-xs text-gray-600 hover:bg-gray-100 transition-colors">Cancelar</button>
+          <button onclick="submitWAOrder()" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black py-3 rounded-xl shadow-lg shadow-emerald-600/30 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-sm">
+            <i class="fab fa-whatsapp text-lg"></i> Comprar y Pagar por WhatsApp
+          </button>
+        </div>
+        <div class="text-center pt-0.5">
+          <button type="button" onclick="fastWAOrder()" class="text-xs text-emerald-700 hover:text-emerald-900 font-extrabold underline inline-flex items-center gap-1.5 transition-colors">
+            <i class="fas fa-bolt text-amber-500"></i> Comprar directo por WhatsApp sin llenar formulario
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CHECKOUT MODAL ===== -->
+  <div id="checkoutModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="bg-gradient-to-r from-purple-600 to-pink-500 p-5 rounded-t-2xl text-white">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-black text-xl"><i class="fas fa-lock mr-2"></i>Finalizar Compra</h2>
+          <button onclick="closeCheckout()" class="text-white/80 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+        </div>
+        <div class="flex gap-4 text-sm">
+          <div id="si1" class="flex items-center gap-2"><span class="w-6 h-6 bg-white text-purple-600 rounded-full flex items-center justify-center font-bold text-xs">1</span> Datos</div>
+          <span class="text-white/40">›</span>
+          <div id="si2" class="flex items-center gap-2 text-white/60"><span class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center font-bold text-xs">2</span> Pago</div>
+          <span class="text-white/40">›</span>
+          <div id="si3" class="flex items-center gap-2 text-white/60"><span class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center font-bold text-xs">3</span> Listo</div>
+        </div>
+      </div>
+      <div class="p-6">
+        <!-- STEP 1 -->
+        <div id="step1">
+          <h3 class="font-bold text-gray-800 mb-4">Tus Datos</h3>
+          <div class="space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+              <div><label class="text-xs font-semibold text-gray-500 mb-1 block">Nombre</label>
+                <input id="cName" type="text" placeholder="Juan" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-purple-400 transition-colors"></div>
+              <div><label class="text-xs font-semibold text-gray-500 mb-1 block">Apellido</label>
+                <input id="cLastName" type="text" placeholder="García" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-purple-400 transition-colors"></div>
+            </div>
+            <div><label class="text-xs font-semibold text-gray-500 mb-1 block">Email</label>
+              <input id="cEmail" type="email" placeholder="tu@email.com" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-purple-400 transition-colors"></div>
+            <div><label class="text-xs font-semibold text-gray-500 mb-1 block">Teléfono / WhatsApp</label>
+              <input id="cPhone" type="tel" placeholder="+1 555 000 0000" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-purple-400 transition-colors"></div>
+            <div><label class="text-xs font-semibold text-gray-500 mb-1 block">Dirección de envío</label>
+              <input id="cAddress" type="text" placeholder="Calle, número, ciudad" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-purple-400 transition-colors"></div>
+            <div><label class="text-xs font-semibold text-gray-500 mb-1 block">País</label>
+              <select id="cCountry" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-purple-400 transition-colors">
+                <option>Colombia</option><option>México</option><option>Argentina</option><option>Chile</option>
+                <option>Perú</option><option>Venezuela</option><option>Ecuador</option><option>España</option><option>EEUU</option>
+              </select></div>
+          </div>
+          <button onclick="goStep(2)" class="mt-5 w-full bg-gradient-to-r from-purple-600 to-pink-500 text-white py-4 rounded-xl font-bold hover:shadow-lg transition-all">
+            Continuar al Pago <i class="fas fa-arrow-right ml-2"></i>
+          </button>
+        </div>
+
+        <!-- STEP 2 -->
+        <div id="step2" class="hidden">
+          <h3 class="font-bold text-gray-800 mb-4">Método de Pago</h3>
+          <div class="space-y-3 mb-5">
+            <label class="flex items-center gap-4 p-4 border-2 border-purple-500 bg-purple-50 rounded-xl cursor-pointer">
+              <input type="radio" name="pm" value="tarjeta" checked class="accent-purple-600">
+              <i class="fas fa-credit-card text-blue-500 text-xl"></i>
+              <span class="font-semibold text-gray-700">Tarjeta de Crédito / Débito</span>
+            </label>
+            <label class="flex items-center gap-4 p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-purple-300">
+              <input type="radio" name="pm" value="paypal" class="accent-purple-600">
+              <i class="fab fa-paypal text-blue-600 text-xl"></i>
+              <span class="font-semibold text-gray-700">PayPal</span>
+            </label>
+            <label class="flex items-center gap-4 p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-purple-300">
+              <input type="radio" name="pm" value="transferencia" class="accent-purple-600">
+              <i class="fas fa-mobile-alt text-purple-600 text-xl"></i>
+              <span class="font-semibold text-gray-700">Nequi / Daviplata / Bancolombia</span>
+            </label>
+          </div>
+          <!-- Virtual Card -->
+          <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 text-white mb-5">
+            <div class="flex justify-between mb-6"><span class="text-xs text-gray-400">CARFE® OFFICIAL STORE</span><i class="fab fa-cc-visa text-2xl"></i></div>
+            <input id="cardNum" type="text" placeholder="0000 0000 0000 0000" maxlength="19" oninput="fmtCard(this)"
+              class="w-full bg-transparent border-b border-white/20 pb-2 mb-4 text-lg font-mono outline-none placeholder-gray-500">
+            <div class="grid grid-cols-3 gap-3">
+              <input id="cardExp" type="text" placeholder="MM/AA" maxlength="5" oninput="fmtExp(this)"
+                class="bg-transparent border-b border-white/20 pb-2 outline-none font-mono placeholder-gray-500 text-sm">
+              <input id="cardCvv" type="text" placeholder="CVV" maxlength="4"
+                class="bg-transparent border-b border-white/20 pb-2 outline-none font-mono placeholder-gray-500 text-sm">
+              <input id="cardName" type="text" placeholder="Tu nombre"
+                class="bg-transparent border-b border-white/20 pb-2 outline-none placeholder-gray-500 text-sm">
+            </div>
+          </div>
+          <div class="bg-purple-50 rounded-xl p-4 mb-4 text-sm">
+            <div class="flex justify-between mb-1"><span class="text-gray-500">Subtotal</span><span id="coSubtotal" class="font-semibold text-gray-800"></span></div>
+            <div class="flex justify-between mb-2"><span class="text-gray-500">Envío</span><span class="font-semibold text-green-600">Gratis</span></div>
+            <div class="flex justify-between font-black text-lg border-t border-purple-200 pt-2"><span>Total</span><span id="coTotal" class="text-purple-600"></span></div>
+          </div>
+          <div class="flex gap-3">
+            <button onclick="goStep(1)" class="flex-1 border-2 border-gray-200 text-gray-600 py-3 rounded-xl font-bold hover:border-purple-400">← Atrás</button>
+            <button onclick="processPay()" id="payBtn" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-500 text-white py-3 rounded-xl font-bold hover:shadow-lg">
+              <i class="fas fa-lock mr-2"></i>Pagar
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 3 Confirmation -->
+        <div id="step3" class="hidden text-center py-6">
+          <div class="text-7xl mb-5">🎉</div>
+          <h3 class="font-black text-2xl text-gray-800 mb-2">¡Pedido Confirmado!</h3>
+          <p class="text-gray-500 mb-2">Gracias por tu compra</p>
+          <div id="orderNum" class="text-purple-600 font-bold text-lg mb-5"></div>
+          <div class="bg-purple-50 rounded-xl p-4 text-left text-sm mb-6 space-y-2">
+            <div class="flex justify-between"><span class="text-gray-500">Cliente:</span><span id="confName" class="font-semibold text-gray-800"></span></div>
+            <div class="flex justify-between"><span class="text-gray-500">Email:</span><span id="confEmail" class="font-semibold text-gray-800"></span></div>
+            <div class="flex justify-between"><span class="text-gray-500">Total:</span><span id="confTotal" class="font-bold text-purple-600"></span></div>
+          </div>
+          <p class="text-sm text-gray-500 mb-6">Te enviaremos la confirmación a tu email y WhatsApp. 📱</p>
+          <div class="flex gap-3">
+            <button onclick="openStoreWA('Hola Carfe®, quiero confirmar mi pedido realizado en la tienda')"
+              class="flex-1 bg-green-500 text-white py-3 rounded-xl font-bold hover:bg-green-600 transition-colors flex items-center justify-center gap-2 cursor-pointer">
+              <i class="fab fa-whatsapp text-lg"></i> Confirmar por WhatsApp
+            </button>
+            <button onclick="closeCheckout()" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-500 text-white py-3 rounded-xl font-bold hover:shadow-lg">
+              Seguir Comprando
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FLOATING TIKTOK LIVE BANNER ===== -->
+  <div id="tiktokLiveFloatingBanner" class="fixed bottom-6 right-6 z-50 max-w-sm w-[90vw] hidden transition-all duration-300">
+    <div class="bg-gradient-to-r from-black via-gray-900 to-pink-950 text-white p-4 rounded-3xl shadow-2xl border-2 border-pink-500/70 backdrop-blur-md">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <span class="relative flex h-3 w-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+          </span>
+          <span class="bg-red-600 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider animate-pulse">EN VIVO EN TIKTOK</span>
+        </div>
+        <button onclick="dismissTikTokLiveBanner()" class="text-gray-400 hover:text-white text-xs p-1" title="Cerrar aviso">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-2xl bg-black flex items-center justify-center text-pink-400 text-xl border border-pink-500/40 flex-shrink-0">
+          <i class="fab fa-tiktok"></i>
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="font-bold text-xs text-pink-300 truncate" id="liveBannerUser">@carfe_oficial</div>
+          <div class="text-xs font-black text-white" id="liveBannerTitle">Transmisión de Calzado en Vivo</div>
+          <div class="text-[10px] text-gray-300" id="liveBannerViewers">👁️ 450+ viendo en directo</div>
+        </div>
+      </div>
+
+      <!-- Producto fijado durante el live (si hay uno en pantalla) -->
+      <div id="liveBannerPinnedProduct" class="hidden bg-white/10 rounded-2xl p-2.5 mb-3 border border-white/10 flex items-center gap-2.5">
+        <div class="w-11 h-11 bg-white rounded-xl p-1 flex items-center justify-center flex-shrink-0 overflow-hidden">
+          <img id="liveBannerPinnedImg" src="" class="w-full h-full object-contain">
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="text-[10px] uppercase font-black text-amber-400 flex items-center gap-1">
+            <i class="fas fa-fire"></i> En Pantalla Ahora
+          </div>
+          <div class="text-xs font-black text-white truncate" id="liveBannerPinnedName">Zapato</div>
+          <div class="text-xs font-bold text-emerald-400" id="liveBannerPinnedPrice">$0</div>
+        </div>
+        <button id="liveBannerBuyBtn" onclick="buyPinnedLiveProduct()" class="bg-amber-400 hover:bg-amber-300 text-gray-900 font-black text-[11px] px-3 py-1.5 rounded-xl transition-all shadow-sm">
+          Comprar
+        </button>
+      </div>
+
+      <div class="flex gap-2">
+        <a id="liveBannerWatchBtn" href="https://www.tiktok.com/@carfe_oficial/live" target="_blank"
+           class="flex-1 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 hover:from-pink-600 hover:to-red-600 text-white font-extrabold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg transition-transform hover:scale-[1.02]">
+          <i class="fab fa-tiktok text-sm"></i> Ver Live y Comprar
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] hidden">
+    <div class="bg-white rounded-2xl shadow-2xl border border-gray-100 px-5 py-3.5 flex items-center gap-3 min-w-64">
+      <span id="toastIcon" class="text-2xl"></span>
+      <div><div id="toastTitle" class="font-bold text-gray-800 text-sm"></div><div id="toastMsg" class="text-xs text-gray-500"></div></div>
+    </div>
+  </div>
+
+  <script src="js/base44-client.js"></script>
+  <script src="js/store.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+          console.log('[CARFE PWA] Service Worker registrado con éxito:', reg.scope);
+        }).catch(err => {
+          console.warn('[CARFE PWA] Error al registrar Service Worker:', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

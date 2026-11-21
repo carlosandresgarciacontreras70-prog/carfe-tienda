@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARCHIVE // 01 — Footwear Studio | Carfe® Calzado</title>
+  <!-- Tipografías Editoriales y Técnicas -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================================================
+       SISTEMA AISLADO (.lx-*) - CERO INTERFERENCIA CON TU CÓDIGO EXISTENTE
+       ========================================================================== */
+    :root {
+      --lx-bg: #0B0B0C;
+      --lx-surface: #121214;
+      --lx-surface-hover: #19191C;
+      --lx-border: #242428;
+      --lx-text: #F4F3EF;
+      --lx-muted: #7C7C85;
+      --lx-accent: #D4FF00; /* Volt Industrial */
+      --lx-accent-olive: #6B705C;
+      --lx-font-display: 'Syne', sans-serif;
+      --lx-font-sans: 'Plus Jakarta Sans', sans-serif;
+      --lx-font-mono: 'JetBrains Mono', monospace;
+      --lx-ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .lx-wrapper, .lx-wrapper * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .lx-wrapper {
+      background-color: var(--lx-bg);
+      color: var(--lx-text);
+      font-family: var(--lx-font-sans);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      selection-background-color: var(--lx-accent);
+      selection-color: #000;
+    }
+
+    /* Textura de grano editorial (Anti-AI sterile look) */
+    .lx-noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Top Ticker Técnico */
+    .lx-ticker {
+      border-bottom: 1px solid var(--lx-border);
+      background: #070708;
+      padding: 8px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--lx-font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--lx-muted);
+      text-transform: uppercase;
+    }
+
+    .lx-ticker-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--lx-text);
+    }
+
+    .lx-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--lx-accent);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--lx-accent);
+    }
+
+    /* Header Brutalista */
+    .lx-header {
+      display: grid;
+      grid-template-columns: 280px 1fr 340px;
+      border-bottom: 1px solid var(--lx-border);
+      background: rgba(11, 11, 12, 0.85);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .lx-brand {
+      padding: 20px 24px;
+      font-family: var(--lx-font-display);
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      border-right: 1px solid var(--lx-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--lx-text);
+      text-decoration: none;
+    }
+
+    .lx-brand span {
+      font-family: var(--lx-font-mono);
+      font-size: 10px;
+      color: var(--lx-muted);
+      font-weight: 400;
+      border: 1px solid var(--lx-border);
+      padding: 2px 6px;
+    }
+
+    .lx-nav {
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 36px;
+    }
+
+    .lx-nav a {
+      color: var(--lx-muted);
+      text-decoration: none;
+      font-family: var(--lx-font-mono);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: color 0.2s ease;
+    }
+
+    .lx-nav a:hover, .lx-nav a.active {
+      color: var(--lx-text);
+    }
+
+    .lx-header-actions {
+      border-left: 1px solid var(--lx-border);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 0 24px;
+      font-family: var(--lx-font-mono);
+      font-size: 12px;
+    }
+
+    .lx-back-btn {
+      background: transparent;
+      color: var(--lx-muted);
+      border: 1px solid var(--lx-border);
+      padding: 8px 12px;
+      font-family: var(--lx-font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .lx-back-btn:hover {
+      border-color: var(--lx-text);
+      color: var(--lx-text);
+      background: var(--lx-surface-hover);
+    }
+
+    .lx-cart-btn {
+      background: var(--lx-text);
+      color: var(--lx-bg);
+      border: none;
+      padding: 8px 16px;
+      font-family: var(--lx-font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.25s var(--lx-ease);
+    }
+
+    .lx-cart-btn:hover {
+      background: var(--lx-accent);
+    }
+
+    /* ==========================================================================
+       HERO & 3D INTERACTIVE SHOWCASE (SPLIT ARCHITECTURAL GRID)
+       ========================================================================== */
+    .lx-hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 480px;
+      min-height: calc(100vh - 97px);
+      border-bottom: 1px solid var(--lx-border);
+    }
+
+    /* Columna Izquierda: Escenario 3D */
+    .lx-stage-container {
+      position: relative;
+      border-right: 1px solid var(--lx-border);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 50%, #1C1D1A 0%, #0B0B0C 72%);
+      perspective: 1400px;
+    }
+
+    /* Retícula técnica de fondo */
+    .lx-stage-grid-bg {
+      position: absolute;
+      inset: 0;
+      background-size: 48px 48px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      pointer-events: none;
+    }
+
+    /* Tipografía Monumental de Fondo */
+    .lx-bg-typography {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--lx-font-display);
+      font-size: clamp(90px, 13vw, 210px);
+      font-weight: 800;
+      line-height: 0.82;
+      letter-spacing: -0.05em;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(255, 255, 255, 0.07);
+      white-space: nowrap;
+      pointer-events: none;
+      user-select: none;
+      z-index: 1;
+      transition: transform 0.2s ease-out;
+    }
+
+    /* Barra superior del visor 3D */
+    .lx-stage-hud-top {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      padding: 24px 32px;
+      font-family: var(--lx-font-mono);
+      font-size: 11px;
+      color: var(--lx-muted);
+    }
+
+    .lx-hud-coords {
+      display: flex;
+      gap: 20px;
+    }
+
+    .lx-hud-badge {
+      border: 1px solid var(--lx-border);
+      background: rgba(18, 18, 20, 0.8);
+      padding: 4px 10px;
+      color: var(--lx-text);
+    }
+
+    /* Contenedor del Objeto 3D */
+    .lx-3d-viewport {
+      position: relative;
+      z-index: 5;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      transform-style: preserve-3d;
+    }
+
+    .lx-3d-viewport:active {
+      cursor: grabbing;
+    }
+
+    .lx-shoe-rig {
+      position: relative;
+      width: min(640px, 85%);
+      height: 380px;
+      transform-style: preserve-3d;
+      transition: transform 0.12s ease-out;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Sombra dinámica en piso 3D */
+    .lx-shoe-shadow {
+      position: absolute;
+      bottom: 15px;
+      width: 75%;
+      height: 45px;
+      background: radial-gradient(ellipse at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 75%);
+      transform: rotateX(75deg) translateZ(-60px);
+      filter: blur(10px);
+      transition: all 0.2s ease-out;
+    }
+
+    /* Anillo orbital 3D */
+    .lx-orbit-ring {
+      position: absolute;
+      width: 520px;
+      height: 520px;
+      border: 1px dashed rgba(212, 255, 0, 0.22);
+      border-radius: 50%;
+      transform: rotateX(72deg) rotateY(-8deg);
+      pointer-events: none;
+    }
+
+    /* Imagen del Zapato en Capas 3D */
+    .lx-shoe-img {
+      width: 100%;
+      max-width: 580px;
+      height: auto;
+      object-fit: contain;
+      transform: translateZ(70px) rotate(-14deg);
+      filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.65));
+      transition: filter 0.4s ease, transform 0.35s var(--lx-ease);
+      user-select: none;
+      pointer-events: none;
+    }
+
+    /* Puntos de telemetría flotantes en 3D (Hotspots) */
+    .lx-hotspot {
+      position: absolute;
+      transform: translateZ(110px);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .lx-hotspot-pin {
+      width: 22px;
+      height: 22px;
+      border: 1px solid var(--lx-accent);
+      background: rgba(11, 11, 12, 0.85);
+      color: var(--lx-accent);
+      font-family: var(--lx-font-mono);
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .lx-hotspot:hover .lx-hotspot-pin {
+      background: var(--lx-accent);
+      color: #000;
+      transform: scale(1.15);
+    }
+
+    .lx-hotspot-card {
+      background: rgba(18, 18, 20, 0.92);
+      border: 1px solid var(--lx-border);
+      padding: 6px 10px;
+      font-family: var(--lx-font-mono);
+      font-size: 10px;
+      color: var(--lx-text);
+      white-space: nowrap;
+      backdrop-filter: blur(8px);
+      opacity: 0.85;
+      transition: opacity 0.2s ease, border-color 0.2s ease;
+    }
+
+    .lx-hotspot:hover .lx-hotspot-card {
+      opacity: 1;
+      border-color: var(--lx-accent);
+    }
+
+    .lx-hs-1 { top: 22%; left: 16%; }
+    .lx-hs-2 { bottom: 26%; right: 14%; }
+    .lx-hs-3 { top: 28%; right: 24%; }
+
+    /* Controles inferiores del visor 3D */
+    .lx-stage-hud-bottom {
+      position: relative;
+      z-index: 10;
+      padding: 20px 32px;
+      border-top: 1px solid var(--lx-border);
+      background: rgba(11, 11, 12, 0.75);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .lx-angle-control {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+      max-width: 360px;
+    }
+
+    .lx-angle-label {
+      font-family: var(--lx-font-mono);
+      font-size: 11px;
+      color: var(--lx-muted);
+      white-space: nowrap;
+    }
+
+    .lx-range {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 2px;
+      background: var(--lx-border);
+      outline: none;
+    }
+
+    .lx-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      background: var(--lx-accent);
+      cursor: pointer;
+      border: none;
+    }
+
+    .lx-view-presets {
+      display: flex;
+      gap: 8px;
+    }
+
+    .lx-preset-btn {
+      background: transparent;
+      border: 1px solid var(--lx-border);
+      color: var(--lx-muted);
+      padding: 6px 12px;
+      font-family: var(--lx-font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .lx-preset-btn.active, .lx-preset-btn:hover {
+      border-color: var(--lx-text);
+      color: var(--lx-text);
+    }
+
+    /* ==========================================================================
+       COLUMNA DERECHA: PANEL DE COMPRA & ESPECIFICACIONES
+       ========================================================================== */
+    .lx-product-panel {
+      background: var(--lx-surface);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .lx-panel-section {
+      padding: 28px 32px;
+      border-bottom: 1px solid var(--lx-border);
+    }
+
+    .lx-sku-row {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--lx-font-mono);
+      font-size: 11px;
+      color: var(--lx-muted);
+      margin-bottom: 12px;
+    }
+
+    .lx-sku-tag {
+      color: var(--lx-accent);
+    }
+
+    .lx-product-title {
+      font-family: var(--lx-font-display);
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+
+    .lx-price-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding-top: 12px;
+      border-top: 1px dashed var(--lx-border);
+    }
+
+    .lx-price {
+      font-family: var(--lx-font-mono);
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .lx-tax-note {
+      font-family: var(--lx-font-mono);
+      font-size: 11px;
+      color: var(--lx-muted);
+    }
+
+    /* Selector de Colorway */
+    .lx-section-label {
+      font-family: var(--lx-font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--lx-muted);
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .lx-section-label strong {
+      color: var(--lx-text);
+      font-weight: 400;
+    }
+
+    .lx-colorways {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .lx-color-btn {
+      background: var(--lx-bg);
+      border: 1px solid var(--lx-border);
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+      text-align: left;
+    }
+
+    .lx-color-btn.active, .lx-color-btn:hover {
+      border-color: var(--lx-text);
+    }
+
+    .lx-swatch {
+      width: 18px;
+      height: 18px;
+      border: 1px solid rgba(255,255,255,0.2);
+      flex-shrink: 0;
+    }
+
+    .lx-color-name {
+      font-family: var(--lx-font-mono);
+      font-size: 10px;
+      color: var(--lx-text);
+      line-height: 1.2;
+    }
+
+    /* Selector de Tallas (Grilla Técnica) */
+    .lx-size-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .lx-size-btn {
+      background: var(--lx-bg);
+      border: 1px solid var(--lx-border);
+      color: var(--lx-text);
+      padding: 12px 0;
+      font-family: var(--lx-font-mono);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+
+    .lx-size-btn:hover:not(.disabled) {
+      border-color: var(--lx-muted);
+      background: var(--lx-surface-hover);
+    }
+
+    .lx-size-btn.active {
+      background: var(--lx-text);
+      color: var(--lx-bg);
+      border-color: var(--lx-text);
+      font-weight: 600;
+    }
+
+    .lx-size-btn.disabled {
+      color: #3E3E44;
+      cursor: not-allowed;
+      background: repeating-linear-gradient(
+        -45deg,
+        #0B0B0C,
+        #0B0B0C 4px,
+        #141417 4px,
+        #141417 8px
+      );
+    }
+
+    /* Botones de Acción (CTA) */
+    .lx-cta-group {
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .lx-btn-primary {
+      width: 100%;
+      background: var(--lx-accent);
+      color: #080808;
+      border: none;
+      padding: 18px 24px;
+      font-family: var(--lx-font-mono);
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.2s var(--lx-ease), filter 0.2s ease;
+    }
+
+    .lx-btn-primary:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    .lx-btn-secondary {
+      width: 100%;
+      background: transparent;
+      color: var(--lx-text);
+      border: 1px solid var(--lx-border);
+      padding: 15px 24px;
+      font-family: var(--lx-font-mono);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .lx-btn-secondary:hover {
+      border-color: var(--lx-text);
+      background: var(--lx-surface-hover);
+    }
+
+    /* Especificaciones Técnicas Desplegables */
+    .lx-specs-list {
+      border-top: 1px solid var(--lx-border);
+      font-family: var(--lx-font-mono);
+      font-size: 11px;
+    }
+
+    .lx-spec-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 32px;
+      border-bottom: 1px solid var(--lx-border);
+      color: var(--lx-muted);
+    }
+
+    .lx-spec-item span:last-child {
+      color: var(--lx-text);
+    }
+
+    /* ==========================================================================
+       SECCIÓN DE INGENIERÍA & ANATOMÍA (BENTO EDITORIAL)
+       ========================================================================== */
+    .lx-anatomy-section {
+      border-bottom: 1px solid var(--lx-border);
+    }
+
+    .lx-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 48px 32px 32px;
+      border-bottom: 1px solid var(--lx-border);
+    }
+
+    .lx-section-title {
+      font-family: var(--lx-font-display);
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: -0.03em;
+    }
+
+    .lx-section-subtitle {
+      font-family: var(--lx-font-mono);
+      font-size: 12px;
+      color: var(--lx-muted);
+      max-width: 340px;
+      text-align: right;
+    }
+
+    .lx-bento-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .lx-bento-card {
+      padding: 36px 32px;
+      border-right: 1px solid var(--lx-border);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 290px;
+      background: var(--lx-bg);
+      transition: background 0.3s ease;
+    }
+
+    .lx-bento-card:last-child {
+      border-right: none;
+    }
+
+    .lx-bento-card:hover {
+      background: var(--lx-surface);
+    }
+
+    .lx-bento-num {
+      font-family: var(--lx-font-mono);
+      font-size: 11px;
+      color: var(--lx-accent);
+      border: 1px solid rgba(212, 255, 0, 0.3);
+      padding: 3px 8px;
+      width: fit-content;
+    }
+
+    .lx-bento-title {
+      font-family: var(--lx-font-display);
+      font-size: 22px;
+      margin: 24px 0 12px;
+      text-transform: uppercase;
+    }
+
+    .lx-bento-desc {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--lx-muted);
+    }
+
+    .lx-bento-metric {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px dashed var(--lx-border);
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--lx-font-mono);
+      font-size: 12px;
+    }
+
+    /* ==========================================================================
+       ARCHIVE / CURATED ROTATION (VAULT)
+       ========================================================================== */
+    .lx-vault-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-bottom: 1px solid var(--lx-border);
+    }
+
+    .lx-vault-item {
+      border-right: 1px solid var(--lx-border);
+      padding: 24px;
+      background: var(--lx-bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: background 0.25s ease;
+    }
+
+    .lx-vault-item:last-child {
+      border-right: none;
+    }
+
+    .lx-vault-item:hover {
+      background: var(--lx-surface);
+    }
+
+    .lx-vault-meta {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--lx-font-mono);
+      font-size: 11px;
+      color: var(--lx-muted);
+    }
+
+    .lx-vault-img-box {
+      height: 190px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+
+    .lx-vault-img-box img {
+      width: 88%;
+      height: auto;
+      object-fit: contain;
+      filter: grayscale(25%) contrast(1.08);
+      transition: transform 0.4s var(--lx-ease), filter 0.4s ease;
+    }
+
+    .lx-vault-item:hover .lx-vault-img-box img {
+      transform: scale(1.07) rotate(-4deg);
+      filter: grayscale(0%) contrast(1.12);
+    }
+
+    .lx-vault-name {
+      font-family: var(--lx-font-display);
+      font-size: 16px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .lx-vault-price {
+      font-family: var(--lx-font-mono);
+      font-size: 13px;
+      color: var(--lx-muted);
+    }
+
+    /* Responsive */
+    @media (max-width: 1080px) {
+      .lx-header {
+        grid-template-columns: 1fr auto;
+      }
+      .lx-nav {
+        display: none;
+      }
+      .lx-hero-grid {
+        grid-template-columns: 1fr;
+      }
+      .lx-stage-container {
+        min-height: 540px;
+        border-right: none;
+        border-bottom: 1px solid var(--lx-border);
+      }
+      .lx-bento-grid {
+        grid-template-columns: 1fr;
+      }
+      .lx-bento-card {
+        border-right: none;
+        border-bottom: 1px solid var(--lx-border);
+      }
+      .lx-vault-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .lx-vault-item {
+        border-bottom: 1px solid var(--lx-border);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .lx-vault-grid {
+        grid-template-columns: 1fr;
+      }
+      .lx-stage-hud-bottom {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="lx-wrapper">
+  <!-- Textura Analógica Sutil -->
+  <div class="lx-noise"></div>
+
+  <!-- Barra de Telemetría Superior -->
+  <div class="lx-ticker">
+    <div class="lx-ticker-status">
+      <span class="lx-dot"></span>
+      <span>DROP 04 // ARCHIVE RELEASE — EN STOCK PARA ENVÍO INMEDIATO</span>
+    </div>
+    <div>BOG / MED / BAQ — LOGÍSTICA EXPRESA 24/48H • PAGO CONTRA ENTREGA</div>
+  </div>
+
+  <!-- Navegación Editorial -->
+  <header class="lx-header">
+    <a href="index.html" class="lx-brand">
+      CARFE // 3D LAB
+      <span>EST. 26</span>
+    </a>
+    <nav class="lx-nav">
+      <a href="#stage" class="active">01 / Visor 3D</a>
+      <a href="#anatomy">02 / Ingeniería</a>
+      <a href="#vault">03 / Rotación</a>
+      <a href="#specs">04 / Autenticidad</a>
+    </nav>
+    <div class="lx-header-actions">
+      <a href="index.html" class="lx-back-btn">
+        <span>← TIENDA PRINCIPAL</span>
+      </a>
+      <button class="lx-cart-btn" id="lxCartCounter" onclick="window.location.href='index.html'">BOLSO [0]</button>
+    </div>
+  </header>
+
+  <!-- HERO: ESCENARIO 3D + PANEL DE CONFIGURACIÓN -->
+  <main class="lx-hero-grid" id="stage">
+    
+    <!-- COLUMNA IZQUIERDA: VISOR 3D INTERACTIVO -->
+    <section class="lx-stage-container" id="lxStage">
+      <div class="lx-stage-grid-bg"></div>
+      <div class="lx-bg-typography" id="lxBgText">LOW OG // 01</div>
+
+      <!-- HUD Superior -->
+      <div class="lx-stage-hud-top">
+        <div class="lx-hud-coords">
+          <span>PITCH: <strong id="lxPitchVal">0.0°</strong></span>
+          <span>YAW: <strong id="lxYawVal">-14.0°</strong></span>
+          <span>FOV: <strong>45mm</strong></span>
+        </div>
+        <div class="lx-hud-badge">INTERACTIVE 3D RIG // ARRASTRA O MUEVE EL CURSOR</div>
+      </div>
+
+      <!-- Objeto 3D Central -->
+      <div class="lx-3d-viewport" id="lxViewport">
+        <div class="lx-shoe-rig" id="lxShoeRig">
+          <div class="lx-orbit-ring"></div>
+          <div class="lx-shoe-shadow" id="lxShoeShadow"></div>
+          
+          <img 
+            src="https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=1400&q=85" 
+            alt="Sneaker Low OG Silhouette" 
+            class="lx-shoe-img" 
+            id="lxMainShoe"
+          >
+
+          <!-- Hotspots flotantes con paralaje 3D -->
+          <div class="lx-hotspot lx-hs-1">
+            <div class="lx-hotspot-pin">01</div>
+            <div class="lx-hotspot-card">GAMUZA PREMIUM // 1.8MM NUBUCK</div>
+          </div>
+
+          <div class="lx-hotspot lx-hs-2">
+            <div class="lx-hotspot-pin">02</div>
+            <div class="lx-hotspot-card">CÁPSULA AIR-SOLE // CAUCHO VULCANIZADO</div>
+          </div>
+
+          <div class="lx-hotspot lx-hs-3">
+            <div class="lx-hotspot-pin">03</div>
+            <div class="lx-hotspot-card">COSTURA REFORZADA // NYLON BALLISTIC</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controles de Rotación 3D Inferior -->
+      <div class="lx-stage-hud-bottom">
+        <div class="lx-angle-control">
+          <span class="lx-angle-label">ROTACIÓN 3D</span>
+          <input type="range" min="-35" max="25" value="-14" class="lx-range" id="lxAngleSlider">
+        </div>
+        <div class="lx-view-presets">
+          <button class="lx-preset-btn active" data-rx="0" data-ry="0" data-rz="-14">PERFIL</button>
+          <button class="lx-preset-btn" data-rx="18" data-ry="-22" data-rz="-5">ISOMÉTRICO</button>
+          <button class="lx-preset-btn" data-rx="-15" data-ry="25" data-rz="-22">SUELA / TALÓN</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- COLUMNA DERECHA: FICHA TÉCNICA Y COMPRA -->
+    <aside class="lx-product-panel">
+      <div>
+        <!-- Cabecera del Producto -->
+        <div class="lx-panel-section">
+          <div class="lx-sku-row">
+            <span>SKU: AJ1-BLK-OLV-026</span>
+            <span class="lx-sku-tag">● EDICIÓN VERIFICADA</span>
+          </div>
+          <h1 class="lx-product-title" id="lxProductTitle">TRAVIS ARCHIVE LOW OG "BLACK OLIVE"</h1>
+          <div class="lx-price-row">
+            <span class="lx-price" id="lxProductPrice">$420.000 COP</span>
+            <span class="lx-tax-note">ENVÍO ASEGURADO INCLUIDO</span>
+          </div>
+        </div>
+
+        <!-- Selector de Colorway -->
+        <div class="lx-panel-section">
+          <div class="lx-section-label">
+            <span>COLORWAY</span>
+            <strong id="lxColorLabel">BLACK OLIVE / SAIL</strong>
+          </div>
+          <div class="lx-colorways">
+            <button class="lx-color-btn active" 
+              data-title="TRAVIS ARCHIVE LOW OG &quot;BLACK OLIVE&quot;"
+              data-color="BLACK OLIVE / SAIL"
+              data-bg="LOW OG // 01"
+              data-price="$420.000 COP"
+              data-img="https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=1400&q=85">
+              <span class="lx-swatch" style="background: linear-gradient(135deg, #2b2d24 50%, #e5e0d5 50%);"></span>
+              <span class="lx-color-name">Black<br>Olive</span>
+            </button>
+
+            <button class="lx-color-btn" 
+              data-title="AF1 LOW RETRO &quot;TRIPLE WHITE LAB&quot;"
+              data-color="PURE PLATINUM / WHITE"
+              data-bg="AF1 // 02"
+              data-price="$360.000 COP"
+              data-img="https://images.unsplash.com/photo-1600269452121-4f2416e55c28?auto=format&fit=crop&w=1400&q=85">
+              <span class="lx-swatch" style="background: linear-gradient(135deg, #F5F5F7 50%, #D2D2D7 50%);"></span>
+              <span class="lx-color-name">Triple<br>White</span>
+            </button>
+
+            <button class="lx-color-btn" 
+              data-title="T90 III ARCHIVE &quot;METALLIC CHROME&quot;"
+              data-color="CHROME / VOLT BLACK"
+              data-bg="T90 // 03"
+              data-price="$390.000 COP"
+              data-img="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1400&q=85">
+              <span class="lx-swatch" style="background: linear-gradient(135deg, #c9182b 50%, #141414 50%);"></span>
+              <span class="lx-color-name">Crimson<br>Volt</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Selector de Talla -->
+        <div class="lx-panel-section">
+          <div class="lx-section-label">
+            <span>SELECCIONAR TALLA (EU / US)</span>
+            <strong id="lxSelectedSizeText">39 EU / 7.5 US</strong>
+          </div>
+          <div class="lx-size-grid" id="lxSizeGrid">
+            <button class="lx-size-btn" data-size="37 EU / 6 US">37</button>
+            <button class="lx-size-btn" data-size="38 EU / 6.5 US">38</button>
+            <button class="lx-size-btn active" data-size="39 EU / 7.5 US">39</button>
+            <button class="lx-size-btn" data-size="40 EU / 8 US">40</button>
+            <button class="lx-size-btn" data-size="41 EU / 9 US">41</button>
+            <button class="lx-size-btn" data-size="42 EU / 9.5 US">42</button>
+            <button class="lx-size-btn" data-size="43 EU / 10.5 US">43</button>
+            <button class="lx-size-btn disabled" disabled>44</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Acciones de Compra -->
+      <div>
+        <div class="lx-cta-group">
+          <button class="lx-btn-primary" id="lxAddToBagBtn">
+            <span>RESERVAR PAR EN BOLSA</span>
+            <span>→</span>
+          </button>
+          <button class="lx-btn-secondary" id="lxDirectOrderBtn">
+            <span>PEDIDO DIRECTO VÍA WHATSAPP</span>
+            <span>⚡</span>
+          </button>
+        </div>
+
+        <!-- Especificaciones Rápidas -->
+        <div class="lx-specs-list" id="specs">
+          <div class="lx-spec-item">
+            <span>CONSTRUCCIÓN</span>
+            <span>CUERO GRANO COMPLETO & NUBUCK</span>
+          </div>
+          <div class="lx-spec-item">
+            <span>ENTRESUELA</span>
+            <span>ESPUMA EVA DE ALTA DENSIDAD</span>
+          </div>
+          <div class="lx-spec-item">
+            <span>INCLUYE</span>
+            <span>CAJA ORIGINAL + EXTRA LACES + SILICA PACK</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- SECCIÓN 02: ANATOMÍA & MATERIALIDAD -->
+  <section class="lx-anatomy-section" id="anatomy">
+    <div class="lx-section-header">
+      <h2 class="lx-section-title">ARQUITECTURA DEL CALZADO</h2>
+      <p class="lx-section-subtitle">DISEÑO ESTRUCTURAL PENSADO PARA DURABILIDAD URBANA, TRACCIÓN MULTIDIRECCIONAL Y PERFIL LIMPIO.</p>
+    </div>
+
+    <div class="lx-bento-grid">
+      <article class="lx-bento-card">
+        <div>
+          <div class="lx-bento-num">SPEC // 01</div>
+          <h3 class="lx-bento-title">CAPELLADA EN NUBUCK HIDROFÓBICO</h3>
+          <p class="lx-bento-desc">Paneles cortados a láser con gamuza cepillada de tacto denso y cuero tumbado que evita pliegues prematuros en la puntera.</p>
+        </div>
+        <div class="lx-bento-metric">
+          <span>DENSIDAD</span>
+          <span>1.8 MM CALIBRADO</span>
+        </div>
+      </article>
+
+      <article class="lx-bento-card">
+        <div>
+          <div class="lx-bento-num">SPEC // 02</div>
+          <h3 class="lx-bento-title">AMORTIGUACIÓN ENCAPSULADA</h3>
+          <p class="lx-bento-desc">Unidad de absorción de impacto en el talón combinada con plantilla anatómica de poliuretano de retorno rápido.</p>
+        </div>
+        <div class="lx-bento-metric">
+          <span>RETORNO DE ENERGÍA</span>
+          <span>84% COMPRESIÓN</span>
+        </div>
+      </article>
+
+      <article class="lx-bento-card">
+        <div>
+          <div class="lx-bento-num">SPEC // 03</div>
+          <h3 class="lx-bento-title">CONTROL DE OLOR & CONSERVACIÓN</h3>
+          <p class="lx-bento-desc">Cada par es despachado con empaque protector libre de humedad y cápsula desodorizante activa para aroma fresco de fábrica.</p>
+        </div>
+        <div class="lx-bento-metric">
+          <span>PROTOCOLO QC</span>
+          <span>INSPECCIÓN 12 PUNTOS</span>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 03: ROTACIÓN / MODELOS DEL ARCHIVO -->
+  <section id="vault">
+    <div class="lx-section-header">
+      <h2 class="lx-section-title">ROTACIÓN DESTACADA // VAULT</h2>
+      <p class="lx-section-subtitle">HAZ CLIC EN CUALQUIER SILUETA PARA CARGARLA EN EL ESCENARIO 3D SUPERIOR.</p>
+    </div>
+
+    <div class="lx-vault-grid">
+      <div class="lx-vault-item" data-load-title="NIKE AIR FORCE 1 '07 &quot;CLEAN STUDIO&quot;" data-load-price="$360.000 COP" data-load-bg="AF1 // 07" data-load-img="https://images.unsplash.com/photo-1600269452121-4f2416e55c28?auto=format&fit=crop&w=1400&q=85">
+        <div class="lx-vault-meta">
+          <span>01 / CLASSIC</span>
+          <span>TALLAS 36-43</span>
+        </div>
+        <div class="lx-vault-img-box">
+          <img src="https://images.unsplash.com/photo-1600269452121-4f2416e55c28?auto=format&fit=crop&w=700&q=80" alt="Air Force 1">
+        </div>
+        <div>
+          <h4 class="lx-vault-name">AIR FORCE 1 '07 TRIPLE WHITE</h4>
+          <div class="lx-vault-price">$360.000 COP — CARGAR EN 3D ↗</div>
+        </div>
+      </div>
+
+      <div class="lx-vault-item" data-load-title="ADIDAS SAMBA OG &quot;CORE BLACK GUM&quot;" data-load-price="$350.000 COP" data-load-bg="SAMBA // OG" data-load-img="https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=1400&q=85">
+        <div class="lx-vault-meta">
+          <span>02 / TERRACE</span>
+          <span>TALLAS 36-42</span>
+        </div>
+        <div class="lx-vault-img-box">
+          <img src="https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=700&q=80" alt="Samba OG">
+        </div>
+        <div>
+          <h4 class="lx-vault-name">SAMBA OG CORE BLACK / GUM</h4>
+          <div class="lx-vault-price">$350.000 COP — CARGAR EN 3D ↗</div>
+        </div>
+      </div>
+
+      <div class="lx-vault-item" data-load-title="TRAVIS ARCHIVE LOW OG &quot;BLACK OLIVE&quot;" data-load-price="$420.000 COP" data-load-bg="LOW OG // 01" data-load-img="https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=1400&q=85">
+        <div class="lx-vault-meta">
+          <span>03 / COLLAB</span>
+          <span>TALLAS 38-43</span>
+        </div>
+        <div class="lx-vault-img-box">
+          <img src="https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=700&q=80" alt="Jordan Low OG">
+        </div>
+        <div>
+          <h4 class="lx-vault-name">JORDAN 1 LOW OG "BLACK OLIVE"</h4>
+          <div class="lx-vault-price">$420.000 COP — CARGAR EN 3D ↗</div>
+        </div>
+      </div>
+
+      <div class="lx-vault-item" data-load-title="TOTAL 90 III SP &quot;METALLIC PITCH&quot;" data-load-price="$390.000 COP" data-load-bg="T90 // III" data-load-img="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1400&q=85">
+        <div class="lx-vault-meta">
+          <span>04 / FOOTBALL LAB</span>
+          <span>TALLAS 39-43</span>
+        </div>
+        <div class="lx-vault-img-box">
+          <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=700&q=80" alt="Total 90 III">
+        </div>
+        <div>
+          <h4 class="lx-vault-name">NIKE T90 III METALLIC EDITION</h4>
+          <div class="lx-vault-price">$390.000 COP — CARGAR EN 3D ↗</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  /* ==========================================================================
+     MOTOR 3D INTERACTIVO & LÓGICA DE CONFIGURACIÓN (ENCAPSULADO EN IIFE)
+     ========================================================================== */
+  (function() {
+    const stage = document.getElementById('lxStage');
+    const shoeRig = document.getElementById('lxShoeRig');
+    const mainShoe = document.getElementById('lxMainShoe');
+    const shoeShadow = document.getElementById('lxShoeShadow');
+    const bgText = document.getElementById('lxBgText');
+    const pitchVal = document.getElementById('lxPitchVal');
+    const yawVal = document.getElementById('lxYawVal');
+    const angleSlider = document.getElementById('lxAngleSlider');
+    
+    let currentRotZ = -14;
+    let baseRotX = 0;
+    let baseRotY = 0;
+
+    // Sincronizar teléfono oficial configurado en Carfe®
+    function getStoreWAPhone() {
+      try {
+        const custom = localStorage.getItem('carfe_wa_store_phone');
+        if (custom) return custom.replace(/\D/g, '');
+      } catch(e) {}
+      return '573001234567';
+    }
+
+    // Sincronizar contador de bolso
+    function updateBagCounter() {
+      try {
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const count = cart.reduce((acc, i) => acc + (i.qty || 1), 0);
+        const counterBtn = document.getElementById('lxCartCounter');
+        if (counterBtn) counterBtn.textContent = `BOLSO [${count}]`;
+      } catch(e) {}
+    }
+    updateBagCounter();
+
+    // 1. Física 3D al movimiento del cursor en el escenario
+    stage.addEventListener('mousemove', (e) => {
+      const rect = stage.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+
+      const rotY = baseRotY + (x * 28);
+      const rotX = baseRotX - (y * 22);
+
+      shoeRig.style.transform = `rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg)`;
+      mainShoe.style.transform = `translateZ(75px) rotate(${currentRotZ}deg)`;
+      
+      // Sombra reactiva y paralaje tipográfico
+      shoeShadow.style.transform = `rotateX(75deg) translateZ(-60px) translateX(${(x * -35).toFixed(1)}px)`;
+      bgText.style.transform = `translate(calc(-50% + ${(x * -24).toFixed(1)}px), calc(-50% + ${(y * -16).toFixed(1)}px))`;
+
+      pitchVal.textContent = `${rotX.toFixed(1)}°`;
+      yawVal.textContent = `${rotY.toFixed(1)}°`;
+    });
+
+    stage.addEventListener('mouseleave', () => {
+      shoeRig.style.transform = `rotateX(${baseRotX}deg) rotateY(${baseRotY}deg)`;
+      bgText.style.transform = `translate(-50%, -50%)`;
+      pitchVal.textContent = `${baseRotX.toFixed(1)}°`;
+      yawVal.textContent = `${baseRotY.toFixed(1)}°`;
+    });
+
+    // 2. Slider de inclinación manual 360
+    angleSlider.addEventListener('input', (e) => {
+      currentRotZ = parseFloat(e.target.value);
+      mainShoe.style.transform = `translateZ(75px) rotate(${currentRotZ}deg)`;
+    });
+
+    // 3. Botones de vistas predefinidas (Cámaras 3D)
+    const presetBtns = document.querySelectorAll('.lx-preset-btn');
+    presetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        presetBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        baseRotX = parseFloat(btn.dataset.rx);
+        baseRotY = parseFloat(btn.dataset.ry);
+        currentRotZ = parseFloat(btn.dataset.rz);
+        angleSlider.value = currentRotZ;
+
+        shoeRig.style.transform = `rotateX(${baseRotX}deg) rotateY(${baseRotY}deg)`;
+        mainShoe.style.transform = `translateZ(75px) rotate(${currentRotZ}deg)`;
+        pitchVal.textContent = `${baseRotX.toFixed(1)}°`;
+        yawVal.textContent = `${baseRotY.toFixed(1)}°`;
+      });
+    });
+
+    // 4. Cambio de Colorways / Modelos en tiempo real
+    const colorBtns = document.querySelectorAll('.lx-color-btn');
+    const productTitle = document.getElementById('lxProductTitle');
+    const colorLabel = document.getElementById('lxColorLabel');
+
+    function loadShoeModel(title, colorText, bgString, imgUrl, priceText) {
+      mainShoe.style.transform = `translateZ(20px) rotate(${currentRotZ - 8}deg) scale(0.92)`;
+      mainShoe.style.opacity = '0.3';
+      
+      setTimeout(() => {
+        mainShoe.src = imgUrl;
+        productTitle.textContent = title;
+        if (colorText) colorLabel.textContent = colorText;
+        if (bgString) bgText.textContent = bgString;
+        if (priceText) document.getElementById('lxProductPrice').textContent = priceText;
+
+        mainShoe.style.transform = `translateZ(75px) rotate(${currentRotZ}deg) scale(1)`;
+        mainShoe.style.opacity = '1';
+      }, 180);
+    }
+
+    colorBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        colorBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadShoeModel(btn.dataset.title, btn.dataset.color, btn.dataset.bg, btn.dataset.img, btn.dataset.price);
+      });
+    });
+
+    // 5. Cargar desde la grilla inferior (Vault) al visor 3D
+    const vaultItems = document.querySelectorAll('.lx-vault-item');
+    vaultItems.forEach(item => {
+      item.addEventListener('click', () => {
+        loadShoeModel(
+          item.dataset.loadTitle,
+          'ARCHIVE SELECTION',
+          item.dataset.loadBg,
+          item.dataset.loadImg,
+          item.dataset.loadPrice
+        );
+        document.getElementById('stage').scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    // 6. Selector de Tallas
+    const sizeBtns = document.querySelectorAll('.lx-size-btn:not(.disabled)');
+    const selectedSizeText = document.getElementById('lxSelectedSizeText');
+    let currentSize = '39 EU / 7.5 US';
+
+    sizeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        sizeBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentSize = btn.dataset.size;
+        selectedSizeText.textContent = currentSize;
+      });
+    });
+
+    // 7. Carrito y Orden Directa por WhatsApp
+    const cartCounter = document.getElementById('lxCartCounter');
+    const addToBagBtn = document.getElementById('lxAddToBagBtn');
+    const directOrderBtn = document.getElementById('lxDirectOrderBtn');
+
+    addToBagBtn.addEventListener('click', () => {
+      const model = productTitle.textContent;
+      const priceStr = document.getElementById('lxProductPrice').textContent;
+      const numPrice = parseInt(priceStr.replace(/\D/g, '')) || 380000;
+      const currentImg = mainShoe.src;
+
+      try {
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const existing = cart.find(i => i.name === model && i.size === currentSize);
+        if (existing) {
+          existing.qty = (existing.qty || 1) + 1;
+        } else {
+          cart.push({
+            id: 'STUDIO-3D-' + Date.now(),
+            name: model,
+            brand: 'Carfe // 3D Studio',
+            price: numPrice,
+            qty: 1,
+            size: currentSize,
+            img: currentImg,
+            photoData: currentImg
+          });
+        }
+        localStorage.setItem('cart', JSON.stringify(cart));
+        window.dispatchEvent(new Event('storage'));
+        updateBagCounter();
+      } catch(e) {}
+
+      const originalText = addToBagBtn.innerHTML;
+      addToBagBtn.innerHTML = `<span>✓ PAR AÑADIDO AL BOLSO (${currentSize})</span><span>✓</span>`;
+      setTimeout(() => {
+        addToBagBtn.innerHTML = originalText;
+      }, 1600);
+    });
+
+    directOrderBtn.addEventListener('click', () => {
+      const model = productTitle.textContent;
+      const price = document.getElementById('lxProductPrice').textContent;
+      const phone = getStoreWAPhone();
+      const orderId = 'CRF-3D-' + Math.floor(1000 + Math.random() * 9000);
+
+      const msg = 
+`👋 *¡HOLA CARFE® CALZADO! PEDIDO DIRECTO DESDE EL ESTUDIO 3D:*
+━━━━━━━━━━━━━━━━━━━━
+👟 *Modelo:* ${model}
+📏 *Talla:* ${currentSize}
+💰 *Precio:* ${price}
+🏷️ *Ref Orden:* ${orderId}
+━━━━━━━━━━━━━━━━━━━━
+Deseo confirmar la disponibilidad de este par y coordinar el envío con pago contra entrega. ¡Muchas gracias! ✨`;
+
+      // Registrar como pedido pendiente para notificación en el Admin
+      try {
+        const numPrice = parseInt(price.replace(/\D/g, '')) || 420000;
+        const pending = JSON.parse(localStorage.getItem('ss_pending_orders') || '[]');
+        pending.unshift({
+          id: orderId,
+          client: 'Cliente 3D Studio WhatsApp',
+          product: `${model} (Talla: ${currentSize})`,
+          photo: mainShoe.src,
+          total: numPrice,
+          date: new Date().toISOString(),
+          payMethod: 'WhatsApp (Estudio 3D)',
+          address: 'Por coordinar en WhatsApp',
+          status: 'pendiente'
+        });
+        localStorage.setItem('ss_pending_orders', JSON.stringify(pending.slice(0, 50)));
+        window.dispatchEvent(new Event('storage'));
+      } catch(e) {}
+
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+    });
+  })();
+</script>
+
+</body>
+</html>

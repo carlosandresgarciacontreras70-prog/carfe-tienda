@@ -1,0 +1,57 @@
+{
+  "name": "Cartera",
+  "type": "object",
+  "properties": {
+    "creditId": {
+      "type": "string",
+      "description": "Código de crédito (ej: CRT-001)"
+    },
+    "clientName": {
+      "type": "string",
+      "description": "Nombre del cliente con crédito activo"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Teléfono de cobranza"
+    },
+    "product": {
+      "type": "string",
+      "description": "Calzado financiado a 2 cuotas"
+    },
+    "total": {
+      "type": "number",
+      "description": "Valor total de la venta a crédito"
+    },
+    "deposit": {
+      "type": "number",
+      "description": "Cuota 1 pagada (abono inicial)"
+    },
+    "pendingQuota": {
+      "type": "number",
+      "description": "Cuota 2 pendiente de cobro"
+    },
+    "quota2Paid": {
+      "type": "boolean",
+      "default": false,
+      "description": "Indica si la cuota 2 ya fue saldada"
+    },
+    "dueDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha límite de pago de la cuota 2"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["al_dia", "vencida", "pagada"],
+      "default": "al_dia",
+      "description": "Estado financiero de la cartera"
+    }
+  },
+  "required": ["clientName", "total", "pendingQuota"],
+  "rls": {
+    "read": { "user_condition": { "role": "admin" } },
+    "create": { "user_condition": { "role": "admin" } },
+    "update": { "user_condition": { "role": "admin" } },
+    "delete": { "user_condition": { "role": "admin" } }
+  }
+}

@@ -1,0 +1,365 @@
+/* ===== STREETWEAR / SPORT URBANO (NIKE / OFF-WHITE THEME) ===== */
+
+:root {
+  --lx-bg: #0A0A0C;
+  --lx-surface: #121215;
+  --lx-surface-hover: #18181D;
+  --lx-border: #232328;
+  --lx-border-glow: #383842;
+  --lx-text: #F4F3EF;
+  --lx-muted: #8E8E98;
+  --lx-volt: #D4FF00; /* Volt Industrial */
+  --lx-volt-glow: rgba(212, 255, 0, 0.35);
+  --lx-crimson: #FF2E4D;
+  --font-display: 'Syne', 'Plus Jakarta Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-body: 'Inter', -apple-system, sans-serif;
+}
+
+* { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--lx-bg);
+  color: var(--lx-text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* Headings text-wrap & crisp kerning */
+h1, h2, h3, h4, h5, h6 {
+  text-wrap: balance;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* Tabular figures for clean number alignment */
+.tabular-nums, .price-tabular {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.015em;
+}
+
+/* Smooth Hardware-Accelerated Micro-Interactions */
+.product-card, .wishlist-btn, .cat-btn, .add-btn {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+/* Drawer Panels (Wishlist & Cart) */
+.drawer-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  max-width: 24rem;
+  background-color: #ffffff;
+  box-shadow: -10px 0 35px rgba(0, 0, 0, 0.25);
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.32s ease;
+  will-change: transform;
+}
+
+.drawer-panel.is-closed {
+  transform: translateX(100%) !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  display: none !important;
+}
+
+.drawer-panel.is-open {
+  transform: translateX(0) !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  display: flex !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #c4b5fd; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #7c3aed; }
+
+/* Category Buttons */
+.category-btn, .cat-btn {
+  background: var(--lx-surface);
+  color: var(--lx-muted);
+  border: 1.5px solid var(--lx-border);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 10px 22px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.category-btn:hover, .cat-btn:hover {
+  border-color: var(--lx-volt);
+  color: var(--lx-volt);
+  transform: translateY(-1px);
+}
+.category-btn.active-cat, .cat-btn.active {
+  background: var(--lx-volt) !important;
+  color: #000000 !important;
+  border-color: var(--lx-volt) !important;
+  box-shadow: 0 0 20px var(--lx-volt-glow) !important;
+  font-weight: 800 !important;
+}
+
+/* ===== STREETWEAR PRODUCT CARD (NIKE / OFF-WHITE VIBE) ===== */
+.product-card {
+  position: relative;
+  background: var(--lx-surface);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--lx-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease, border-color 0.28s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--lx-volt);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 255, 0, 0.2);
+}
+
+.product-img-container {
+  position: relative;
+  overflow: hidden;
+  background: #18181D;
+  height: 270px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--lx-border);
+}
+
+.product-img-container img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 5;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.product-card:hover .product-img-container img {
+  transform: scale(1.08);
+}
+
+.product-img-container .emoji {
+  font-size: 100px;
+  transition: transform 0.3s;
+}
+.product-card:hover .emoji {
+  transform: scale(1.1) rotate(-5deg);
+}
+
+/* Badges Streetwear / Técnicos */
+.badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  z-index: 15;
+}
+.badge-new { background: var(--lx-volt); color: #000; border: 1px solid var(--lx-volt); box-shadow: 0 0 12px var(--lx-volt-glow); }
+.badge-sale { background: var(--lx-crimson); color: #FFF; border: 1px solid rgba(255,255,255,0.2); }
+.badge-hot { background: #FF6B00; color: #FFF; }
+.badge-tiktok { background: #0B0B0C; color: var(--lx-volt); border: 1px solid var(--lx-volt); }
+
+.wishlist-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  background: rgba(11, 11, 12, 0.8);
+  backdrop-filter: blur(8px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  border: 1px solid var(--lx-border);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  color: #A1A1AA;
+  z-index: 15;
+}
+.wishlist-btn:hover, .wishlist-btn.liked { 
+  color: var(--lx-crimson); 
+  border-color: var(--lx-crimson);
+  transform: scale(1.12); 
+}
+.wishlist-btn.liked { 
+  background: rgba(255, 46, 77, 0.15); 
+}
+
+.add-to-cart-btn {
+  width: 100%;
+  background: linear-gradient(135deg, var(--purple), var(--pink));
+  color: white;
+  border: none;
+  padding: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 12px;
+  margin-top: 8px;
+}
+.add-to-cart-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(124,58,237,0.4);
+}
+
+/* Stars */
+.stars { color: #fbbf24; font-size: 12px; }
+
+/* Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.status-completado { background: #d1fae5; color: #065f46; }
+.status-pendiente { background: #fef3c7; color: #92400e; }
+.status-enviado { background: #dbeafe; color: #1e40af; }
+.status-cancelado { background: #fee2e2; color: #991b1b; }
+
+/* Channel Badge */
+.channel-web { background: #ede9fe; color: #6d28d9; }
+.channel-tiktok { background: #000; color: #fff; }
+.channel-presencial { background: #dcfce7; color: #166534; }
+
+/* Toast Animation */
+#toast { animation: slideUp 0.3s ease; }
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Invoice Styles */
+.invoice-header { background: linear-gradient(135deg, #7c3aed, #ec4899); }
+.invoice-table th { background: #f9fafb; }
+.invoice-table td, .invoice-table th { padding: 12px 16px; border-bottom: 1px solid #f3f4f6; }
+
+/* Live pulsing dot */
+@keyframes pulse-red {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
+}
+.live-dot { animation: pulse-red 1.5s infinite; }
+
+/* Shimmer loading */
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* View transitions */
+.view-section { animation: fadeIn 0.3s ease; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Table row hover */
+tbody tr:hover { background: #faf5ff; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .product-img-container { height: 230px; }
+  .product-img-container .emoji { font-size: 70px; }
+}
+
+/* Number input */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+/* Scrollbar Hide */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Print */
+@media print {
+  #navbar, .no-print { display: none !important; }
+  body { background: white !important; }
+  #invoiceContent { padding: 0 !important; }
+}
+
+/* ============================================================
+   FORZAR VISIBILIDAD TOTAL DE TEXTO EN TODOS LOS INPUTS Y SELECTS
+   Evita que el texto escrito sea blanco o invisible sobre fondo claro
+   ============================================================ */
+input:not(#searchInput):not(.bg-transparent),
+select,
+textarea {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  background-color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+select option {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  background-color: #ffffff !important;
+  font-weight: 600;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #6b7280 !important;
+  -webkit-text-fill-color: #6b7280 !important;
+  opacity: 1 !important;
+}
+
+#searchInput, input.bg-transparent {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  background-color: transparent !important;
+}

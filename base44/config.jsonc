@@ -1,0 +1,10 @@
+{
+  "name": "CARFE Calzado Suite",
+  "description": "Plataforma E-commerce y Suite Administrativa ERP/CRM para Calzado CARFE®",
+  "visibility": "public",
+  "entitiesDir": "./entities",
+  "functionsDir": "./functions",
+  "site": {
+    "outputDirectory": "./"
+  }
+}

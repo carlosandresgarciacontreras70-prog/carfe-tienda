@@ -1,0 +1,67 @@
+{
+  "name": "Product",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nombre del calzado o modelo"
+    },
+    "brand": {
+      "type": "string",
+      "description": "Marca o línea oficial CARFE"
+    },
+    "cat": {
+      "type": "string",
+      "enum": ["hombre", "mujer", "unisex"],
+      "default": "hombre",
+      "description": "Categoría de calzado"
+    },
+    "price": {
+      "type": "number",
+      "description": "Precio de venta al público en COP"
+    },
+    "cost": {
+      "type": "number",
+      "description": "Costo de producción / adquisición en COP"
+    },
+    "sku": {
+      "type": "string",
+      "description": "Código SKU único de referencia"
+    },
+    "img": {
+      "type": "string",
+      "description": "URL o base64 de la fotografía principal del calzado"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descripción comercial y características de confort/cuero"
+    },
+    "sizes": {
+      "type": "array",
+      "items": { "type": "number" },
+      "description": "Tallas disponibles (ej: [38, 39, 40, 41, 42, 43, 44])"
+    },
+    "colors": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Colores disponibles (ej: ['Negro', 'Café', 'Miel'])"
+    },
+    "stock": {
+      "type": "integer",
+      "default": 10,
+      "description": "Existencias en inventario disponible"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Indica si el producto está visible en la tienda pública"
+    }
+  },
+  "required": ["name", "price", "cat"],
+  "rls": {
+    "read": true,
+    "create": { "user_condition": { "role": "admin" } },
+    "update": { "user_condition": { "role": "admin" } },
+    "delete": { "user_condition": { "role": "admin" } }
+  }
+}

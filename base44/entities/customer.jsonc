@@ -1,0 +1,59 @@
+{
+  "name": "Customer",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nombre y apellido del cliente"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Número de teléfono / WhatsApp"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Correo electrónico del cliente"
+    },
+    "address": {
+      "type": "string",
+      "description": "Dirección registrada para envíos"
+    },
+    "city": {
+      "type": "string",
+      "description": "Ciudad de residencia"
+    },
+    "ordersCount": {
+      "type": "integer",
+      "default": 1,
+      "description": "Historial de pedidos realizados"
+    },
+    "totalSpent": {
+      "type": "number",
+      "default": 0,
+      "description": "Total histórico facturado en COP"
+    },
+    "debt": {
+      "type": "number",
+      "default": 0,
+      "description": "Saldo pendiente por cobrar en cartera"
+    },
+    "classification": {
+      "type": "string",
+      "enum": ["nuevo", "frecuente", "vip", "cartera_pendiente", "inactivo"],
+      "default": "nuevo",
+      "description": "Clasificación comercial del cliente"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Preferencias de tallas y notas de atención"
+    }
+  },
+  "required": ["name", "phone"],
+  "rls": {
+    "read": { "user_condition": { "role": "admin" } },
+    "create": { "user_condition": { "role": "admin" } },
+    "update": { "user_condition": { "role": "admin" } },
+    "delete": { "user_condition": { "role": "admin" } }
+  }
+}
