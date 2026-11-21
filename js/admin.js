@@ -384,11 +384,8 @@ function toggleSidebar() {
 
 /* ───────── NOTIFICACIONES & ALERTAS DINÁMICAS EN TIEMPO REAL (6 CATEGORÍAS) ───────── */
 let notifications = [
-  { id: 101, category: 'whatsapp', type: 'whatsapp', icon: '💬', title: 'WhatsApp Business Vinculado', msg: 'Línea de atención +57 activa para pedidos y catálogo', time: '10:00 AM', read: false },
-  { id: 102, category: 'ventas', type: 'order', icon: '🛍️', title: 'Pedido Nuevo #ORD-4821', msg: 'Carlos Mendoza — Trail Master Pro (Talla 42)', time: '10:15 AM', read: false, orderData: { client: 'Carlos Mendoza', product: 'Trail Master Pro', total: 269000, size: '42', phone: '573001234567' } },
-  { id: 103, category: 'finanzas', type: 'cobranza', icon: '💳', title: 'Cuota 2 Próxima a Vencer', msg: 'Andrea Gómez — Saldo pendiente $134.500 (Vence en 2 días)', time: '11:30 AM', read: false, orderData: { creditId: 'CR-1002' } },
+  { id: 101, category: 'whatsapp', type: 'whatsapp', icon: '💬', title: 'WhatsApp Business Vinculado', msg: 'Línea oficial +57 323 269 2578 activa para pedidos y catálogo', time: '10:00 AM', read: false },
   { id: 104, category: 'inventario', type: 'inventario', icon: '⚠️', title: 'Stock Crítico en Referencias', msg: 'Derby Executive (8 pares) y Trail Master Pro (10 pares)', time: '09:00 AM', read: false },
-  { id: 105, category: 'tienda', type: 'tienda', icon: '🏪', title: 'Nuevo Cliente Registrado', msg: 'Laura Restrepo inició navegación y guardó calzado favorito', time: '12:00 PM', read: false },
   { id: 106, category: 'sistema', type: 'sistema', icon: '🛡️', title: 'PWA Instalable Activa', msg: 'CARFE lista para operar en modo offline y celular', time: '08:30 AM', read: false }
 ];
 let unreadCount = notifications.filter(n => !n.read).length;
@@ -452,7 +449,7 @@ function showPendingOrderAlert(order) {
   const size = order.size || order.talla || '40';
   const photo = order.photo || order.img || 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&auto=format&fit=crop&q=80';
   const payMethod = order.payMethod || 'Transferencia Nequi / WhatsApp';
-  const phone = order.phone || order.telefono || '+57 300 123 4567';
+  const phone = order.phone || order.telefono || '+57 323 269 2578';
   const cleanPhone = String(phone).replace(/\D/g, '');
 
   const el = document.createElement('div');
@@ -500,7 +497,7 @@ function showPendingOrderAlert(order) {
       <button onclick="attendPendingOrder('${alertId}', '${order.orderId || ''}')" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs py-2 px-3 rounded-xl shadow-md flex items-center justify-center gap-1.5 transition-all active:scale-95">
         <i class="fas fa-boxes-packing"></i> Atender Pedido
       </button>
-      <a href="https://wa.me/${cleanPhone || '573001234567'}?text=${encodeURIComponent('¡Hola ' + clientName + '! 👋 Gracias por tu pedido de ' + prodName + ' en Carfe®. Estamos alistando tu calzado para despacho.')}" target="_blank" onclick="dismissOrderAlert('${alertId}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 px-3 rounded-xl shadow-md flex items-center justify-center gap-1.5 text-center transition-all active:scale-95">
+      <a href="https://wa.me/${cleanPhone || '573232692578'}?text=${encodeURIComponent('¡Hola ' + clientName + '! 👋 Gracias por tu pedido de ' + prodName + ' en Carfe®. Estamos alistando tu calzado para despacho.')}" target="_blank" onclick="dismissOrderAlert('${alertId}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 px-3 rounded-xl shadow-md flex items-center justify-center gap-1.5 text-center transition-all active:scale-95">
         <i class="fab fa-whatsapp text-sm"></i> WhatsApp
       </a>
     </div>
@@ -569,7 +566,7 @@ function showPaymentReceivedAlert(data) {
   const amountFmt = typeof data.amount === 'number' ? formatCOP(data.amount) : (data.amount || '$0 COP');
   const creditId = data.creditId || 'CRT-000';
   const method = data.method || 'Nequi / Transferencia';
-  const phone = data.phone || '+57 300 123 4567';
+  const phone = data.phone || '+57 323 269 2578';
 
   const el = document.createElement('div');
   el.id = alertId;
@@ -731,7 +728,7 @@ function renderNotifList() {
     const isCredit = n.type === 'cobranza' || n.type === 'credito' || n.title.includes('Cuota');
     const o = n.orderData || {};
     const photo = o.photo || o.img || 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&auto=format&fit=crop&q=80';
-    const cleanPhone = String(o.phone || '573001234567').replace(/\D/g, '');
+    const cleanPhone = String(o.phone || '573232692578').replace(/\D/g, '');
 
     if (isOrder) {
       return `
@@ -871,63 +868,8 @@ function toggleNotifDropdown() {
 }
 
 function simulatePendingOrder() {
-  const clients = [
-    { name: 'Carlos Mario Restrepo', phone: '+57 314 589 1234' },
-    { name: 'María Camila García', phone: '+57 320 892 4567' },
-    { name: 'Valentina Ríos Peña', phone: '+57 301 445 7890' },
-    { name: 'Andrés Felipe Muñoz', phone: '+57 310 765 4321' },
-    { name: 'Isabella Fernández', phone: '+57 318 901 2345' },
-    { name: 'Diego Suárez Londoño', phone: '+57 312 432 9876' }
-  ];
-  const c = clients[Math.floor(Math.random() * clients.length)];
-  const p = PRODUCTS[Math.floor(Math.random() * Math.min(8, PRODUCTS.length))];
-  const size = [38, 39, 40, 41, 42][Math.floor(Math.random() * 5)];
-  const payMethods = ['WhatsApp • Nequi / Daviplata', 'WhatsApp • Bancolombia', 'WhatsApp • Crédito 2 Cuotas'];
-  const payM = payMethods[Math.floor(Math.random() * payMethods.length)];
-  const totalNum = p.price;
-  const totalFmt = formatCOP(totalNum);
-
-  const orderData = {
-    orderId: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
-    client: c.name,
-    product: p.name,
-    total: totalNum,
-    price: totalFmt,
-    size: size,
-    photo: p.img,
-    phone: c.phone,
-    payMethod: payM,
-    date: new Date().toISOString()
-  };
-
-  // 1. Mostrar alerta visual flotante animada con sonido
-  showPendingOrderAlert(orderData);
-
-  // 2. Agregar a la lista de notificaciones con toda su metadata y tarjeta interactiva
-  addNotification('🛍️', `¡Nuevo Pedido! ${c.name}`, `${p.name} (Talla ${size}) — ${totalFmt}`, 'order', orderData);
-
-  // 3. Registrar en salesData como pendiente
-  const unitCost = Math.round(totalNum * 0.48);
-  const newSale = {
-    id: 'V-' + String(salesData.length + 1).padStart(3, '0'),
-    client: c.name,
-    product: `${p.name} (Talla ${size})`,
-    qty: 1,
-    cost: unitCost,
-    total: totalNum,
-    profit: totalNum - unitCost,
-    status: 'pendiente',
-    payMethod: payM,
-    date: new Date().toISOString().split('T')[0],
-    email: 'cliente@whatsapp.com',
-    photo: p.img
-  };
-  salesData.unshift(newSale);
-  filteredSales = [...salesData];
-  salesDirty = true;
-
-  // 4. Actualizar contadores
-  updatePendingOrdersCounter();
+  // Desactivado: Solo se registran pedidos reales realizados por clientes en la tienda o WhatsApp
+  return;
 }
 
 function checkPendingOrders() {
@@ -951,7 +893,7 @@ function checkPendingOrders() {
           price: totalFmt,
           size: o.size || '40',
           photo: o.photo || null,
-          phone: o.phone || '+57 300 123 4567',
+          phone: o.phone || '+57 323 269 2578',
           payMethod: o.payMethod || 'WhatsApp',
           date: o.date || new Date().toISOString()
         };
@@ -985,7 +927,7 @@ function checkPendingOrders() {
             id: 'CRT-' + String(carteraData.length + 1).padStart(3, '0'),
             saleId: 'V-' + String(salesData.length).padStart(3, '0'),
             client: o.client,
-            phone: o.phone || '+57 300 123 4567',
+            phone: o.phone || '+57 323 269 2578',
             email: o.email || '',
             product: o.product || 'Calzado Carfe®',
             total: tot,
@@ -1894,7 +1836,7 @@ function sendPaymentNoticeWA(id) {
               `💰 *SALDO PENDIENTE (Cuota 2):* ${formatCOP(c.quota2)}\n` +
               `📅 *Fecha Límite:* ${c.estimatedDate}\n\n` +
               `🏦 *Canales de Pago Inmediato:*\n` +
-              `• Nequi / Daviplata: 300 123 4567\n` +
+              `• Nequi / Daviplata: 323 269 2578\n` +
               `• Bancolombia Ahorros: 912-00034-82\n` +
               `• 💳 Paga tu cuota en línea aquí de forma segura:\n` +
               `  https://carfe.com/pagar?credito=${c.id}&saldo=${c.quota2}\n\n` +
@@ -2173,94 +2115,20 @@ function simulateCarteraPayment() {
 }
 
 /* ───────── CRM DE CLIENTES, CARTERA & CAMPAÑAS MASIVAS WHATSAPP ───────── */
-let crmClientsData = [
-  {
-    id: 'CLI-001',
-    name: 'Pedro Ramírez',
-    phone: '+57 311 839 2104',
-    email: 'pedro@mail.com',
-    city: 'Bucaramanga',
-    tag: 'deudor',
-    notes: 'Comprador de calzado formal. Tiene crédito 2 cuotas activo.',
-    createdAt: '2026-11-01'
-  },
-  {
-    id: 'CLI-002',
-    name: 'María García',
-    phone: '+57 315 192 8374',
-    email: 'maria@mail.com',
-    city: 'Medellín',
-    tag: 'deudor',
-    notes: 'Compra tacones y sandalias. Cuota 2 pendiente.',
-    createdAt: '2026-10-25'
-  },
-  {
-    id: 'CLI-003',
-    name: 'Roberto Méndez',
-    phone: '+57 300 482 9182',
-    email: 'roberto@mail.com',
-    city: 'Bogotá',
-    tag: 'aldia',
-    notes: 'Crédito al día con cuota estimada a fin de mes.',
-    createdAt: '2026-11-05'
-  },
-  {
-    id: 'CLI-004',
-    name: 'Carlos López',
-    phone: '+57 320 930 1827',
-    email: 'carlos@mail.com',
-    city: 'Cali',
-    tag: 'vip',
-    notes: 'Cliente VIP excelente historial. Ya liquidó créditos anteriores.',
-    createdAt: '2026-10-15'
-  },
-  {
-    id: 'CLI-005',
-    name: 'Lucía Flores',
-    phone: '+57 318 647 3829',
-    email: 'lucia@mail.com',
-    city: 'Bucaramanga',
-    tag: 'deudor',
-    notes: 'Compró High Top Street a crédito. Pendiente cuota 2.',
-    createdAt: '2026-11-07'
-  },
-  {
-    id: 'CLI-006',
-    name: 'Camila Torres',
-    phone: '+57 314 902 4811',
-    email: 'camila@mail.com',
-    city: 'Barranquilla',
-    tag: 'vip',
-    notes: 'Compradora frecuente de zapatillas deportivas Air Runner.',
-    createdAt: '2026-11-12'
-  },
-  {
-    id: 'CLI-007',
-    name: 'Diego Sánchez',
-    phone: '+57 312 781 6543',
-    email: 'diego@mail.com',
-    city: 'Bogotá',
-    tag: 'aldia',
-    notes: 'Compra de contado. Pagos inmediatos.',
-    createdAt: '2026-11-10'
-  },
-  {
-    id: 'CLI-008',
-    name: 'Juan Pérez',
-    phone: '+57 300 891 2345',
-    email: 'juan@mail.com',
-    city: 'Cúcuta',
-    tag: 'aldia',
-    notes: 'Cliente recurrente tienda web.',
-    createdAt: '2026-11-09'
-  }
-];
+let crmClientsData = [];
 
-// Carga persistente de CRM
+// Carga persistente de CRM (Limpiando datos de prueba para ingresar personas reales)
 try {
   const savedCrm = localStorage.getItem('carfe_crm_clients');
   if (savedCrm) {
-    crmClientsData = JSON.parse(savedCrm);
+    const parsed = JSON.parse(savedCrm);
+    if (Array.isArray(parsed)) {
+      const demoNames = new Set([
+        'pedro ramírez', 'maría garcía', 'roberto méndez', 'carlos lópez', 
+        'lucía flores', 'camila torres', 'diego sánchez', 'juan pérez', 'carlos mendoza'
+      ]);
+      crmClientsData = parsed.filter(c => c && c.name && !demoNames.has(c.name.toLowerCase().trim()));
+    }
   }
 } catch(e) {}
 
@@ -2282,19 +2150,34 @@ function initCrmView() {
   renderCrmTable();
 }
 
+function clearEntireCRM() {
+  if (!confirm('¿Deseas vaciar completamente el CRM para comenzar desde cero con clientes reales?')) return;
+  crmClientsData = [];
+  crmSelectedIds.clear();
+  localStorage.setItem('carfe_crm_clients', JSON.stringify([]));
+  updateCrmKPIs();
+  renderCrmTable();
+  updateCrmSelectionUI();
+  toast('🧹', 'CRM Vaciado', 'Se han eliminado los datos de prueba. Puedes registrar personas reales.');
+}
+
 function syncCrmWithCarteraAndSales() {
   const existingNames = new Set(crmClientsData.map(c => c.name.toLowerCase().trim()));
+  const demoNames = new Set([
+    'pedro ramírez', 'maría garcía', 'roberto méndez', 'carlos lópez', 
+    'lucía flores', 'camila torres', 'diego sánchez', 'juan pérez', 'carlos mendoza'
+  ]);
 
-  // Revisar carteraData
+  // Revisar carteraData (solo clientes reales)
   carteraData.forEach(cart => {
     const key = cart.client.toLowerCase().trim();
-    if (!existingNames.has(key)) {
+    if (!existingNames.has(key) && !demoNames.has(key)) {
       existingNames.add(key);
       const isDebtor = !cart.quota2Paid;
       crmClientsData.push({
         id: 'CLI-' + String(crmClientsData.length + 1).padStart(3, '0'),
         name: cart.client,
-        phone: cart.phone || '+57 300 123 4567',
+        phone: cart.phone || '+57 323 269 2578',
         email: cart.email || '',
         city: 'Colombia',
         tag: isDebtor ? 'deudor' : 'aldia',
@@ -2304,15 +2187,15 @@ function syncCrmWithCarteraAndSales() {
     }
   });
 
-  // Revisar salesData
+  // Revisar salesData (solo clientes reales)
   salesData.forEach(sale => {
     const key = sale.client.toLowerCase().trim();
-    if (!existingNames.has(key)) {
+    if (!existingNames.has(key) && !demoNames.has(key)) {
       existingNames.add(key);
       crmClientsData.push({
         id: 'CLI-' + String(crmClientsData.length + 1).padStart(3, '0'),
         name: sale.client,
-        phone: sale.phone || '+57 300 123 4567',
+        phone: sale.phone || '+57 323 269 2578',
         email: sale.email || '',
         city: 'Colombia',
         tag: 'aldia',
@@ -2870,7 +2753,7 @@ const CRM_BULK_TEMPLATES = {
          `💰 *Saldo a Liquidar:* {saldo}\n` +
          `📅 *Fecha Límite:* {fecha_limite}\n\n` +
          `🏦 *Canales para pago inmediato:*\n` +
-         `• Nequi / Daviplata: 300 123 4567\n` +
+         `• Nequi / Daviplata: 323 269 2578\n` +
          `• Bancolombia Ahorros: 912-00034-82\n` +
          `• 💳 Paga tu cuota en línea aquí de forma segura:\n` +
          `  https://carfe.com/pagar?credito={ref_credito}&monto={saldo}\n\n` +
@@ -4851,7 +4734,7 @@ let activeBroadcastQueue = [];
 
 function getAdminStoreWAPhone() {
   const custom = localStorage.getItem('carfe_wa_store_phone');
-  return custom ? custom.replace(/\D/g, '') : '573001234567';
+  return custom ? custom.replace(/\D/g, '') : '573232692578';
 }
 
 function updateHeaderWAIndicator() {
@@ -4898,7 +4781,7 @@ function updateModalWaPreview(val) {
   const clean = String(val || '').replace(/\D/g, '');
   const preview = document.getElementById('modalWaPreviewLink');
   if (preview) {
-    const full = clean.startsWith('57') ? clean : (clean ? '57' + clean : '573001234567');
+    const full = clean.startsWith('57') ? clean : (clean ? '57' + clean : '573232692578');
     preview.textContent = `https://wa.me/${full}`;
   }
 }
@@ -4908,7 +4791,7 @@ function saveModalWaNumber() {
   if (!inp) return;
   const val = inp.value.trim().replace(/\D/g, '');
   if (val.length < 7) {
-    return toast('⚠️', 'Número incompleto', 'Por favor ingresa un número de WhatsApp de 10 dígitos (ej: 3001234567)');
+    return toast('⚠️', 'Número incompleto', 'Por favor ingresa un número de WhatsApp de 10 dígitos (ej: 3232692578)');
   }
   const fullPhone = val.startsWith('57') ? val : '57' + val;
   localStorage.setItem('carfe_wa_store_phone', fullPhone);
@@ -5224,7 +5107,7 @@ function initCatalog() {
   const stored = localStorage.getItem('carfe_wa_store_phone');
   const inp = document.getElementById('storeWaNumber');
   if (inp) {
-    inp.value = stored ? stored.replace(/^57/, '') : '300 123 4567';
+    inp.value = stored ? stored.replace(/^57/, '') : '323 269 2578';
   }
   updateHeaderWAIndicator();
   renderCatalogGrid();
@@ -7254,33 +7137,8 @@ document.addEventListener('DOMContentLoaded', () => {
   syncCrmWithCarteraAndSales();
   updateCrmKPIs();
 
-  // Semilla de notificación de cobranza pendiente
-  addNotification(
-    '💳',
-    'Cuenta por Cobrar: Pedro Ramírez',
-    'Cuota 2 pendiente: $124.500 COP (Classic Oxford) — Vence en 2 días',
-    'cobranza',
-    {
-      client: 'Pedro Ramírez',
-      product: 'Classic Oxford',
-      phone: '+57 311 839 2104',
-      total: 124500,
-      creditId: 'CRT-002'
-    }
-  );
-
-  // Revisar pedidos pendientes cada 15 segundos
+  // Revisar pedidos reales realizados por clientes desde la tienda cada 15 segundos
   setInterval(checkPendingOrders, 15000);
-
-  // Simulación: primer pedido dinámico y visual a los 10 segundos
-  setTimeout(() => {
-    simulatePendingOrder();
-  }, 10000);
-
-  // Simulación: nuevos pedidos aleatorios cada 75s
-  setInterval(() => {
-    simulatePendingOrder();
-  }, 75000);
 });
 
 /* ───────── NAVEGACIÓN MÓVIL PWA & BOTTOM SHEET "MÁS" ───────── */
@@ -7408,7 +7266,7 @@ function saveFooterSettings() {
   const desc = document.getElementById('ajustes_footerDesc')?.value?.trim() || '';
 
   const footerData = {
-    phone: wa || '+57 300 123 4567',
+    phone: wa || '+57 323 269 2578',
     email: email || 'contacto@carfe.com.co',
     schedule: schedule || 'Lun–Sáb 9AM–7PM',
     city: city || 'Bucaramanga, Colombia',
@@ -7439,7 +7297,7 @@ function loadFooterSettingsInAdmin() {
     const storePhone = localStorage.getItem('carfe_wa_store_phone');
 
     const waEl = document.getElementById('ajustes_footerWa');
-    if (waEl) waEl.value = f?.phone || (storePhone ? '+' + storePhone : '+57 300 123 4567');
+    if (waEl) waEl.value = f?.phone || (storePhone ? '+' + storePhone : '+57 323 269 2578');
 
     const emailEl = document.getElementById('ajustes_footerEmail');
     if (emailEl) emailEl.value = f?.email || 'contacto@carfe.com.co';

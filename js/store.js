@@ -56,7 +56,7 @@ function formatCOP(val) {
 }
 
 // Configuración Teléfono Oficial Carfe® para WhatsApp
-const DEFAULT_STORE_WA = '573001234567';
+const DEFAULT_STORE_WA = '573232692578';
 function getStoreWAPhone() {
   const custom = localStorage.getItem('carfe_wa_store_phone');
   return custom ? custom.replace(/\D/g, '') : DEFAULT_STORE_WA;
@@ -1606,7 +1606,7 @@ function openHelpModal(topic) {
         <div class="p-4 bg-gray-50 rounded-2xl border border-gray-200">
           <label class="block text-xs font-black text-gray-800 uppercase mb-1">Ingresa tu número de pedido o teléfono:</label>
           <div class="flex gap-2">
-            <input type="text" id="trackInput" placeholder="Ej: ORD-4821 o 3001234567" style="color:#111827 !important; -webkit-text-fill-color:#111827 !important; background:#ffffff !important;" class="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-xs font-bold text-gray-900 bg-white outline-none">
+            <input type="text" id="trackInput" placeholder="Ej: ORD-4821 o 3232692578" style="color:#111827 !important; -webkit-text-fill-color:#111827 !important; background:#ffffff !important;" class="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-xs font-bold text-gray-900 bg-white outline-none">
             <button onclick="consultOrderTracking()" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all">Consultar</button>
           </div>
           <div id="trackResult" class="mt-3 text-xs text-emerald-700 font-semibold hidden"></div>
@@ -1752,7 +1752,7 @@ function loadFooterInfo() {
   try {
     const raw = localStorage.getItem('carfe_footer_info');
     const f = raw ? JSON.parse(raw) : null;
-    const phone = f?.phone || (localStorage.getItem('carfe_wa_store_phone') ? '+' + localStorage.getItem('carfe_wa_store_phone') : '+57 300 123 4567');
+    const phone = f?.phone || (localStorage.getItem('carfe_wa_store_phone') ? '+' + localStorage.getItem('carfe_wa_store_phone') : '+57 323 269 2578');
     const email = f?.email || 'contacto@carfe.com.co';
     const schedule = f?.schedule || 'Lun–Sáb 9AM–7PM';
     const city = f?.city || 'Bucaramanga, Colombia';
