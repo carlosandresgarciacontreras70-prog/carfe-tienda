@@ -336,11 +336,12 @@ let ttsDirty = true;
 function showView(viewName) {
   if (currentView === viewName && loadedViews.has(viewName)) return;
 
-  // 1. Ocultar vista anterior directamente (sin iterar todo el DOM)
+  // 1. Ocultar vista anterior directamente
   const prevEl = document.getElementById('view-' + currentView);
   if (prevEl) {
     prevEl.style.display = 'none';
     prevEl.classList.remove('active');
+    prevEl.classList.add('hidden');
   }
   const prevNav = document.getElementById('nav-' + currentView);
   if (prevNav) prevNav.classList.remove('active');
@@ -350,6 +351,7 @@ function showView(viewName) {
   if (target) {
     target.style.display = 'block';
     target.classList.add('active');
+    target.classList.remove('hidden');
   }
   const nextNav = document.getElementById('nav-' + viewName);
   if (nextNav) nextNav.classList.add('active');
@@ -3246,25 +3248,31 @@ function updateQuickBillCalculations() {
 }
 
 function submitQuickBilling() {
-  const clientName = document.getElementById('qbillClient')?.value.trim();
-  const phone = document.getElementById('qbillPhone')?.value.trim();
-  const doc = document.getElementById('qbillDoc')?.value.trim();
-  const address = document.getElementById('qbillAddress')?.value.trim();
+  const clientName = (document.getElementById('qbillClient')?.value || '').trim();
+  const phone = (document.getElementById('qbillPhone')?.value || '').trim();
+  const doc = (document.getElementById('qbillDoc')?.value || '').trim();
+  const address = (document.getElementById('qbillAddress')?.value || '').trim();
 
   if (!clientName) {
-    return toast('⚠️', 'Falta el cliente', 'Por favor ingresa el nombre completo del cliente');
+    const clientInput = document.getElementById('qbillClient');
+    if (clientInput) {
+      clientInput.focus();
+      clientInput.classList.add('border-red-500', 'bg-red-50');
+      setTimeout(() => clientInput.classList.remove('border-red-500', 'bg-red-50'), 2500);
+    }
+    return toast('⚠️', 'Falta el Cliente', 'Por favor ingresa el nombre de la persona que compra');
   }
 
   const sel = document.getElementById('qbillProduct');
-  if (!sel || !sel.options[sel.selectedIndex]) {
-    return toast('⚠️', 'Selecciona calzado', 'Elige el calzado que se va a facturar');
+  if (!sel || !sel.options || sel.selectedIndex < 0) {
+    return toast('⚠️', 'Selecciona Calzado', 'Elige el calzado que se va a facturar');
   }
   const opt = sel.options[sel.selectedIndex];
-  const prodId = parseInt(opt.value);
-  const prodName = opt.dataset.name;
-  const cat = opt.dataset.cat;
-  const unitPrice = parseFloat(document.getElementById('qbillUnitPrice')?.value) || parseFloat(opt.dataset.price);
-  const unitCost = parseFloat(opt.dataset.cost) || Math.round(unitPrice * 0.5);
+  const prodId = parseInt(opt.value) || 1;
+  const prodName = opt.getAttribute('data-name') || opt.dataset.name || (PRODUCTS.find(x => x.id === prodId)?.name) || 'Calzado Carfe®';
+  const cat = opt.getAttribute('data-cat') || opt.dataset.cat || 'hombre';
+  const unitPrice = parseFloat(document.getElementById('qbillUnitPrice')?.value) || parseFloat(opt.getAttribute('data-price')) || 249000;
+  const unitCost = parseFloat(opt.getAttribute('data-cost')) || Math.round(unitPrice * 0.5);
   const qty = parseInt(document.getElementById('qbillQty')?.value) || 1;
   const talla = document.getElementById('qbillTalla')?.value || '40';
 
@@ -4240,24 +4248,55 @@ function checkStockAlerts() {
 }
 
 function openAddStockModal() {
+  if (!inventoryData || inventoryData.length === 0) {
+    buildInventory();
+  }
   const sel = document.getElementById('addStockProduct') || document.getElementById('stockProduct');
-  if (sel) sel.innerHTML = inventoryData.map(p => `<option value="${p.id}">${p.name} (${p.cat === 'hombre' ? 'Hombre' : 'Mujer'}) — Stock actual: ${p.stock}</option>`).join('');
+  if (sel) {
+    const list = (inventoryData && inventoryData.length > 0) ? inventoryData : PRODUCTS;
+    sel.innerHTML = list.map(p => `<option value="${p.id}">${p.name} (${p.cat === 'hombre' ? 'Hombre' : 'Mujer'}) — Stock actual: ${p.stock} pares</option>`).join('');
+  }
+  const qtyInp = document.getElementById('addStockQty') || document.getElementById('stockQty');
+  if (qtyInp && (!qtyInp.value || parseInt(qtyInp.value) <= 0)) {
+    qtyInp.value = 10;
+  }
   openModal('addStockModal');
 }
 
 function addStock() {
+  if (!inventoryData || inventoryData.length === 0) {
+    buildInventory();
+  }
   const idVal = parseInt(document.getElementById('addStockProduct')?.value || document.getElementById('stockProduct')?.value);
-  const qty   = parseInt(document.getElementById('addStockQty')?.value || document.getElementById('stockQty')?.value) || 0;
-  if (!idVal || qty <= 0) return toast('⚠️', 'Error', 'Selecciona producto y cantidad válida');
-  const p = inventoryData.find(x => x.id === idVal || String(x.id) === String(idVal));
+  const qtyInp = document.getElementById('addStockQty') || document.getElementById('stockQty');
+  const qty   = parseInt(qtyInp?.value) || 0;
+  if (!idVal || isNaN(idVal)) {
+    return toast('⚠️', 'Selecciona Producto', 'Elige el calzado al que deseas agregar stock');
+  }
+  if (qty <= 0) {
+    return toast('⚠️', 'Cantidad Inválida', 'Ingresa una cantidad mayor a 0 (ej: 5, 10, 20)');
+  }
+  let p = inventoryData.find(x => x.id === idVal || String(x.id) === String(idVal));
+  if (!p) {
+    p = PRODUCTS.find(x => x.id === idVal || String(x.id) === String(idVal));
+  }
   if (p) {
-    p.stock += qty;
+    p.stock = (parseInt(p.stock) || 0) + qty;
+    const rootP = PRODUCTS.find(x => x.id === p.id || String(x.id) === String(p.id));
+    if (rootP) rootP.stock = p.stock;
     syncProductStock(p);
     saveStockOverride(p.id, p.stock);
-    updateInvKPIs();
-    renderInventoryTable();
+    try {
+      localStorage.setItem('carfe_products_stock_' + p.id, String(p.stock));
+      localStorage.setItem('carfe_inventory_data', JSON.stringify(inventoryData));
+    } catch(e) {}
+    if (typeof updateInvKPIs === 'function') updateInvKPIs();
+    if (typeof renderInventoryTable === 'function') renderInventoryTable();
+    if (typeof renderProductsTable === 'function') renderProductsTable();
     closeModal('addStockModal');
-    toast('✅', 'Stock agregado', `+${qty} pares a ${p.name} (Total: ${p.stock})`);
+    toast('✅', 'Stock Agregado', `+${qty} pares agregados a ${p.name} (Total disponible: ${p.stock})`);
+  } else {
+    toast('⚠️', 'Error', 'No se encontró el calzado seleccionado');
   }
 }
 
@@ -6324,7 +6363,7 @@ function saveSettings() {
 }
 
 /* ───────── TOAST (OPTIMIZADO) ───────── */
-function toast(icon, title, msg, ms = 2500) {
+function toast(icon, title, msg, ms = 2800) {
   const el = document.getElementById('adminToast') || document.getElementById('toast');
   if (!el) return;
   const iconEl = document.getElementById('toastIcon');
@@ -6334,7 +6373,8 @@ function toast(icon, title, msg, ms = 2500) {
   if (titleEl) titleEl.textContent = title;
   if (msgEl) msgEl.textContent = msg;
 
-  el.style.display = 'flex';
+  el.classList.remove('hidden');
+  el.style.setProperty('display', 'flex', 'important');
   el.style.opacity = '1';
   el.style.transform = 'translateY(0)';
 
@@ -6342,7 +6382,10 @@ function toast(icon, title, msg, ms = 2500) {
   el._toastTimer = setTimeout(() => {
     el.style.opacity = '0';
     el.style.transform = 'translateY(10px)';
-    setTimeout(() => { el.style.display = 'none'; }, 200);
+    setTimeout(() => {
+      el.style.setProperty('display', 'none', 'important');
+      el.classList.add('hidden');
+    }, 200);
   }, ms);
 }
 
@@ -6351,7 +6394,7 @@ function openModal(id) {
   const el = document.getElementById(id);
   if (el) {
     el.classList.remove('hidden');
-    el.style.display = 'flex';
+    el.style.setProperty('display', 'flex', 'important');
     el.style.opacity = '1';
     el.style.visibility = 'visible';
     el.style.pointerEvents = 'auto';
@@ -6362,7 +6405,7 @@ function closeModal(id) {
   const el = document.getElementById(id);
   if (el) {
     el.classList.add('hidden');
-    el.style.display = 'none';
+    el.style.setProperty('display', 'none', 'important');
   }
 }
 
@@ -7368,7 +7411,7 @@ function clearAllSystemData() {
 }
 
 /* ───────── INIT ───────── */
-document.addEventListener('DOMContentLoaded', () => {
+function initAdminApp() {
   purgeAllDemoData();
   checkAuth();
   updateHeaderDate();
@@ -7386,8 +7429,16 @@ document.addEventListener('DOMContentLoaded', () => {
   initDashboard();
 
   // Revisar pedidos reales de clientes desde la tienda o WhatsApp en tiempo real
-  setInterval(checkPendingOrders, 5000);
-});
+  if (!window._ordersCheckInterval) {
+    window._ordersCheckInterval = setInterval(checkPendingOrders, 5000);
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAdminApp);
+} else {
+  initAdminApp();
+}
 
 /* ───────── NAVEGACIÓN MÓVIL PWA & BOTTOM SHEET "MÁS" ───────── */
 function openMobileMoreSheet() {
