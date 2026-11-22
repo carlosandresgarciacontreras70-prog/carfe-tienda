@@ -4051,21 +4051,31 @@ function syncProductStock(item) {
 function openEditProductModal(id) {
   const p = PRODUCTS.find(x => x.id === id || String(x.id) === String(id)) || 
             (inventoryData && inventoryData.find(x => x.id === id || String(x.id) === String(id)));
-  if (!p) return toast('⚠️', 'Producto no encontrado', `No se encontró el ID ${id}`);
+  if (!p) return toast('⚠️', 'Producto no encontrado', 'No se encontró el calzado solicitado');
 
   document.getElementById('editProdId').value = p.id;
   document.getElementById('editProdName').value = p.name || '';
+  if (document.getElementById('editProdBrand')) {
+    document.getElementById('editProdBrand').value = p.brand || 'Carfe®';
+  }
   document.getElementById('editProdCat').value = p.cat || 'hombre';
   document.getElementById('editProdStock').value = p.stock !== undefined ? p.stock : 12;
   document.getElementById('editProdCost').value = p.cost || Math.round((p.price || 0) * 0.5);
   document.getElementById('editProdPrice').value = p.price || 0;
+  if (document.getElementById('editProdDesc')) {
+    document.getElementById('editProdDesc').value = p.desc || 'Calzado exclusivo Carfe® en cuero 100% legítimo.';
+  }
+  if (document.getElementById('editProdImgUrl')) {
+    document.getElementById('editProdImgUrl').value = (p.img && p.img.startsWith('http')) ? p.img : '';
+  }
 
   document.getElementById('editProdCurrentName').textContent = p.name;
   document.getElementById('editProdCurrentBrand').textContent = (p.brand || 'Carfe®') + ' • ' + (p.cat === 'hombre' ? 'Hombre' : 'Mujer');
 
+  window.editProductPhotoData = p.img || p.photoData || null;
   const imgDiv = document.getElementById('editProdImgPreview');
   if (imgDiv) {
-    const photo = p.img || p.photoData;
+    const photo = window.editProductPhotoData;
     if (photo) {
       imgDiv.innerHTML = `<img src="${photo}" class="w-full h-full object-contain p-1">`;
     } else {
@@ -4075,6 +4085,38 @@ function openEditProductModal(id) {
 
   updateEditFinancialPreview();
   openModal('editProductModal');
+}
+
+function handleEditPhotoUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    window.editProductPhotoData = e.target.result;
+    const imgDiv = document.getElementById('editProdImgPreview');
+    if (imgDiv) {
+      imgDiv.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-contain p-1">`;
+    }
+    toast('📷', 'Foto Cargada', 'Se previsualiza la nueva foto del calzado');
+  };
+  reader.readAsDataURL(file);
+}
+
+function onEditPhotoUrlChange(url) {
+  if (!url || !url.trim()) return;
+  window.editProductPhotoData = url.trim();
+  const imgDiv = document.getElementById('editProdImgPreview');
+  if (imgDiv) {
+    imgDiv.innerHTML = `<img src="${url.trim()}" class="w-full h-full object-contain p-1">`;
+  }
+}
+
+function clearEditPhoto() {
+  window.editProductPhotoData = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=80';
+  const imgDiv = document.getElementById('editProdImgPreview');
+  if (imgDiv) {
+    imgDiv.innerHTML = `<i class="fas fa-shoe-prints text-purple-600 text-xl"></i>`;
+  }
 }
 
 function updateEditFinancialPreview() {
@@ -4095,10 +4137,13 @@ function saveEditProduct() {
   const id = isNaN(idStr) ? idStr : Number(idStr);
 
   const name = document.getElementById('editProdName')?.value.trim();
+  const brand = document.getElementById('editProdBrand')?.value.trim() || 'Carfe®';
   const cat = document.getElementById('editProdCat')?.value || 'hombre';
   const stock = parseInt(document.getElementById('editProdStock')?.value);
   const cost = parseFloat(document.getElementById('editProdCost')?.value);
   const price = parseFloat(document.getElementById('editProdPrice')?.value);
+  const desc = document.getElementById('editProdDesc')?.value.trim() || 'Calzado exclusivo Carfe® en cuero 100% legítimo.';
+  const photo = window.editProductPhotoData || null;
 
   if (!name) return toast('⚠️', 'Nombre requerido', 'Ingresa el nombre del calzado');
   if (isNaN(stock) || stock < 0) return toast('⚠️', 'Stock inválido', 'Ingresa una cantidad de pares válida');
@@ -4109,10 +4154,16 @@ function saveEditProduct() {
   const p = PRODUCTS.find(x => x.id === id || String(x.id) === String(id));
   if (p) {
     p.name = name;
+    p.brand = brand;
     p.cat = cat;
     p.stock = stock;
     p.cost = cost;
     p.price = price;
+    p.desc = desc;
+    if (photo) {
+      p.img = photo;
+      p.photoData = photo;
+    }
   }
 
   // 2. Actualizar en inventoryData
@@ -4120,17 +4171,23 @@ function saveEditProduct() {
     const inv = inventoryData.find(x => x.id === id || String(x.id) === String(id));
     if (inv) {
       inv.name = name;
+      inv.brand = brand;
       inv.cat = cat;
       inv.stock = stock;
       inv.cost = cost;
       inv.price = price;
+      if (photo) inv.img = photo;
     }
   }
 
   // 3. Persistir en ss_product_overrides para sincronizar con store.js y recargas
   try {
     const overrides = JSON.parse(localStorage.getItem('ss_product_overrides') || '{}');
-    overrides[id] = { name, cat, stock, cost, price };
+    overrides[id] = { name, brand, cat, stock, cost, price, desc };
+    if (photo) {
+      overrides[id].img = photo;
+      overrides[id].photoData = photo;
+    }
     localStorage.setItem('ss_product_overrides', JSON.stringify(overrides));
 
     // Si estaba en customProducts, actualizarlo también
@@ -4138,10 +4195,16 @@ function saveEditProduct() {
     const cpIdx = cp.findIndex(x => x.id === id || String(x.id) === String(id));
     if (cpIdx !== -1) {
       cp[cpIdx].name = name;
+      cp[cpIdx].brand = brand;
       cp[cpIdx].cat = cat;
       cp[cpIdx].stock = stock;
       cp[cpIdx].cost = cost;
       cp[cpIdx].price = price;
+      cp[cpIdx].desc = desc;
+      if (photo) {
+        cp[cpIdx].img = photo;
+        cp[cpIdx].photoData = photo;
+      }
       localStorage.setItem('ss_custom_products', JSON.stringify(cp));
     }
   } catch(e) {
@@ -4159,7 +4222,178 @@ function saveEditProduct() {
   if (typeof renderCatalogGrid === 'function') renderCatalogGrid();
 
   closeModal('editProductModal');
-  toast('✅', 'Producto actualizado', `${name}: Stock ${stock} pares, Venta ${formatCOP(price)}`);
+  toast('✅', 'Producto Actualizado', `${name}: Stock ${stock} pares, Venta ${formatCOP(price)}`);
+}
+
+
+/* ───────── CAMBIAR FOTO DIRECTA EN CUALQUIER PRODUCTO (SIN IA) ───────── */
+let activeChangePhotoProductId = null;
+let tempNewPhotoData = null;
+
+function quickChangePhoto(id) {
+  const p = PRODUCTS.find(x => x.id === id || String(x.id) === String(id)) || 
+            (inventoryData && inventoryData.find(x => x.id === id || String(x.id) === String(id)));
+  if (!p) return toast('⚠️', 'Producto no encontrado', 'No se encontró el producto para cambiar foto');
+
+  activeChangePhotoProductId = p.id;
+  tempNewPhotoData = p.img || p.photoData || null;
+
+  const idInp = document.getElementById('changePhotoProdId');
+  const titleEl = document.getElementById('changePhotoProdTitle');
+  const imgPreview = document.getElementById('changePhotoPreviewImg');
+  const placeholder = document.getElementById('changePhotoEmptyPlaceholder');
+  const urlInp = document.getElementById('changePhotoUrlInput');
+  const fileInp = document.getElementById('changePhotoFileInput');
+
+  if (idInp) idInp.value = p.id;
+  if (titleEl) titleEl.textContent = `${p.name} (${(p.brand || 'Carfe®').toUpperCase()} • ${p.cat === 'hombre' ? 'Hombre' : 'Mujer'})`;
+  if (fileInp) fileInp.value = '';
+  if (urlInp) urlInp.value = (p.img && p.img.startsWith('http')) ? p.img : '';
+
+  if (p.img || p.photoData) {
+    if (imgPreview) {
+      imgPreview.src = p.img || p.photoData;
+      imgPreview.classList.remove('hidden');
+    }
+    if (placeholder) placeholder.classList.add('hidden');
+  } else {
+    if (imgPreview) imgPreview.classList.add('hidden');
+    if (placeholder) placeholder.classList.remove('hidden');
+  }
+
+  openModal('changePhotoModal');
+}
+
+function previewNewProductPhoto(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    tempNewPhotoData = e.target.result;
+    const imgPreview = document.getElementById('changePhotoPreviewImg');
+    const placeholder = document.getElementById('changePhotoEmptyPlaceholder');
+    if (imgPreview) {
+      imgPreview.src = tempNewPhotoData;
+      imgPreview.classList.remove('hidden');
+    }
+    if (placeholder) placeholder.classList.add('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+
+function onPhotoUrlChange(url) {
+  if (!url || !url.trim()) return;
+  tempNewPhotoData = url.trim();
+  const imgPreview = document.getElementById('changePhotoPreviewImg');
+  const placeholder = document.getElementById('changePhotoEmptyPlaceholder');
+  if (imgPreview) {
+    imgPreview.src = tempNewPhotoData;
+    imgPreview.classList.remove('hidden');
+  }
+  if (placeholder) placeholder.classList.add('hidden');
+}
+
+function saveNewProductPhoto() {
+  const idStr = document.getElementById('changePhotoProdId')?.value;
+  const id = isNaN(idStr) ? idStr : Number(idStr);
+  const newPhoto = tempNewPhotoData || document.getElementById('changePhotoUrlInput')?.value?.trim();
+
+  if (!newPhoto) {
+    return toast('⚠️', 'Sin Foto', 'Selecciona o sube una imagen antes de guardar');
+  }
+
+  const p = PRODUCTS.find(x => x.id === id || String(x.id) === String(id));
+  if (p) {
+    p.img = newPhoto;
+    p.photoData = newPhoto;
+  }
+
+  if (inventoryData) {
+    const inv = inventoryData.find(x => x.id === id || String(x.id) === String(id));
+    if (inv) inv.img = newPhoto;
+  }
+
+  try {
+    const overrides = JSON.parse(localStorage.getItem('ss_product_overrides') || '{}');
+    if (!overrides[id]) overrides[id] = {};
+    overrides[id].img = newPhoto;
+    overrides[id].photoData = newPhoto;
+    localStorage.setItem('ss_product_overrides', JSON.stringify(overrides));
+
+    const cp = JSON.parse(localStorage.getItem('ss_custom_products') || '[]');
+    const cpIdx = cp.findIndex(x => x.id === id || String(x.id) === String(id));
+    if (cpIdx !== -1) {
+      cp[cpIdx].img = newPhoto;
+      cp[cpIdx].photoData = newPhoto;
+      localStorage.setItem('ss_custom_products', JSON.stringify(cp));
+    }
+  } catch(e) {
+    console.error(e);
+  }
+
+  closeModal('changePhotoModal');
+  if (typeof renderAllProductsGrid === 'function') renderAllProductsGrid();
+  if (typeof renderInventoryTable === 'function') renderInventoryTable();
+  if (typeof renderCatalogGrid === 'function') renderCatalogGrid();
+
+  toast('📸', 'Foto Guardada', `La foto de "${p ? p.name : 'calzado'}" se actualizó con éxito.`);
+}
+
+function applyDirectPhoto(inputDataUrl) {
+  if (!inputDataUrl) return;
+  productPhotoData = inputDataUrl;
+  rawPhotoData = inputDataUrl;
+
+  const imgPreview = document.getElementById('productPhotoPreview');
+  const placeholder = document.getElementById('photoPlaceholder');
+  const controls = document.getElementById('directPhotoControls');
+
+  if (imgPreview) {
+    imgPreview.src = inputDataUrl;
+    imgPreview.classList.remove('hidden');
+  }
+  if (placeholder) {
+    placeholder.classList.add('hidden');
+  }
+  if (controls) {
+    controls.classList.remove('hidden');
+    controls.classList.add('flex');
+  }
+
+  applyPhotoToPreview(inputDataUrl);
+  toast('📸', 'Foto Cargada', 'La imagen del calzado quedó lista.');
+}
+
+function autoEnhanceWithAIStudio(inputDataUrl) {
+  applyDirectPhoto(inputDataUrl);
+}
+
+function applyPhotoUrl(url) {
+  if (!url || !url.trim()) return;
+  applyDirectPhoto(url.trim());
+}
+
+function removePhoto() {
+  productPhotoData = null;
+  rawPhotoData = null;
+  const imgPreview = document.getElementById('productPhotoPreview');
+  const placeholder = document.getElementById('photoPlaceholder');
+  const controls = document.getElementById('directPhotoControls');
+  const fileInp = document.getElementById('photoFileInput');
+  const urlInp = document.getElementById('photoUrlInput');
+
+  if (imgPreview) { imgPreview.src = ''; imgPreview.classList.add('hidden'); }
+  if (placeholder) placeholder.classList.remove('hidden');
+  if (controls) { controls.classList.add('hidden'); controls.classList.remove('flex'); }
+  if (fileInp) fileInp.value = '';
+  if (urlInp) urlInp.value = '';
+
+  const prevPhoto = document.getElementById('prevPhoto');
+  const prevPlaceholder = document.getElementById('prevPlaceholder');
+  if (prevPhoto) { prevPhoto.src = ''; prevPhoto.classList.add('hidden'); }
+  if (prevPlaceholder) prevPlaceholder.classList.remove('hidden');
+
+  toast('🗑️', 'Foto Removida', 'Puedes subir una nueva imagen cuando desees.');
 }
 
 function deleteProduct(id) {
@@ -4675,13 +4909,14 @@ function openCamera() {
 function capturePhoto() {
   const video = document.getElementById('cameraVideo');
   if (!video) return;
-  const canvas = document.createElement('canvas');
-  canvas.width = video.videoWidth || 640;
-  canvas.height = video.videoHeight || 480;
-  canvas.getContext('2d').drawImage(video, 0, 0);
-  const capturedRaw = canvas.toDataURL('image/jpeg', 0.88);
+  const canvas = document.getElementById('photoCanvas') || document.createElement('canvas');
+  canvas.width = video.videoWidth || 800;
+  canvas.height = video.videoHeight || 600;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0);
+  const capturedRaw = canvas.toDataURL('image/jpeg', 0.90);
   stopCamera();
-  autoEnhanceWithAIStudio(capturedRaw);
+  applyDirectPhoto(capturedRaw);
 }
 
 function stopCamera() {
@@ -4691,11 +4926,11 @@ function stopCamera() {
 }
 
 function handlePhotoUpload(event) {
-  const file = event.target.files[0];
+  const file = event.target.files && event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
-    autoEnhanceWithAIStudio(e.target.result);
+    applyDirectPhoto(e.target.result);
   };
   reader.readAsDataURL(file);
 }
@@ -4893,30 +5128,36 @@ function saveProduct() {
 function renderAllProductsGrid() {
   const grid = document.getElementById('allProdGrid');
   if (!grid) return;
+  safeText('allProdCount', PRODUCTS.length + ' Zapatos');
   grid.innerHTML = PRODUCTS.map(p => `
-    <div class="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+    <div class="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
       <div>
-        <div class="h-32 bg-gradient-to-br from-gray-50 to-purple-50 flex items-center justify-center relative overflow-hidden border-b border-gray-100">
+        <div class="h-36 bg-gray-50 flex items-center justify-center relative overflow-hidden border-b border-gray-100">
           ${p.img || p.photoData
-            ? `<img src="${p.img || p.photoData}" class="w-full h-full object-contain p-2">`
-            : `<div class="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center text-purple-600 border border-purple-100"><i class="fas fa-shoe-prints text-lg"></i></div>`}
-          <span class="absolute top-2 right-2 bg-purple-100 text-purple-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full capitalize">${p.cat}</span>
+            ? `<img src="${p.img || p.photoData}" class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-200">`
+            : `<div class="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600"><i class="fas fa-shoe-prints text-xl"></i></div>`}
+          <span class="absolute top-2 right-2 bg-purple-100 text-purple-700 text-[10px] font-black px-2 py-0.5 rounded-full capitalize shadow-sm">${p.cat}</span>
+          <span class="absolute top-2 left-2 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">${p.stock} pares</span>
         </div>
         <div class="p-3">
           <div class="font-bold text-xs text-gray-800 truncate mb-0.5" title="${p.name}">${p.name}</div>
           <div class="text-[10px] text-purple-600 font-bold uppercase mb-1">${p.brand || 'Carfe®'}</div>
-          <div class="flex justify-between items-center">
-            <span class="font-black text-purple-700 text-xs">${formatCOP(p.price)}</span>
-            <span class="text-[10px] font-semibold text-gray-400">${p.stock} pares</span>
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-black text-purple-700">${formatCOP(p.price)}</span>
+            <span class="text-[10px] text-gray-400 font-semibold">Costo: ${formatCOP(p.cost || p.price*0.5)}</span>
           </div>
         </div>
       </div>
-      <div class="p-3 pt-0 space-y-1.5">
-        <button onclick="openEditProductModal(${p.id})" class="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 font-extrabold py-1.5 px-2 rounded-xl text-[10px] flex items-center justify-center gap-1 transition-colors border border-purple-200 shadow-sm" title="Modificar stock o precio">
-          <i class="fas fa-edit text-purple-600"></i> Modificar Stock / Precio
+      <!-- BOTONES DE ACCIÓN: MODIFICAR, CAMBIAR FOTO, BORRAR -->
+      <div class="p-2.5 pt-0 grid grid-cols-3 gap-1.5 border-t border-gray-100 mt-2">
+        <button onclick="openEditProductModal(${p.id})" class="bg-purple-600 hover:bg-purple-700 text-white font-black py-2 px-1 rounded-xl text-[11px] flex flex-col items-center justify-center gap-1 transition-all shadow-sm" title="Modificar todos los datos del producto">
+          <i class="fas fa-edit text-xs"></i> <span>Editar</span>
         </button>
-        <button onclick="enhanceExistingProductAI(${p.id})" class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-extrabold py-1.5 px-2 rounded-xl text-[10px] flex items-center justify-center gap-1 transition-colors border border-indigo-200 shadow-sm" title="Aplica estudio y corrección de luz IA">
-          <i class="fas fa-wand-magic-sparkles text-amber-500"></i> Calibrar con Estudio IA
+        <button onclick="quickChangePhoto(${p.id})" class="bg-blue-50 hover:bg-blue-100 text-blue-700 font-black py-2 px-1 rounded-xl text-[11px] flex flex-col items-center justify-center gap-1 transition-all border border-blue-200" title="Cambiar foto del calzado">
+          <i class="fas fa-camera text-xs"></i> <span>Foto</span>
+        </button>
+        <button onclick="deleteProduct(${p.id})" class="bg-red-50 hover:bg-red-100 text-red-600 font-black py-2 px-1 rounded-xl text-[11px] flex flex-col items-center justify-center gap-1 transition-all border border-red-200" title="Eliminar producto permanentemente">
+          <i class="fas fa-trash text-xs"></i> <span>Borrar</span>
         </button>
       </div>
     </div>
@@ -7767,3 +8008,20 @@ window.initInventory = initInventory;
 window.buildInventory = buildInventory;
 window.updateInvKPIs = updateInvKPIs;
 
+
+/* ───────── EXPOSICIÓN GLOBAL DE APIS DE PRODUCTOS Y FOTOS ───────── */
+window.quickChangePhoto = quickChangePhoto;
+window.previewNewProductPhoto = previewNewProductPhoto;
+window.onPhotoUrlChange = onPhotoUrlChange;
+window.saveNewProductPhoto = saveNewProductPhoto;
+window.openEditProductModal = openEditProductModal;
+window.saveEditProduct = saveEditProduct;
+window.handleEditPhotoUpload = handleEditPhotoUpload;
+window.clearEditPhoto = clearEditPhoto;
+window.onEditPhotoUrlChange = onEditPhotoUrlChange;
+window.deleteProduct = deleteProduct;
+window.deleteProductFromModal = deleteProductFromModal;
+window.renderAllProductsGrid = renderAllProductsGrid;
+window.applyDirectPhoto = applyDirectPhoto;
+window.applyPhotoUrl = applyPhotoUrl;
+window.removePhoto = removePhoto;

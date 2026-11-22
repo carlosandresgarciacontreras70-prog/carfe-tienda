@@ -620,6 +620,333 @@
       reader.readAsDataURL(file);
     };
 
+    /* ───────── GESTOR DE FOTOS DIRECTAS (SIN IA) & ACCIONES DE PRODUCTOS ───────── */
+    window.applyDirectPhoto = function(dataUrl) {
+      if (!dataUrl) return;
+      window.productPhotoData = dataUrl;
+      var imgPreview = document.getElementById('productPhotoPreview');
+      var placeholder = document.getElementById('photoPlaceholder');
+      var controls = document.getElementById('directPhotoControls');
+      if (imgPreview) { imgPreview.src = dataUrl; imgPreview.classList.remove('hidden'); }
+      if (placeholder) { placeholder.classList.add('hidden'); }
+      if (controls) { controls.classList.remove('hidden'); controls.classList.add('flex'); }
+      if (typeof window.applyPhotoToPreview === 'function') window.applyPhotoToPreview(dataUrl);
+      var prevPhoto = document.getElementById('prevPhoto');
+      var prevPlaceholder = document.getElementById('prevPlaceholder');
+      if (prevPhoto) { prevPhoto.src = dataUrl; prevPhoto.classList.remove('hidden'); }
+      if (prevPlaceholder) { prevPlaceholder.classList.add('hidden'); }
+      window.toast('📸', 'Foto Cargada', 'La imagen del calzado quedó lista.');
+    };
+
+    window.applyPhotoUrl = function(url) {
+      if (!url || !url.trim()) return;
+      window.applyDirectPhoto(url.trim());
+    };
+
+    window.removePhoto = function() {
+      window.productPhotoData = null;
+      var imgPreview = document.getElementById('productPhotoPreview');
+      var placeholder = document.getElementById('photoPlaceholder');
+      var controls = document.getElementById('directPhotoControls');
+      var fileInp = document.getElementById('photoFileInput');
+      var urlInp = document.getElementById('photoUrlInput');
+      if (imgPreview) { imgPreview.src = ''; imgPreview.classList.add('hidden'); }
+      if (placeholder) { placeholder.classList.remove('hidden'); }
+      if (controls) { controls.classList.add('hidden'); controls.classList.remove('flex'); }
+      if (fileInp) fileInp.value = '';
+      if (urlInp) urlInp.value = '';
+      var prevPhoto = document.getElementById('prevPhoto');
+      var prevPlaceholder = document.getElementById('prevPlaceholder');
+      if (prevPhoto) { prevPhoto.src = ''; prevPhoto.classList.add('hidden'); }
+      if (prevPlaceholder) { prevPlaceholder.classList.remove('hidden'); }
+      window.toast('🗑️', 'Foto Removida', 'Puedes subir una nueva imagen.');
+    };
+
+    window.handlePhotoUpload = function(event) {
+      var file = event.target.files && event.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        window.applyDirectPhoto(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    };
+
+    /* ───────── CAMBIAR FOTO DIRECTA DESDE CUALQUIER PRODUCTO ───────── */
+    window.quickChangePhoto = function(id) {
+      var list = (typeof PRODUCTS !== 'undefined') ? PRODUCTS : [];
+      var p = list.find(function(x) { return x.id === id || String(x.id) === String(id); });
+      if (!p) return window.toast('⚠️', 'Producto no encontrado', 'No se encontró el calzado solicitado');
+
+      window._activeChangePhotoId = p.id;
+      window._tempNewPhoto = p.img || p.photoData || null;
+
+      var idInp = document.getElementById('changePhotoProdId');
+      var titleEl = document.getElementById('changePhotoProdTitle');
+      var imgPreview = document.getElementById('changePhotoPreviewImg');
+      var placeholder = document.getElementById('changePhotoEmptyPlaceholder');
+      var urlInp = document.getElementById('changePhotoUrlInput');
+      var fileInp = document.getElementById('changePhotoFileInput');
+
+      if (idInp) idInp.value = p.id;
+      if (titleEl) titleEl.textContent = p.name + ' (' + (p.brand || 'Carfe®').toUpperCase() + ')';
+      if (fileInp) fileInp.value = '';
+      if (urlInp) urlInp.value = (p.img && p.img.startsWith('http')) ? p.img : '';
+
+      if (p.img || p.photoData) {
+        if (imgPreview) { imgPreview.src = p.img || p.photoData; imgPreview.classList.remove('hidden'); }
+        if (placeholder) placeholder.classList.add('hidden');
+      } else {
+        if (imgPreview) imgPreview.classList.add('hidden');
+        if (placeholder) placeholder.classList.remove('hidden');
+      }
+
+      window.openModal('changePhotoModal');
+    };
+
+    window.previewNewProductPhoto = function(event) {
+      var file = event.target.files && event.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        window._tempNewPhoto = e.target.result;
+        var imgPreview = document.getElementById('changePhotoPreviewImg');
+        var placeholder = document.getElementById('changePhotoEmptyPlaceholder');
+        if (imgPreview) { imgPreview.src = e.target.result; imgPreview.classList.remove('hidden'); }
+        if (placeholder) placeholder.classList.add('hidden');
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.onPhotoUrlChange = function(url) {
+      if (!url || !url.trim()) return;
+      window._tempNewPhoto = url.trim();
+      var imgPreview = document.getElementById('changePhotoPreviewImg');
+      var placeholder = document.getElementById('changePhotoEmptyPlaceholder');
+      if (imgPreview) { imgPreview.src = url.trim(); imgPreview.classList.remove('hidden'); }
+      if (placeholder) placeholder.classList.add('hidden');
+    };
+
+    window.saveNewProductPhoto = function() {
+      var idStr = document.getElementById('changePhotoProdId') ? document.getElementById('changePhotoProdId').value : window._activeChangePhotoId;
+      var id = isNaN(idStr) ? idStr : Number(idStr);
+      var newPhoto = window._tempNewPhoto || (document.getElementById('changePhotoUrlInput') ? document.getElementById('changePhotoUrlInput').value.trim() : null);
+
+      if (!newPhoto) return window.toast('⚠️', 'Sin Foto', 'Selecciona o sube una imagen antes de guardar');
+
+      var list = (typeof PRODUCTS !== 'undefined') ? PRODUCTS : [];
+      var p = list.find(function(x) { return x.id === id || String(x.id) === String(id); });
+      if (p) {
+        p.img = newPhoto;
+        p.photoData = newPhoto;
+      }
+
+      try {
+        var overrides = JSON.parse(localStorage.getItem('ss_product_overrides') || '{}');
+        if (!overrides[id]) overrides[id] = {};
+        overrides[id].img = newPhoto;
+        overrides[id].photoData = newPhoto;
+        localStorage.setItem('ss_product_overrides', JSON.stringify(overrides));
+
+        var cp = JSON.parse(localStorage.getItem('ss_custom_products') || '[]');
+        var cpIdx = cp.findIndex(function(x) { return x.id === id || String(x.id) === String(id); });
+        if (cpIdx !== -1) {
+          cp[cpIdx].img = newPhoto;
+          cp[cpIdx].photoData = newPhoto;
+          localStorage.setItem('ss_custom_products', JSON.stringify(cp));
+        }
+      } catch(e) {}
+
+      window.closeModal('changePhotoModal');
+      if (typeof window.renderAllProductsGrid === 'function') window.renderAllProductsGrid();
+      if (typeof window.renderInventoryTable === 'function') window.renderInventoryTable();
+      if (typeof window.renderCatalogGrid === 'function') window.renderCatalogGrid();
+
+      window.toast('📸', 'Foto Guardada', 'La nueva foto del calzado se guardó con éxito en toda la tienda.');
+    };
+
+    /* ───────── MODAL DE EDICIÓN COMPLETA: MODIFICAR, CAMBIAR FOTO Y BORRAR ───────── */
+    window.openEditProductModal = function(id) {
+      if (typeof window._adminOpenEditProductModal === 'function') return window._adminOpenEditProductModal(id);
+      var list = (typeof PRODUCTS !== 'undefined') ? PRODUCTS : [];
+      var p = list.find(function(x) { return x.id === id || String(x.id) === String(id); });
+      if (!p) return window.toast('⚠️', 'No encontrado', 'No se encontró el calzado solicitado');
+
+      var idInp = document.getElementById('editProdId');
+      var nameInp = document.getElementById('editProdName');
+      var brandInp = document.getElementById('editProdBrand');
+      var catInp = document.getElementById('editProdCat');
+      var stockInp = document.getElementById('editProdStock');
+      var costInp = document.getElementById('editProdCost');
+      var priceInp = document.getElementById('editProdPrice');
+      var descInp = document.getElementById('editProdDesc');
+      var urlInp = document.getElementById('editProdImgUrl');
+
+      if (idInp) idInp.value = p.id;
+      if (nameInp) nameInp.value = p.name || '';
+      if (brandInp) brandInp.value = p.brand || 'Carfe®';
+      if (catInp) catInp.value = p.cat || 'hombre';
+      if (stockInp) stockInp.value = p.stock !== undefined ? p.stock : 12;
+      if (costInp) costInp.value = p.cost || Math.round((p.price || 0) * 0.5);
+      if (priceInp) priceInp.value = p.price || 0;
+      if (descInp) descInp.value = p.desc || 'Calzado exclusivo Carfe® en cuero 100% legítimo.';
+      if (urlInp) urlInp.value = (p.img && p.img.startsWith('http')) ? p.img : '';
+
+      var curName = document.getElementById('editProdCurrentName');
+      var curBrand = document.getElementById('editProdCurrentBrand');
+      if (curName) curName.textContent = p.name;
+      if (curBrand) curBrand.textContent = (p.brand || 'Carfe®') + ' • ' + (p.cat === 'hombre' ? 'Hombre' : 'Mujer');
+
+      window.editProductPhotoData = p.img || p.photoData || null;
+      var imgDiv = document.getElementById('editProdImgPreview');
+      if (imgDiv) {
+        if (window.editProductPhotoData) {
+          imgDiv.innerHTML = '<img src="' + window.editProductPhotoData + '" class="w-full h-full object-contain p-1">';
+        } else {
+          imgDiv.innerHTML = '<i class="fas fa-shoe-prints text-purple-600 text-xl"></i>';
+        }
+      }
+
+      if (typeof window.updateEditFinancialPreview === 'function') window.updateEditFinancialPreview();
+      window.openModal('editProductModal');
+    };
+
+    window.handleEditPhotoUpload = function(event) {
+      var file = event.target.files && event.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        window.editProductPhotoData = e.target.result;
+        var imgDiv = document.getElementById('editProdImgPreview');
+        if (imgDiv) {
+          imgDiv.innerHTML = '<img src="' + e.target.result + '" class="w-full h-full object-contain p-1">';
+        }
+        window.toast('📷', 'Foto Cargada', 'Se previsualiza la nueva foto.');
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.onEditPhotoUrlChange = function(url) {
+      if (!url || !url.trim()) return;
+      window.editProductPhotoData = url.trim();
+      var imgDiv = document.getElementById('editProdImgPreview');
+      if (imgDiv) {
+        imgDiv.innerHTML = '<img src="' + url.trim() + '" class="w-full h-full object-contain p-1">';
+      }
+    };
+
+    window.clearEditPhoto = function() {
+      window.editProductPhotoData = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=80';
+      var imgDiv = document.getElementById('editProdImgPreview');
+      if (imgDiv) {
+        imgDiv.innerHTML = '<i class="fas fa-shoe-prints text-purple-600 text-xl"></i>';
+      }
+    };
+
+    window.saveEditProduct = function() {
+      var idStr = document.getElementById('editProdId') ? document.getElementById('editProdId').value : null;
+      if (!idStr) return;
+      var id = isNaN(idStr) ? idStr : Number(idStr);
+
+      var name = (document.getElementById('editProdName') ? document.getElementById('editProdName').value : '').trim();
+      var brand = (document.getElementById('editProdBrand') ? document.getElementById('editProdBrand').value : '').trim() || 'Carfe®';
+      var cat = document.getElementById('editProdCat') ? document.getElementById('editProdCat').value : 'hombre';
+      var stock = parseInt(document.getElementById('editProdStock') ? document.getElementById('editProdStock').value : 0);
+      var cost = parseFloat(document.getElementById('editProdCost') ? document.getElementById('editProdCost').value : 0);
+      var price = parseFloat(document.getElementById('editProdPrice') ? document.getElementById('editProdPrice').value : 0);
+      var desc = (document.getElementById('editProdDesc') ? document.getElementById('editProdDesc').value : '').trim() || 'Calzado exclusivo Carfe® en cuero 100% legítimo.';
+      var photo = window.editProductPhotoData || null;
+
+      if (!name) return window.toast('⚠️', 'Nombre requerido', 'Ingresa el nombre del calzado');
+      if (isNaN(stock) || stock < 0) return window.toast('⚠️', 'Stock inválido', 'Ingresa una cantidad de pares válida');
+      if (isNaN(price) || price <= 0) return window.toast('⚠️', 'Precio inválido', 'Ingresa un precio mayor a 0');
+
+      var list = (typeof PRODUCTS !== 'undefined') ? PRODUCTS : [];
+      var p = list.find(function(x) { return x.id === id || String(x.id) === String(id); });
+      if (p) {
+        p.name = name;
+        p.brand = brand;
+        p.cat = cat;
+        p.stock = stock;
+        p.cost = cost;
+        p.price = price;
+        p.desc = desc;
+        if (photo) { p.img = photo; p.photoData = photo; }
+      }
+
+      try {
+        var overrides = JSON.parse(localStorage.getItem('ss_product_overrides') || '{}');
+        overrides[id] = { name: name, brand: brand, cat: cat, stock: stock, cost: cost, price: price, desc: desc };
+        if (photo) { overrides[id].img = photo; overrides[id].photoData = photo; }
+        localStorage.setItem('ss_product_overrides', JSON.stringify(overrides));
+
+        var cp = JSON.parse(localStorage.getItem('ss_custom_products') || '[]');
+        var cpIdx = cp.findIndex(function(x) { return x.id === id || String(x.id) === String(id); });
+        if (cpIdx !== -1) {
+          cp[cpIdx].name = name;
+          cp[cpIdx].brand = brand;
+          cp[cpIdx].cat = cat;
+          cp[cpIdx].stock = stock;
+          cp[cpIdx].cost = cost;
+          cp[cpIdx].price = price;
+          cp[cpIdx].desc = desc;
+          if (photo) { cp[cpIdx].img = photo; cp[cpIdx].photoData = photo; }
+          localStorage.setItem('ss_custom_products', JSON.stringify(cp));
+        }
+      } catch(e) {}
+
+      window.closeModal('editProductModal');
+      if (typeof window.renderAllProductsGrid === 'function') window.renderAllProductsGrid();
+      if (typeof window.renderInventoryTable === 'function') window.renderInventoryTable();
+      if (typeof window.renderCatalogGrid === 'function') window.renderCatalogGrid();
+      window.toast('✅', 'Producto Actualizado', name + ': ' + stock + ' pares, Precio $' + Math.round(price).toLocaleString('es-CO'));
+    };
+
+    window.deleteProduct = function(id) {
+      var list = (typeof PRODUCTS !== 'undefined') ? PRODUCTS : [];
+      var p = list.find(function(x) { return x.id === id || String(x.id) === String(id); });
+      var name = p ? p.name : 'este calzado';
+
+      if (!confirm('¿Estás seguro de que deseas eliminar permanentemente "' + name + '" del inventario y del catálogo Carfe®?\n\nEsta acción quitará el calzado de la tienda pública, WhatsApp y reportes.')) {
+        return;
+      }
+      window.executeDeleteProduct(id, name);
+    };
+
+    window.deleteProductFromModal = function() {
+      var idStr = document.getElementById('editProdId') ? document.getElementById('editProdId').value : null;
+      if (!idStr) return;
+      var id = isNaN(idStr) ? idStr : Number(idStr);
+      var name = document.getElementById('editProdName') ? document.getElementById('editProdName').value : 'este calzado';
+      if (!confirm('¿Eliminar definitivamente "' + name + '" del catálogo e inventario?')) return;
+      window.closeModal('editProductModal');
+      window.executeDeleteProduct(id, name);
+    };
+
+    window.executeDeleteProduct = function(id, name) {
+      var list = (typeof PRODUCTS !== 'undefined') ? PRODUCTS : [];
+      var pIdx = list.findIndex(function(x) { return x.id === id || String(x.id) === String(id); });
+      if (pIdx !== -1) list.splice(pIdx, 1);
+
+      try {
+        var deleted = JSON.parse(localStorage.getItem('ss_deleted_products') || '[]');
+        if (!deleted.includes(id)) deleted.push(id);
+        localStorage.setItem('ss_deleted_products', JSON.stringify(deleted));
+
+        var cp = JSON.parse(localStorage.getItem('ss_custom_products') || '[]');
+        var newCp = cp.filter(function(x) { return x.id !== id && String(x.id) !== String(id); });
+        localStorage.setItem('ss_custom_products', JSON.stringify(newCp));
+
+        var overrides = JSON.parse(localStorage.getItem('ss_product_overrides') || '{}');
+        if (overrides[id]) { delete overrides[id]; localStorage.setItem('ss_product_overrides', JSON.stringify(overrides)); }
+      } catch(e) {}
+
+      if (typeof window.renderAllProductsGrid === 'function') window.renderAllProductsGrid();
+      if (typeof window.renderInventoryTable === 'function') window.renderInventoryTable();
+      if (typeof window.renderCatalogGrid === 'function') window.renderCatalogGrid();
+      window.toast('🗑️', 'Producto Eliminado', '"' + name + '" fue retirado con éxito.');
+    };
+
     function checkAuth() {
       var ok = sessionStorage.getItem('stepstyle_admin') || localStorage.getItem('stepstyle_admin');
       if (ok === 'true') {
@@ -1971,122 +2298,78 @@
               </div>
             </div>
 
-            <!-- Photo & Preview with AI Studio -->
+            <!-- Photo & Preview Direct (Sin IA) -->
             <div class="space-y-5">
               <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                 <div class="flex items-center justify-between mb-4">
                   <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
-                    <i class="fas fa-wand-magic-sparkles text-purple-600"></i>
-                    <span>Estudio Fotográfico IA</span>
+                    <i class="fas fa-camera text-purple-600"></i>
+                    <span>Foto del Calzado</span>
                   </h3>
-                  <span class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[10px] font-black uppercase px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1">
-                    <i class="fas fa-robot text-xs"></i> Auto-Mejora IA
+                  <span class="bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
+                    <i class="fas fa-check-circle text-emerald-500"></i> Foto Directa Real
                   </span>
                 </div>
 
-                <!-- Selector de Ambiente de Estudio IA -->
-                <div class="bg-purple-50/50 p-3 rounded-xl border border-purple-100 mb-4 space-y-2">
-                  <div class="flex items-center justify-between text-xs font-bold text-gray-700">
-                    <span class="flex items-center gap-1.5"><i class="fas fa-palette text-purple-600"></i>Fondo de Estudio:</span>
-                    <span id="aiPresetName" class="text-[11px] text-purple-700 font-extrabold">Blanco Puro E-Commerce</span>
-                  </div>
-                  <div class="grid grid-cols-3 gap-2">
-                    <button type="button" onclick="setStudioPreset('white', this)" class="preset-btn active-preset px-2 py-1.5 rounded-lg border-2 border-purple-600 bg-purple-100/70 text-purple-800 font-extrabold text-[11px] flex items-center justify-center gap-1.5 transition-all shadow-sm">
-                      <span class="w-2.5 h-2.5 rounded-full bg-white border border-gray-300"></span> Blanco
-                    </button>
-                    <button type="button" onclick="setStudioPreset('pearl', this)" class="preset-btn px-2 py-1.5 rounded-lg border-2 border-gray-200 bg-white text-gray-600 font-bold text-[11px] flex items-center justify-center gap-1.5 transition-all hover:border-purple-300">
-                      <span class="w-2.5 h-2.5 rounded-full bg-gray-200"></span> Gris Perla
-                    </button>
-                    <button type="button" onclick="setStudioPreset('podium', this)" class="preset-btn px-2 py-1.5 rounded-lg border-2 border-gray-200 bg-white text-gray-600 font-bold text-[11px] flex items-center justify-center gap-1.5 transition-all hover:border-purple-300">
-                      <span class="w-2.5 h-2.5 rounded-full bg-amber-200 border border-amber-300"></span> Podio Luxury
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Área de Vista Previa y Carga con Capa de Procesamiento IA -->
+                <!-- Área de Vista Previa y Carga -->
                 <div id="photoPreviewArea" onclick="document.getElementById('photoFileInput').click()"
-                  class="bg-gradient-to-br from-gray-50 via-white to-purple-50 rounded-2xl h-64 flex flex-col items-center justify-center border-2 border-dashed border-purple-200 mb-3 overflow-hidden relative cursor-pointer hover:border-purple-400 transition-colors shadow-inner">
+                  class="bg-gray-50 hover:bg-gray-100 rounded-2xl h-64 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 hover:border-purple-500 mb-3 overflow-hidden relative cursor-pointer transition-all shadow-inner">
                   
-                  <img id="productPhotoPreview" src="" alt="" class="hidden w-full h-full object-contain p-2">
+                  <img id="productPhotoPreview" src="" alt="Foto Producto" class="hidden w-full h-full object-contain p-2">
                   
-                  <div id="photoPlaceholder" class="text-center pointer-events-none p-4">
-                    <div class="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center text-purple-600 mx-auto mb-3 border border-purple-100">
-                      <i class="fas fa-camera text-2xl"></i>
+                  <div id="photoPlaceholder" class="text-center p-4">
+                    <div class="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center text-purple-600 mx-auto mb-3 border border-gray-200">
+                      <i class="fas fa-image text-2xl"></i>
                     </div>
-                    <div class="font-extrabold text-gray-800 text-sm">Toma una foto o sube una imagen</div>
-                    <div class="text-xs text-purple-600 font-semibold mt-1 flex items-center justify-center gap-1">
-                      <i class="fas fa-wand-magic-sparkles text-amber-500"></i> La IA corregirá la luz y pondrá fondo de estudio
+                    <div class="font-extrabold text-gray-800 text-sm">Haz clic aquí para subir la foto</div>
+                    <div class="text-xs text-gray-500 font-medium mt-1">
+                      Sube una imagen desde tu celular o computador
                     </div>
-                  </div>
-
-                  <!-- Overlay de Procesamiento IA en Vivo -->
-                  <div id="aiProcessingOverlay" class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm hidden flex-col items-center justify-center p-5 text-center z-20">
-                    <div class="relative w-16 h-16 mb-3">
-                      <div class="w-16 h-16 rounded-full border-4 border-purple-500/30 border-t-purple-400 animate-spin"></div>
-                      <div class="absolute inset-0 flex items-center justify-center text-white text-xl">
-                        <i class="fas fa-wand-magic-sparkles text-amber-400 animate-pulse"></i>
-                      </div>
-                    </div>
-                    <div id="aiStatusStep" class="font-black text-white text-sm">✨ IA Calibrando Iluminación...</div>
-                    <div class="text-[11px] text-purple-200 mt-1">Estandarizando fondo de estudio y sombras</div>
-                    <div class="w-48 bg-white/20 h-2 rounded-full mt-3 overflow-hidden">
-                      <div id="aiProgressBar" class="bg-gradient-to-r from-pink-500 via-purple-400 to-indigo-400 h-full w-0 transition-all duration-300"></div>
-                    </div>
-                  </div>
-
-                  <!-- Badge de Estado IA -->
-                  <div id="aiStudioBadge" class="hidden absolute top-2 left-2 bg-black/70 backdrop-blur text-white text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/20 items-center gap-1">
-                    <i class="fas fa-check-circle text-green-400"></i> Estudio IA Optimizado
                   </div>
                 </div>
 
-                <!-- Botones de Control IA Antes / Después -->
-                <div id="aiControlsRow" class="hidden flex items-center justify-between gap-2 mb-3">
-                  <button type="button" onclick="toggleBeforeAfter()" id="btnBeforeAfter" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-colors">
-                    <i class="fas fa-code-compare text-purple-600"></i> <span id="btnBeforeAfterText">Ver Original</span>
+                <!-- Controles para la foto seleccionada -->
+                <div id="directPhotoControls" class="hidden flex items-center gap-2 mb-3">
+                  <button type="button" onclick="document.getElementById('photoFileInput').click()" class="flex-1 bg-purple-50 hover:bg-purple-100 text-purple-700 py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 border border-purple-200 transition-colors">
+                    <i class="fas fa-rotate"></i> Cambiar Foto
                   </button>
-                  <button type="button" onclick="reprocessCurrentPhoto()" class="flex-1 bg-purple-50 hover:bg-purple-100 text-purple-700 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 border border-purple-200 transition-colors">
-                    <i class="fas fa-arrows-rotate"></i> Re-optimizar IA
-                  </button>
-                  <button type="button" onclick="removePhoto()" class="bg-red-50 hover:bg-red-100 text-red-600 p-2.5 rounded-xl text-xs transition-colors" title="Eliminar foto">
-                    <i class="fas fa-trash"></i>
+                  <button type="button" onclick="removePhoto()" class="bg-red-50 hover:bg-red-100 text-red-600 py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 border border-red-200 transition-colors" title="Eliminar foto">
+                    <i class="fas fa-trash"></i> Quitar Foto
                   </button>
                 </div>
 
-                <!-- Botones de Captura -->
-                <div class="grid grid-cols-2 gap-3 mb-2">
-                  <button onclick="openCamera()" class="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-xl font-bold text-sm hover:shadow-md transition-all">
+                <!-- Botones de Captura Directos -->
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                  <button type="button" onclick="openCamera()" class="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white py-3 rounded-xl font-bold text-sm shadow-sm transition-all">
                     <i class="fas fa-camera"></i> Tomar con Cámara
                   </button>
-                  <label class="flex items-center justify-center gap-2 bg-gray-100 text-gray-700 py-3 rounded-xl font-bold text-sm hover:bg-gray-200 cursor-pointer transition-colors">
+                  <label class="flex items-center justify-center gap-2 bg-purple-100 hover:bg-purple-200 text-purple-800 py-3 rounded-xl font-bold text-sm cursor-pointer transition-colors border border-purple-200">
                     <i class="fas fa-upload"></i> Subir Imagen
                     <input id="photoFileInput" type="file" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
                   </label>
                 </div>
 
-                <!-- Video de la cámara en vivo con marco guía de estudio -->
-                <div id="cameraSection" class="hidden mb-4 bg-gray-900 p-3 rounded-2xl">
+                <!-- O pegar enlace directo -->
+                <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-200 flex items-center gap-2">
+                  <i class="fas fa-link text-gray-400 text-xs pl-1"></i>
+                  <input id="photoUrlInput" type="url" placeholder="O pega el enlace web de la foto..." class="bg-transparent text-xs w-full outline-none text-gray-700" onchange="applyPhotoUrl(this.value)">
+                  <button type="button" onclick="applyPhotoUrl(document.getElementById('photoUrlInput').value)" class="text-xs bg-gray-200 hover:bg-gray-300 font-bold px-3 py-1.5 rounded-lg text-gray-700 transition-colors">Usar</button>
+                </div>
+
+                <!-- Video de la cámara en vivo -->
+                <div id="cameraSection" class="hidden mt-3 bg-gray-900 p-3 rounded-2xl">
                   <div class="relative rounded-xl overflow-hidden mb-3">
                     <video id="cameraVideo" class="w-full bg-black" autoplay playsinline style="max-height:240px;object-fit:cover"></video>
-                    <!-- Guía de encuadre de estudio -->
-                    <div class="absolute inset-0 border-2 border-dashed border-white/40 pointer-events-none rounded-xl m-3 flex items-center justify-center">
-                      <span class="text-[11px] text-white/80 bg-black/60 px-2.5 py-1 rounded-full font-bold">Ubica el calzado aquí</span>
-                    </div>
                   </div>
                   <canvas id="photoCanvas" class="hidden"></canvas>
                   <div class="grid grid-cols-2 gap-3">
-                    <button onclick="capturePhoto()" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-xl font-black text-sm hover:shadow-lg flex items-center justify-center gap-2">
-                      <i class="fas fa-wand-magic-sparkles text-amber-300"></i> Capturar & Procesar IA
+                    <button type="button" onclick="capturePhoto()" class="bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-black text-sm shadow-md flex items-center justify-center gap-2">
+                      <i class="fas fa-camera"></i> Tomar Foto
                     </button>
-                    <button onclick="stopCamera()" class="bg-gray-800 text-gray-300 py-3 rounded-xl font-bold text-sm hover:bg-gray-700">
+                    <button type="button" onclick="stopCamera()" class="bg-gray-800 hover:bg-gray-700 text-gray-300 py-3 rounded-xl font-bold text-sm">
                       <i class="fas fa-times mr-1"></i> Cancelar
                     </button>
                   </div>
-                </div>
-
-                <div class="text-[11px] text-gray-400 mt-2 text-center flex items-center justify-center gap-1.5">
-                  <i class="fas fa-sparkles text-purple-500"></i>
-                  <span>Corrección de luz, balance de blancos y sombra de piso automática 100% integrados</span>
                 </div>
               </div>
 
@@ -4638,14 +4921,15 @@
   </div>
 
   <!-- Modal Editar Producto (Stock, Precio, Costo, Nombre, Categoría) -->
+  <!-- Edit Product Modal Completo: Modificar, Cambiar Foto y Borrar -->
   <div id="editProductModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[85] hidden items-center justify-center p-4">
     <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden border border-gray-100">
       <div class="bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-600 p-5 text-white flex items-center justify-between">
         <div>
           <h2 class="font-black text-lg flex items-center gap-2">
-            <i class="fas fa-edit"></i> Modificar Producto en Inventario
+            <i class="fas fa-edit"></i> Modificar Calzado
           </h2>
-          <p class="text-xs text-purple-200 mt-0.5">Ajusta cantidad de stock, precio de venta y costo de calzado</p>
+          <p class="text-xs text-purple-200 mt-0.5">Edita foto, nombre, marca, categoría, stock, costo y precio de venta</p>
         </div>
         <button onclick="closeModal('editProductModal')" class="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors">
           <i class="fas fa-times text-lg"></i>
@@ -4655,14 +4939,29 @@
       <div class="p-6 space-y-4 max-h-[85vh] overflow-y-auto">
         <input type="hidden" id="editProdId">
 
-        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-100">
-          <div id="editProdImgPreview" class="w-14 h-14 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center overflow-hidden flex-shrink-0">
-            <i class="fas fa-shoe-prints text-purple-600 text-xl"></i>
+        <!-- Foto del Producto y Cambio Directo -->
+        <div class="flex items-center gap-4 p-3.5 bg-gray-50 rounded-2xl border border-gray-100">
+          <div id="editProdImgPreview" class="w-20 h-20 rounded-2xl bg-white border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm relative">
+            <i class="fas fa-shoe-prints text-purple-600 text-2xl"></i>
           </div>
           <div class="flex-1 min-w-0">
-            <div id="editProdCurrentName" class="font-extrabold text-sm text-gray-900 truncate">Zapato Carfe</div>
-            <div id="editProdCurrentBrand" class="text-xs text-purple-600 font-bold uppercase">Carfe® Oficial</div>
+            <div id="editProdCurrentName" class="font-black text-sm text-gray-900 truncate">Zapato Carfe</div>
+            <div id="editProdCurrentBrand" class="text-xs text-purple-600 font-bold uppercase mb-2">Carfe® Oficial</div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <label class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-bold py-1.5 px-3 rounded-xl cursor-pointer flex items-center gap-1.5 shadow-sm transition-all">
+                <i class="fas fa-camera"></i> Cambiar Foto
+                <input type="file" id="editPhotoFileInput" accept="image/*" class="hidden" onchange="handleEditPhotoUpload(event)">
+              </label>
+              <button type="button" onclick="clearEditPhoto()" class="text-gray-500 hover:text-red-600 text-xs font-semibold py-1.5 px-2.5 rounded-xl hover:bg-red-50 border border-gray-200 transition-colors">
+                Quitar
+              </button>
+            </div>
           </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-gray-500 mb-1">O escribe/pega el enlace de la imagen:</label>
+          <input id="editProdImgUrl" type="url" placeholder="https://ejemplo.com/zapato.jpg" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none focus:border-purple-500 font-mono" onchange="onEditPhotoUrlChange(this.value)">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -4671,19 +4970,26 @@
             <input id="editProdName" type="text" class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-purple-500">
           </div>
           <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1">Marca *</label>
+            <input id="editProdBrand" type="text" placeholder="Carfe®" class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-purple-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
             <label class="block text-xs font-bold text-gray-600 mb-1">Categoría *</label>
             <select id="editProdCat" class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm font-bold text-purple-700 outline-none focus:border-purple-500">
               <option value="hombre">Hombre</option>
               <option value="mujer">Mujer</option>
             </select>
           </div>
-        </div>
-
-        <div class="grid grid-cols-3 gap-3">
           <div>
             <label class="block text-xs font-bold text-gray-600 mb-1">Stock (Pares) *</label>
             <input id="editProdStock" type="number" min="0" class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm font-black text-gray-900 outline-none focus:border-purple-500 text-center">
           </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-bold text-purple-700 mb-1">Costo Prod. (COP)</label>
             <input id="editProdCost" type="number" step="100" min="0" oninput="updateEditFinancialPreview()" class="w-full border border-purple-200 bg-purple-50/30 rounded-xl px-3 py-2.5 text-sm font-bold text-gray-800 outline-none focus:border-purple-500 text-right">
@@ -4692,6 +4998,11 @@
             <label class="block text-xs font-bold text-green-700 mb-1">Precio Venta (COP)</label>
             <input id="editProdPrice" type="number" step="100" min="0" oninput="updateEditFinancialPreview()" class="w-full border border-green-200 bg-green-50/30 rounded-xl px-3 py-2.5 text-sm font-black text-gray-900 outline-none focus:border-green-500 text-right">
           </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Descripción del Calzado</label>
+          <textarea id="editProdDesc" rows="2" placeholder="Materiales, detalles del calzado..." class="w-full border border-gray-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:border-purple-500"></textarea>
         </div>
 
         <!-- Tarjeta de Ganancia calculada en vivo para edición -->
@@ -4703,7 +5014,7 @@
           <div class="grid grid-cols-2 gap-2 text-center">
             <div class="bg-white rounded-xl p-2 border border-emerald-100">
               <div class="text-[10px] font-bold text-gray-500">Ganancia por Par</div>
-              <div id="editCalcProfit" class="text-sm font-black text-emerald-700 mt-0.5">$0</div>
+              <div id="editCalcProfit" class="text-sm font-black text-emerald-700 mt-0.5">/bin/zsh</div>
             </div>
             <div class="bg-white rounded-xl p-2 border border-emerald-100">
               <div class="text-[10px] font-bold text-gray-500">Margen de Ganancia</div>
@@ -4713,7 +5024,7 @@
         </div>
 
         <div class="flex items-center justify-between pt-2">
-          <button type="button" onclick="deleteProductFromModal()" class="text-red-600 hover:text-red-800 hover:bg-red-50 px-3 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 border border-red-200">
+          <button type="button" onclick="deleteProductFromModal()" class="text-red-600 hover:text-red-800 hover:bg-red-50 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 border border-red-200">
             <i class="fas fa-trash"></i> Eliminar Zapato
           </button>
           <div class="flex items-center gap-2">
@@ -4724,6 +5035,63 @@
               <i class="fas fa-check"></i> Guardar Cambios
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Rápido: Cambiar Foto de Producto -->
+  <div id="changePhotoModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-gray-100">
+      <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-5 text-white flex items-center justify-between">
+        <div>
+          <h2 class="font-black text-lg flex items-center gap-2">
+            <i class="fas fa-camera"></i> Cambiar Foto de Calzado
+          </h2>
+          <p id="changePhotoProdTitle" class="text-xs text-blue-100 mt-0.5 truncate max-w-xs">Selecciona la nueva foto para este zapato</p>
+        </div>
+        <button onclick="closeModal('changePhotoModal')" class="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors">
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <input type="hidden" id="changePhotoProdId">
+
+        <!-- Previsualización de la foto -->
+        <div class="w-full h-56 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden relative">
+          <img id="changePhotoPreviewImg" src="" alt="Previsualización" class="w-full h-full object-contain p-2">
+          <div id="changePhotoEmptyPlaceholder" class="hidden text-center text-gray-400 p-4">
+            <i class="fas fa-image text-3xl mb-2 text-gray-300"></i>
+            <div class="text-xs font-bold">Selecciona una imagen abajo</div>
+          </div>
+        </div>
+
+        <!-- Botones para elegir archivo -->
+        <div class="grid grid-cols-2 gap-3">
+          <label class="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white py-3 rounded-xl font-bold text-xs cursor-pointer shadow-sm transition-all">
+            <i class="fas fa-folder-open"></i> Subir Imagen
+            <input type="file" id="changePhotoFileInput" accept="image/*" class="hidden" onchange="previewNewProductPhoto(event)">
+          </label>
+          <label class="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-bold text-xs cursor-pointer transition-colors border border-gray-200">
+            <i class="fas fa-camera"></i> Tomar con Cámara
+            <input type="file" id="changePhotoCameraInput" accept="image/*" capture="environment" class="hidden" onchange="previewNewProductPhoto(event)">
+          </label>
+        </div>
+
+        <!-- O ingresar URL de imagen -->
+        <div>
+          <label class="block text-[11px] font-bold text-gray-500 mb-1">O escribe/pega el enlace de la imagen:</label>
+          <input type="url" id="changePhotoUrlInput" placeholder="https://ejemplo.com/foto-zapato.jpg" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none focus:border-purple-500 font-mono" onchange="onPhotoUrlChange(this.value)">
+        </div>
+
+        <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+          <button type="button" onclick="closeModal('changePhotoModal')" class="border border-gray-200 hover:bg-gray-100 text-gray-600 px-4 py-2.5 rounded-xl text-xs font-bold transition-colors">
+            Cancelar
+          </button>
+          <button type="button" onclick="saveNewProductPhoto()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5">
+            <i class="fas fa-save"></i> Guardar Nueva Foto
+          </button>
         </div>
       </div>
     </div>
