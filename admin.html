@@ -210,6 +210,102 @@
     </div>
   </div>
 
+  <!-- SCRIPT DE ACCESO AUTÓNOMO E INMEDIATO (SIN ESPERAR ARCHIVOS EXTERNOS) -->
+  <script>
+    function doLogin() {
+      var uInp = document.getElementById('loginUser');
+      var pInp = document.getElementById('loginPass');
+      var err = document.getElementById('loginError');
+      var errTxt = document.getElementById('loginErrorMsg') || err;
+      
+      var u = (uInp ? uInp.value : '').trim().toLowerCase();
+      var p = (pInp ? pInp.value : '').trim();
+      
+      var validUsers = ['admin', 'carfe', 'carlos'];
+      try {
+        var custom = JSON.parse(localStorage.getItem('carfe_admin_creds') || 'null');
+        if (custom && custom.user) validUsers.push(custom.user.toLowerCase());
+      } catch(e) {}
+      
+      var validPasswords = ['2026', 'carfe2026', 'admin', 'admin2026'];
+      try {
+        var custom = JSON.parse(localStorage.getItem('carfe_admin_creds') || 'null');
+        if (custom && custom.pass) validPasswords.push(custom.pass);
+      } catch(e) {}
+      
+      var isMatch = (validUsers.indexOf(u) !== -1 || u === '') && (validPasswords.indexOf(p) !== -1);
+      if (isMatch) {
+        sessionStorage.setItem('stepstyle_admin', 'true');
+        localStorage.setItem('stepstyle_admin', 'true');
+        if (err) {
+          err.style.display = 'none';
+          err.classList.add('hidden');
+        }
+        showAdminPanel();
+      } else {
+        if (err) {
+          err.style.display = 'flex';
+          err.classList.remove('hidden');
+          if (errTxt) errTxt.textContent = '❌ Contraseña o usuario incorrecto. Usuario: admin | Contraseña: 2026';
+        }
+        if (pInp) pInp.value = '';
+      }
+    }
+
+    function quickOwnerLogin() {
+      var uInp = document.getElementById('loginUser');
+      var pInp = document.getElementById('loginPass');
+      if (uInp) uInp.value = 'admin';
+      if (pInp) pInp.value = '2026';
+      doLogin();
+    }
+
+    function showAdminPanel() {
+      var login = document.getElementById('loginScreen');
+      var panel = document.getElementById('adminPanel');
+      if (login) {
+        login.style.setProperty('display', 'none', 'important');
+        login.classList.add('hidden');
+      }
+      if (panel) {
+        panel.style.setProperty('display', 'flex', 'important');
+        panel.classList.remove('hidden');
+      }
+      try {
+        if (typeof showView === 'function') showView('dashboard');
+        if (typeof updateHeaderWAIndicator === 'function') updateHeaderWAIndicator();
+        if (typeof checkPendingOrders === 'function') checkPendingOrders();
+      } catch(e) {
+        console.warn('Dashboard init deferred:', e);
+      }
+    }
+
+    function checkAuth() {
+      var ok = sessionStorage.getItem('stepstyle_admin') || localStorage.getItem('stepstyle_admin');
+      if (ok === 'true') {
+        showAdminPanel();
+      } else {
+        var login = document.getElementById('loginScreen');
+        var panel = document.getElementById('adminPanel');
+        if (login) {
+          login.style.setProperty('display', 'flex', 'important');
+          login.classList.remove('hidden');
+        }
+        if (panel) {
+          panel.style.setProperty('display', 'none', 'important');
+          panel.classList.add('hidden');
+        }
+      }
+    }
+
+    // Comprobación instantánea
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', checkAuth);
+    } else {
+      checkAuth();
+    }
+  </script>
+
   <!-- ===== ADMIN PANEL ===== -->
   <div id="adminPanel" style="display:none;" class="min-h-screen">
 
@@ -5193,8 +5289,42 @@
     </div>
   </div>
 
-  <script src="js/base44-client.js"></script>
-  <script src="js/admin.js"></script>
+  <!-- CARGA RESILIENTE DE SCRIPTS (RAÍZ O SUBDIRECTORIO JS) -->
+  <script>
+    (function() {
+      // 1. Cargar base44-client
+      var b = document.createElement('script');
+      b.src = 'js/base44-client.js';
+      b.onerror = function() {
+        var b2 = document.createElement('script');
+        b2.src = 'base44-client.js';
+        document.body.appendChild(b2);
+      };
+      document.body.appendChild(b);
+
+      // 2. Cargar admin.js (soporta subida en la raíz o en js/ con anti-caché)
+      var s = document.createElement('script');
+      s.src = 'admin.js?v=' + Date.now();
+      s.onload = function() {
+        console.log('[CARFE] admin.js cargado exitosamente desde la raíz.');
+        if (sessionStorage.getItem('stepstyle_admin') === 'true' || localStorage.getItem('stepstyle_admin') === 'true') {
+          showAdminPanel();
+        }
+      };
+      s.onerror = function() {
+        var s2 = document.createElement('script');
+        s2.src = 'js/admin.js?v=' + Date.now();
+        s2.onload = function() {
+          console.log('[CARFE] admin.js cargado exitosamente desde js/.');
+          if (sessionStorage.getItem('stepstyle_admin') === 'true' || localStorage.getItem('stepstyle_admin') === 'true') {
+            showAdminPanel();
+          }
+        };
+        document.body.appendChild(s2);
+      };
+      document.body.appendChild(s);
+    })();
+  </script>
   <!-- REGISTRO DEL SERVICE WORKER (PWA) Y CONTROL OFFLINE -->
   <script>
     if ('serviceWorker' in navigator) {
