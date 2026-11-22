@@ -1374,7 +1374,7 @@ function initChannelChart() {
 }
 
 /* ───────── VENTAS ───────── */
-let filteredSales = [...salesData];
+filteredSales = [...salesData];
 
 function renderSalesTable() {
   const tbody = document.getElementById('salesTableBody');
@@ -3130,7 +3130,7 @@ function skipCrmBulkClient() {
 
 
 /* ───────── FACTURACIÓN RÁPIDA & FACTURAS OFICIALES ───────── */
-let filteredInvoices = [...invoicesData];
+filteredInvoices = [...invoicesData];
 let quickBillMode = 'contado';
 let activeInvoiceForWA = null;
 
@@ -7738,3 +7738,32 @@ async function syncAllCarfeToBase44() {
     toast('⚠️', 'Error al Sincronizar', e.message);
   }
 }
+
+/* ───────── EXPOSICIÓN GLOBAL GARANTIZADA DE FUNCIONES DE ADMIN ───────── */
+window.openAddStockModal = openAddStockModal;
+window.addStock = addStock;
+window.filterInventory = filterInventory;
+window.exportInventory = exportInventory;
+window.openQuickBillingModal = openQuickBillingModal;
+window.executeQuickBilling = executeQuickBilling;
+window.setQuickBillPayMode = setQuickBillPayMode;
+window.onQuickBillProductChange = onQuickBillProductChange;
+window.saveProduct = saveProduct;
+window.updateFinancialPreview = updateFinancialPreview;
+window.updatePreview = updatePreview;
+window.toggleSizeNew = toggleSizeNew;
+window.selectSizesPreset = selectSizesPreset;
+window.openCamera = openCamera;
+window.capturePhoto = capturePhoto;
+window.stopCamera = stopCamera;
+window.handlePhotoUpload = handlePhotoUpload;
+window.applyPhotoToPreview = applyPhotoToPreview;
+window.autoEnhanceWithAIStudio = autoEnhanceWithAIStudio;
+window.renderProductsTable = renderProductsTable;
+window.renderInventoryTable = renderInventoryTable;
+window.renderInvoicesTable = renderInvoicesTable;
+window.renderSalesTable = renderSalesTable;
+window.initInventory = initInventory;
+window.buildInventory = buildInventory;
+window.updateInvKPIs = updateInvKPIs;
+

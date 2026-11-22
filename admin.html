@@ -442,6 +442,184 @@
       }
     };
 
+    /* ───────── CÁLCULO FINANCIERO Y GESTOR DE PRODUCTOS EN VIVO ───────── */
+    window.updateFinancialPreview = function() {
+      var cost = parseFloat(document.getElementById('newProdCost') ? document.getElementById('newProdCost').value : 0) || 0;
+      var price = parseFloat(document.getElementById('newProdPrice') ? document.getElementById('newProdPrice').value : 0) || 0;
+      var profit = price - cost;
+      var margin = price > 0 ? ((profit / price) * 100).toFixed(1) : '0.0';
+      var markup = cost > 0 ? ((profit / cost) * 100).toFixed(1) : '0.0';
+
+      var profitEl = document.getElementById('calcProfitUnit');
+      var marginEl = document.getElementById('calcMarginPct');
+      var markupEl = document.getElementById('calcMarkupPct');
+
+      if (profitEl) {
+        profitEl.textContent = (profit >= 0 ? '+' : '') + '$' + Math.round(profit).toLocaleString('es-CO');
+        profitEl.className = profit >= 0 ? 'text-sm md:text-base font-black text-emerald-700 mt-0.5' : 'text-sm md:text-base font-black text-red-600 mt-0.5';
+      }
+      if (marginEl) {
+        marginEl.textContent = margin + '%';
+        marginEl.className = margin >= 20 ? 'text-sm md:text-base font-black text-emerald-700 mt-0.5' : 'text-sm md:text-base font-black text-amber-600 mt-0.5';
+      }
+      if (markupEl) {
+        markupEl.textContent = markup + '%';
+      }
+    };
+
+    window.updatePreview = function() {
+      var name = (document.getElementById('newProdName') ? document.getElementById('newProdName').value : '').trim() || 'Nombre del Calzado';
+      var brand = (document.getElementById('newProdBrand') ? document.getElementById('newProdBrand').value : '').trim() || 'Carfe®';
+      var cat = (document.getElementById('newProdCat') ? document.getElementById('newProdCat').value : 'hombre');
+      var price = parseFloat(document.getElementById('newProdPrice') ? document.getElementById('newProdPrice').value : 0) || 0;
+      var cost = parseFloat(document.getElementById('newProdCost') ? document.getElementById('newProdCost').value : 0) || 0;
+
+      var prevName = document.getElementById('prevName');
+      var prevBrand = document.getElementById('prevBrand');
+      var prevPrice = document.getElementById('prevPrice');
+      var prevCostBadge = document.getElementById('prevCostBadge');
+
+      if (prevName) prevName.textContent = name;
+      if (prevBrand) prevBrand.textContent = brand + ' • ' + (cat === 'hombre' ? 'Hombre' : 'Mujer');
+      if (prevPrice) prevPrice.textContent = '$' + Math.round(price).toLocaleString('es-CO');
+      if (prevCostBadge) {
+        var profit = price - cost;
+        prevCostBadge.textContent = 'Ganancia: $' + Math.round(profit).toLocaleString('es-CO');
+      }
+    };
+
+    window.toggleSizeNew = function(btn) {
+      if (!btn) return;
+      btn.classList.toggle('sel');
+    };
+
+    window.selectSizesPreset = function(preset) {
+      var buttons = document.querySelectorAll('#sizeSelector .size-new-btn');
+      if (preset === 'limpiar') {
+        buttons.forEach(function(b) { b.classList.remove('sel'); });
+      } else if (preset === 'todas') {
+        buttons.forEach(function(b) { b.classList.add('sel'); });
+      } else if (preset === 'hombre') {
+        buttons.forEach(function(b) {
+          var sz = parseInt(b.dataset.size || b.textContent);
+          if (sz >= 38 && sz <= 44) b.classList.add('sel');
+          else b.classList.remove('sel');
+        });
+      } else if (preset === 'mujer') {
+        buttons.forEach(function(b) {
+          var sz = parseInt(b.dataset.size || b.textContent);
+          if (sz >= 35 && sz <= 40) b.classList.add('sel');
+          else b.classList.remove('sel');
+        });
+      }
+      if (typeof window.updatePreview === 'function') window.updatePreview();
+    };
+
+    /* ───────── OPERACIONES GARANTIZADAS INLINE (FALLBACK RESILIENTE) ───────── */
+    window.addStock = function() {
+      if (typeof window._adminAddStock === 'function') return window._adminAddStock();
+      var idVal = parseInt(document.getElementById('stockProduct') ? document.getElementById('stockProduct').value : (document.getElementById('addStockProduct') ? document.getElementById('addStockProduct').value : 0));
+      var qtyInp = document.getElementById('stockQty') || document.getElementById('addStockQty');
+      var qty = parseInt(qtyInp ? qtyInp.value : 0) || 10;
+      if (!idVal || isNaN(idVal)) {
+        return window.toast('⚠️', 'Selecciona Producto', 'Elige el calzado al que deseas agregar stock');
+      }
+      var list = (typeof PRODUCTS !== 'undefined') ? PRODUCTS : [];
+      var p = list.find(function(x) { return x.id === idVal || String(x.id) === String(idVal); });
+      if (p) {
+        p.stock = (parseInt(p.stock) || 0) + qty;
+        try {
+          localStorage.setItem('carfe_products_stock_' + p.id, String(p.stock));
+          var inv = JSON.parse(localStorage.getItem('carfe_inventory_data') || '[]');
+          var ip = inv.find(function(x) { return x.id === p.id; });
+          if (ip) { ip.stock = p.stock; }
+          localStorage.setItem('carfe_inventory_data', JSON.stringify(inv));
+        } catch(e) {}
+        if (typeof updateInvKPIs === 'function') updateInvKPIs();
+        if (typeof renderInventoryTable === 'function') renderInventoryTable();
+        window.closeModal('addStockModal');
+        window.toast('✅', 'Stock Agregado', '+' + qty + ' pares agregados a ' + p.name + ' (Total disponible: ' + p.stock + ')');
+      }
+    };
+
+    window.saveProduct = function() {
+      if (typeof window._adminSaveProduct === 'function') return window._adminSaveProduct();
+      var nameInp = document.getElementById('newProdName');
+      var name = (nameInp ? nameInp.value : '').trim();
+      if (!name) {
+        return window.toast('⚠️', 'Nombre Requerido', 'Ingresa el nombre del calzado.');
+      }
+      var brand = (document.getElementById('newProdBrand') ? document.getElementById('newProdBrand').value : '').trim() || 'Carfe®';
+      var price = parseFloat(document.getElementById('newProdPrice') ? document.getElementById('newProdPrice').value : 0) || 220000;
+      var cost = parseFloat(document.getElementById('newProdCost') ? document.getElementById('newProdCost').value : 0) || Math.round(price * 0.48);
+      var cat = document.getElementById('newProdCat') ? document.getElementById('newProdCat').value : 'hombre';
+      var stock = parseInt(document.getElementById('newProdStock') ? document.getElementById('newProdStock').value : 0) || 12;
+      var desc = (document.getElementById('newProdDesc') ? document.getElementById('newProdDesc').value : '').trim() || 'Calzado exclusivo Carfe® en cuero 100% legítimo.';
+
+      var newProd = {
+        id: Date.now(),
+        name: name,
+        brand: brand,
+        cat: cat,
+        cost: cost,
+        price: price,
+        oldPrice: Math.round(price * 1.25),
+        stock: stock,
+        badge: 'new',
+        colors: ['Negro', 'Café'],
+        sizes: cat === 'mujer' ? [35, 36, 37, 38, 39, 40] : [38, 39, 40, 41, 42, 43, 44],
+        img: (typeof productPhotoData !== 'undefined' && productPhotoData) ? productPhotoData : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=80',
+        desc: desc
+      };
+
+      try {
+        var custom = JSON.parse(localStorage.getItem('ss_custom_products') || '[]');
+        custom.unshift(newProd);
+        localStorage.setItem('ss_custom_products', JSON.stringify(custom));
+        if (typeof PRODUCTS !== 'undefined') PRODUCTS.unshift(newProd);
+        if (typeof inventoryData !== 'undefined') inventoryData.unshift(newProd);
+      } catch(e) {}
+
+      if (typeof updateInvKPIs === 'function') updateInvKPIs();
+      if (typeof renderProductsTable === 'function') renderProductsTable();
+      if (typeof renderInventoryTable === 'function') renderInventoryTable();
+      window.toast('🎉', '¡Producto Guardado!', 'El calzado "' + name + '" se agregó con éxito al catálogo con ' + stock + ' pares.');
+    };
+
+    window.openCamera = function() {
+      var camSection = document.getElementById('cameraSection');
+      if (camSection) camSection.classList.remove('hidden');
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+          .then(function(stream) {
+            window._cameraStream = stream;
+            var video = document.getElementById('cameraVideo');
+            if (video) { video.srcObject = stream; video.play(); }
+          }).catch(function() {
+            window.toast('⚠️', 'Cámara no accesible', 'Puedes subir una foto directamente con el botón "Subir Imagen".');
+          });
+      }
+    };
+
+    window.handlePhotoUpload = function(event) {
+      var file = event.target.files && event.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var dataUrl = e.target.result;
+        window.productPhotoData = dataUrl;
+        var imgPreview = document.getElementById('productPhotoPreview');
+        var placeholder = document.getElementById('photoPlaceholder');
+        if (imgPreview) {
+          imgPreview.src = dataUrl;
+          imgPreview.classList.remove('hidden');
+        }
+        if (placeholder) placeholder.classList.add('hidden');
+        window.toast('✨', 'Foto Cargada', 'Imagen cargada en el estudio con éxito.');
+      };
+      reader.readAsDataURL(file);
+    };
+
     function checkAuth() {
       var ok = sessionStorage.getItem('stepstyle_admin') || localStorage.getItem('stepstyle_admin');
       if (ok === 'true') {
