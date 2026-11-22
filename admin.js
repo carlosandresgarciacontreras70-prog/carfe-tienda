@@ -4222,6 +4222,7 @@ function saveEditProduct() {
   if (typeof renderCatalogGrid === 'function') renderCatalogGrid();
 
   closeModal('editProductModal');
+  broadcastAdminUpdate('product_updated', { id, name, price, stock, photo });
   toast('✅', 'Producto Actualizado', `${name}: Stock ${stock} pares, Venta ${formatCOP(price)}`);
 }
 
@@ -4336,6 +4337,7 @@ function saveNewProductPhoto() {
   if (typeof renderInventoryTable === 'function') renderInventoryTable();
   if (typeof renderCatalogGrid === 'function') renderCatalogGrid();
 
+  broadcastAdminUpdate('photo_updated', { id, newPhoto });
   toast('📸', 'Foto Guardada', `La foto de "${p ? p.name : 'calzado'}" se actualizó con éxito.`);
 }
 
@@ -4471,6 +4473,7 @@ function executeDeleteProduct(id, name) {
   if (typeof renderCatalogGrid === 'function') renderCatalogGrid();
   safeText('catalogCount', PRODUCTS.length + ' Calzados');
 
+  broadcastAdminUpdate('product_deleted', { id, name });
   toast('🗑️', 'Producto Eliminado', `"${name}" fue retirado del inventario y catálogo`);
 }
 
@@ -8025,3 +8028,38 @@ window.renderAllProductsGrid = renderAllProductsGrid;
 window.applyDirectPhoto = applyDirectPhoto;
 window.applyPhotoUrl = applyPhotoUrl;
 window.removePhoto = removePhoto;
+
+/* ───────── SINCRONIZACIÓN INMEDIATA CON LA TIENDA PÚBLICA (INDEX) ───────── */
+function broadcastAdminUpdate(type, data) {
+  const ts = Date.now();
+  try {
+    localStorage.setItem('carfe_last_admin_update', String(ts));
+    localStorage.setItem('carfe_update_payload', JSON.stringify({ type, data, ts }));
+    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new CustomEvent('carfe_admin_sync', { detail: { type, data, ts } }));
+  } catch(e) {}
+}
+
+function publishHeroVideoUrl() {
+  const inp = document.getElementById('inp_heroVideoUrl');
+  let url = (inp ? inp.value : '').trim();
+  if (!url) return toast('⚠️', 'Ingresa una URL', 'Escribe o pega el enlace del video MP4.');
+
+  localStorage.setItem('carfe_hero_video_url', url);
+  localStorage.setItem('carfe_has_custom_video', 'true');
+  localStorage.setItem('carfe_video_updated_at', String(Date.now()));
+  broadcastAdminUpdate('video_updated', { url });
+
+  const cfg = (typeof getStoreThemeConfig === 'function') ? getStoreThemeConfig() : {};
+  cfg.heroVideoUrl = url;
+  cfg.heroBackgroundType = 'video';
+  try {
+    localStorage.setItem('carfe_theme_config', JSON.stringify(cfg));
+  } catch(e) {}
+
+  updateAdminVideoPreviewFromUrl(url);
+  toast('🎬', '¡Video Publicado en Portada!', 'El video se actualizó y saldrá de inmediato en la página principal.');
+}
+
+window.broadcastAdminUpdate = broadcastAdminUpdate;
+window.publishHeroVideoUrl = publishHeroVideoUrl;

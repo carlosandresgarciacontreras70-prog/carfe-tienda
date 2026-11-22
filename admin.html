@@ -947,6 +947,35 @@
       window.toast('🗑️', 'Producto Eliminado', '"' + name + '" fue retirado con éxito.');
     };
 
+
+    window.broadcastAdminUpdate = function(type, data) {
+      var ts = Date.now();
+      try {
+        localStorage.setItem('carfe_last_admin_update', String(ts));
+        localStorage.setItem('carfe_update_payload', JSON.stringify({ type: type, data: data, ts: ts }));
+        window.dispatchEvent(new Event('storage'));
+      } catch(e) {}
+    };
+
+    window.publishHeroVideoUrl = function() {
+      var inp = document.getElementById('inp_heroVideoUrl');
+      var url = (inp ? inp.value : '').trim();
+      if (!url) return window.toast('⚠️', 'Ingresa una URL', 'Escribe o pega el enlace del video MP4.');
+      localStorage.setItem('carfe_hero_video_url', url);
+      localStorage.setItem('carfe_has_custom_video', 'true');
+      localStorage.setItem('carfe_video_updated_at', String(Date.now()));
+      window.broadcastAdminUpdate('video_updated', { url: url });
+      try {
+        var cfg = JSON.parse(localStorage.getItem('carfe_theme_config') || '{}');
+        cfg.heroVideoUrl = url;
+        cfg.heroBackgroundType = 'video';
+        localStorage.setItem('carfe_theme_config', JSON.stringify(cfg));
+      } catch(e) {}
+      var prev = document.getElementById('adminHeroVideoPreview');
+      if (prev) { prev.src = url; prev.load(); prev.play().catch(function(){}); }
+      window.toast('🎬', '¡Video Publicado!', 'El video se actualizó y se verá de inmediato en la página principal.');
+    };
+
     function checkAuth() {
       var ok = sessionStorage.getItem('stepstyle_admin') || localStorage.getItem('stepstyle_admin');
       if (ok === 'true') {
@@ -3962,10 +3991,13 @@
                     <i class="fas fa-check-circle"></i> <span id="adminVideoFileName">video.mp4</span>
                   </div>
 
-                  <div class="flex items-center gap-2 mb-2">
-                    <input type="text" id="inp_heroVideoUrl" value="assets/hero-video.mp4" oninput="updateAdminVideoPreviewFromUrl(this.value)" placeholder="assets/hero-video.mp4" class="flex-1 border border-gray-200 bg-white rounded-xl px-3 py-2 text-xs outline-none focus:border-purple-400 font-mono">
-                    <button type="button" onclick="resetDefaultHeroVideo()" class="bg-purple-100 hover:bg-purple-200 text-purple-800 font-bold text-xs px-3 py-2 rounded-xl transition-all whitespace-nowrap">
-                       Video Oficial
+                  <div class="flex items-center gap-2 mb-2 flex-wrap sm:flex-nowrap">
+                    <input type="text" id="inp_heroVideoUrl" value="assets/hero-video.mp4" oninput="updateAdminVideoPreviewFromUrl(this.value)" placeholder="assets/hero-video.mp4 o https://..." class="flex-1 border border-gray-200 bg-white rounded-xl px-3 py-2.5 text-xs outline-none focus:border-purple-400 font-mono">
+                    <button type="button" onclick="publishHeroVideoUrl()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-1.5 whitespace-nowrap">
+                      <i class="fas fa-check-circle"></i> Publicar en Portada
+                    </button>
+                    <button type="button" onclick="resetDefaultHeroVideo()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs px-3 py-2.5 rounded-xl transition-all whitespace-nowrap border border-gray-200">
+                      Oficial
                     </button>
                   </div>
 
