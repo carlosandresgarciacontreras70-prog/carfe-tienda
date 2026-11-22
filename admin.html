@@ -280,6 +280,80 @@
       }
     }
 
+    // Gestor de navegación garantizado e inmediato para todas las aplicaciones
+    window.showView = function(viewName) {
+      var views = document.querySelectorAll('.view');
+      for (var i = 0; i < views.length; i++) {
+        views[i].style.setProperty('display', 'none', 'important');
+        views[i].classList.remove('active');
+        views[i].classList.add('hidden');
+      }
+      var navItems = document.querySelectorAll('.nav-item');
+      for (var j = 0; j < navItems.length; j++) {
+        navItems[j].classList.remove('active');
+      }
+
+      var target = document.getElementById('view-' + viewName);
+      if (target) {
+        target.style.setProperty('display', 'block', 'important');
+        target.classList.add('active');
+        target.classList.remove('hidden');
+      }
+      var nextNav = document.getElementById('nav-' + viewName);
+      if (nextNav) nextNav.classList.add('active');
+
+      // Sincronizar título del header
+      var titles = {
+        dashboard: 'Panel General',
+        ventas: 'Gestión de Ventas',
+        cartera: 'Cartera 2 Cuotas & Cobranza',
+        crm: 'CRM & Trazabilidad de Clientes',
+        facturas: 'Facturación Electrónica',
+        contabilidad: 'Contabilidad & Gastos',
+        inventario: 'Control de Inventario',
+        productos: 'Gestor de Productos',
+        catalogo: 'Catálogo & WhatsApp',
+        tiktok: 'TikTok Studio & Videos',
+        marketing: 'Marketing Digital',
+        metaads: 'Meta Ads Manager',
+        tiktokshop: 'TikTok Shop',
+        pagos: 'Métodos de Pago',
+        diseno: 'Personalización de Marca',
+        ajustes: 'Ajustes del Sistema'
+      };
+      var pt = document.getElementById('pageTitle');
+      if (pt && titles[viewName]) pt.textContent = titles[viewName];
+
+      // Ejecutar inicializador de la vista si admin.js ya está disponible
+      try {
+        if (typeof window._adminJsShowView === 'function') {
+          window._adminJsShowView(viewName);
+        } else if (viewName === 'dashboard' && typeof initDashboard === 'function') {
+          initDashboard();
+        } else if (viewName === 'ventas' && typeof renderSalesTable === 'function') {
+          renderSalesTable();
+        } else if (viewName === 'cartera') {
+          if (typeof initCartera === 'function') initCartera();
+          else if (typeof renderCarteraTable === 'function') renderCarteraTable();
+        } else if (viewName === 'crm') {
+          if (typeof initCrmView === 'function') initCrmView();
+          else if (typeof renderCrmTable === 'function') renderCrmTable();
+        } else if (viewName === 'facturas' && typeof renderInvoicesTable === 'function') {
+          renderInvoicesTable();
+        } else if (viewName === 'contabilidad' && typeof initContabilidad === 'function') {
+          initContabilidad();
+        } else if (viewName === 'inventario' && typeof initInventory === 'function') {
+          initInventory();
+        } else if (viewName === 'productos' && typeof initProductsView === 'function') {
+          initProductsView();
+        } else if (viewName === 'catalogo' && typeof initCatalog === 'function') {
+          initCatalog();
+        }
+      } catch(e) {
+        console.warn('Init view ' + viewName + ':', e);
+      }
+    };
+
     function checkAuth() {
       var ok = sessionStorage.getItem('stepstyle_admin') || localStorage.getItem('stepstyle_admin');
       if (ok === 'true') {
@@ -5292,6 +5366,32 @@
   <!-- CARGA RESILIENTE DE SCRIPTS (RAÍZ O SUBDIRECTORIO JS) -->
   <script>
     (function() {
+      function onScriptReady() {
+        if (typeof window.showView === 'function') {
+          window._adminJsShowView = window.showView;
+        }
+        if (typeof initAdminApp === 'function') {
+          initAdminApp();
+        } else if (typeof initDashboard === 'function') {
+          try {
+            if (typeof purgeAllDemoData === 'function') purgeAllDemoData();
+            if (typeof updateHeaderDate === 'function') updateHeaderDate();
+            if (typeof updateHeaderWAIndicator === 'function') updateHeaderWAIndicator();
+            if (typeof renderSalesTable === 'function') renderSalesTable();
+            if (typeof renderInvoicesTable === 'function') renderInvoicesTable();
+            if (typeof renderCarteraTable === 'function') renderCarteraTable();
+            if (typeof renderCrmTable === 'function') renderCrmTable();
+            initDashboard();
+          } catch(e) {
+            console.warn('Bootstrap fallback error:', e);
+          }
+        }
+        if (sessionStorage.getItem('stepstyle_admin') === 'true' || localStorage.getItem('stepstyle_admin') === 'true') {
+          showAdminPanel();
+          showView('dashboard');
+        }
+      }
+
       // 1. Cargar base44-client
       var b = document.createElement('script');
       b.src = 'js/base44-client.js';
@@ -5307,18 +5407,14 @@
       s.src = 'admin.js?v=' + Date.now();
       s.onload = function() {
         console.log('[CARFE] admin.js cargado exitosamente desde la raíz.');
-        if (sessionStorage.getItem('stepstyle_admin') === 'true' || localStorage.getItem('stepstyle_admin') === 'true') {
-          showAdminPanel();
-        }
+        onScriptReady();
       };
       s.onerror = function() {
         var s2 = document.createElement('script');
         s2.src = 'js/admin.js?v=' + Date.now();
         s2.onload = function() {
           console.log('[CARFE] admin.js cargado exitosamente desde js/.');
-          if (sessionStorage.getItem('stepstyle_admin') === 'true' || localStorage.getItem('stepstyle_admin') === 'true') {
-            showAdminPanel();
-          }
+          onScriptReady();
         };
         document.body.appendChild(s2);
       };
