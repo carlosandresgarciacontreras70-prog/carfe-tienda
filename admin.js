@@ -4390,16 +4390,38 @@ function renderStudioPhotograph(sourceImg, preset = 'white') {
   canvas.height = S;
   const ctx = canvas.getContext('2d');
 
-  // Lienzo intermedio para procesar y aislar el calzado
+  // Redimensionar preliminarmente a max 800px para que NUNCA congele el celular ni la PC
+  const maxDim = 800;
+  let rawW = sourceImg.naturalWidth || sourceImg.width || S;
+  let rawH = sourceImg.naturalHeight || sourceImg.height || S;
+  let srcW = rawW;
+  let srcH = rawH;
+  if (srcW > maxDim || srcH > maxDim) {
+    const scale = Math.min(maxDim / srcW, maxDim / srcH);
+    srcW = Math.max(100, Math.round(srcW * scale));
+    srcH = Math.max(100, Math.round(srcH * scale));
+  }
+
+  // Lienzo intermedio optimizado y ultrarrápido
   const offCanvas = document.createElement('canvas');
-  const srcW = sourceImg.naturalWidth || sourceImg.width || S;
-  const srcH = sourceImg.naturalHeight || sourceImg.height || S;
   offCanvas.width = srcW;
   offCanvas.height = srcH;
   const offCtx = offCanvas.getContext('2d');
   offCtx.drawImage(sourceImg, 0, 0, srcW, srcH);
 
-  const imgData = offCtx.getImageData(0, 0, srcW, srcH);
+  let imgData;
+  try {
+    imgData = offCtx.getImageData(0, 0, srcW, srcH);
+  } catch(e) {
+    // Si hay restricción de canvas, dibujar directo sin pixel loop
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, S, S);
+    const aspect = srcW / srcH;
+    let dw = S * 0.85, dh = (S * 0.85) / aspect;
+    if (dh > S * 0.85) { dh = S * 0.85; dw = dh * aspect; }
+    ctx.drawImage(offCanvas, (S - dw)/2, (S - dh)/2, dw, dh);
+    return canvas.toDataURL('image/jpeg', 0.90);
+  }
   const data = imgData.data;
   const len = data.length;
 
@@ -4582,7 +4604,9 @@ function autoEnhanceWithAIStudio(inputDataUrl) {
   if (statusEl) statusEl.textContent = '🤖 IA Carfe® analizando calzado...';
 
   const img = new Image();
-  img.crossOrigin = 'anonymous';
+  if (inputDataUrl && inputDataUrl.startsWith('http')) {
+    img.crossOrigin = 'anonymous';
+  }
   img.onload = () => {
     setTimeout(() => {
       if (barEl) barEl.style.width = '65%';
@@ -4712,7 +4736,9 @@ function enhanceExistingProductAI(id) {
   toast('✨', 'Procesando con Estudio IA...', `Optimizando iluminación y fondo de ${p.name}`);
 
   const img = new Image();
-  img.crossOrigin = 'anonymous';
+  if (inputDataUrl && inputDataUrl.startsWith('http')) {
+    img.crossOrigin = 'anonymous';
+  }
   img.onload = () => {
     try {
       const enhanced = renderStudioPhotograph(img, 'white');
@@ -4743,26 +4769,50 @@ function enhanceExistingProductAI(id) {
 }
 
 function saveProduct() {
-  const name  = document.getElementById('newProdName')?.value.trim();
-  const brand = document.getElementById('newProdBrand')?.value.trim() || 'Carfe®';
-  const cost  = parseFloat(document.getElementById('newProdCost')?.value);
-  const price = parseFloat(document.getElementById('newProdPrice')?.value);
-  const oldPrice = parseFloat(document.getElementById('newProdOldPrice')?.value) || null;
-  const cat   = document.getElementById('newProdCat')?.value || 'hombre';
-  const stock = parseInt(document.getElementById('newProdStock')?.value) || 12;
-  const desc  = document.getElementById('newProdDesc')?.value.trim();
-  const badge = document.getElementById('newProdBadge')?.value || '';
-  const colors = (document.getElementById('newProdColors')?.value || 'Negro, Café').split(',').map(s=>s.trim());
-  let sizes = [...document.querySelectorAll('#sizeSelector .size-new-btn.sel')].map(b => parseInt(b.dataset.size || b.textContent));
+  const nameInput = document.getElementById('newProdName');
+  let name = (nameInput?.value || '').trim();
+  if (!name) {
+    if (nameInput) {
+      nameInput.focus();
+      nameInput.classList.add('border-red-500', 'bg-red-50');
+      setTimeout(() => nameInput.classList.remove('border-red-500', 'bg-red-50'), 2500);
+    }
+    return toast('⚠️', 'Nombre Requerido', 'Ingresa el nombre del calzado para guardarlo en inventario.');
+  }
 
-  if (!name) return toast('⚠️', 'Nombre requerido', 'Ingresa el nombre del calzado');
-  if (!cost || cost <= 0) return toast('⚠️', 'Costo requerido', 'Ingresa el costo del producto en COP');
-  if (!price || price <= 0) return toast('⚠️', 'Precio inválido', 'Ingresa el precio de venta al público en COP');
-  if (price < cost) return toast('⚠️', 'Margen negativo', 'El precio de venta debe ser superior al costo');
+  const brand = document.getElementById('newProdBrand')?.value.trim() || 'Carfe®';
+  let price = parseFloat(document.getElementById('newProdPrice')?.value);
+  if (isNaN(price) || price <= 0) {
+    price = 220000;
+    const priceInp = document.getElementById('newProdPrice');
+    if (priceInp) priceInp.value = price;
+  }
+
+  let cost = parseFloat(document.getElementById('newProdCost')?.value);
+  if (isNaN(cost) || cost <= 0) {
+    cost = Math.round(price * 0.48);
+    const costInp = document.getElementById('newProdCost');
+    if (costInp) costInp.value = cost;
+  }
+
+  const oldPrice = parseFloat(document.getElementById('newProdOldPrice')?.value) || Math.round(price * 1.25);
+  const cat = document.getElementById('newProdCat')?.value || 'hombre';
+  let stock = parseInt(document.getElementById('newProdStock')?.value);
+  if (isNaN(stock) || stock < 0) stock = 12;
+
+  const desc = document.getElementById('newProdDesc')?.value.trim() || 'Calzado exclusivo Carfe® en cuero 100% legítimo con suela ergonómica de alto confort.';
+  const badge = document.getElementById('newProdBadge')?.value || 'new';
+  const colors = (document.getElementById('newProdColors')?.value || 'Negro, Café').split(',').map(s=>s.trim()).filter(Boolean);
+  let sizes = [...document.querySelectorAll('#sizeSelector .size-new-btn.sel')].map(b => parseInt(b.dataset.size || b.textContent)).filter(Boolean);
   if (sizes.length === 0) {
     sizes = cat === 'mujer' ? [35, 36, 37, 38, 39, 40] : [38, 39, 40, 41, 42, 43, 44];
     selectSizesPreset(cat === 'mujer' ? 'mujer' : 'hombre');
   }
+
+  const defaultPhoto = cat === 'mujer'
+    ? 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=600&auto=format&fit=crop&q=80'
+    : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=80';
+  const finalPhoto = productPhotoData || defaultPhoto;
 
   const newProd = {
     id: Date.now(),
@@ -4776,48 +4826,55 @@ function saveProduct() {
     badge,
     colors: colors.length ? colors : ['Negro', 'Café'],
     sizes: sizes,
-    img: productPhotoData,
-    photoData: productPhotoData,
-    desc: desc || 'Calzado oficial Carfe® confeccionado con materiales de alta calidad y diseño anatómico.',
+    img: finalPhoto,
+    photoData: finalPhoto,
+    desc,
     rating: 5.0,
     reviews: 1,
     createdAt: new Date().toISOString()
   };
 
-  PRODUCTS.push(newProd);
-  customProducts.push(newProd);
-  localStorage.setItem('ss_custom_products', JSON.stringify(customProducts));
+  PRODUCTS.unshift(newProd);
+  customProducts.unshift(newProd);
+  try {
+    localStorage.setItem('ss_custom_products', JSON.stringify(customProducts));
+    saveStockOverride(newProd.id, stock);
+  } catch(e) {}
+
+  if (!inventoryData || inventoryData.length === 0) buildInventory();
+  inventoryData.unshift({
+    id: newProd.id,
+    name,
+    brand,
+    cat,
+    cost,
+    price,
+    stock,
+    minStock: 8,
+    img: finalPhoto
+  });
+
+  try {
+    localStorage.setItem('carfe_inventory_data', JSON.stringify(inventoryData));
+  } catch(e) {}
 
   inventoryDirty = true;
   catalogDirty = true;
   metaAdsDirty = true;
   ttsDirty = true;
 
-  if (inventoryData.length > 0) {
-    inventoryData.push({
-      id: newProd.id,
-      name,
-      brand,
-      cat,
-      cost,
-      price,
-      stock,
-      minStock: 8,
-      img: productPhotoData
-    });
-    updateInvKPIs();
-    renderInventoryTable();
-  }
+  updateInvKPIs();
+  renderInventoryTable();
+  if (typeof renderAllProductsGrid === 'function') renderAllProductsGrid();
+  if (typeof renderCatalogGrid === 'function') renderCatalogGrid();
 
   const profitUnit = price - cost;
   addNotification('📦', 'Calzado Creado', `${name} — Venta: ${formatCOP(price)} | Ganancia: +${formatCOP(profitUnit)}`, 'product');
-  toast('✅', 'Producto guardado', `${name} añadido al catálogo`);
-  renderAllProductsGrid();
+  toast('🎉', '¡Calzado Guardado con Éxito!', `"${name}" se ha añadido a tu inventario con ${stock} pares.`);
   safeText('allProdCount', PRODUCTS.length + ' Zapatos');
 
   // Reset form
-  if (document.getElementById('newProdName')) document.getElementById('newProdName').value = '';
-  if (document.getElementById('newProdBrand')) document.getElementById('newProdBrand').value = '';
+  if (nameInput) nameInput.value = '';
   if (document.getElementById('newProdCost')) document.getElementById('newProdCost').value = '';
   if (document.getElementById('newProdPrice')) document.getElementById('newProdPrice').value = '';
   if (document.getElementById('newProdOldPrice')) document.getElementById('newProdOldPrice').value = '';

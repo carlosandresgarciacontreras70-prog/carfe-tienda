@@ -400,6 +400,48 @@
       }, ms || 2800);
     };
 
+    /* ───────── APERTURA GARANTIZADA DE MODALES DE STOCK Y FACTURACIÓN ───────── */
+    window.openAddStockModal = function() {
+      if (typeof window._adminOpenAddStockModal === 'function') {
+        window._adminOpenAddStockModal();
+      } else {
+        var sel = document.getElementById('stockProduct') || document.getElementById('addStockProduct');
+        if (sel && (sel.options.length === 0 || !sel.innerHTML.trim())) {
+          var list = (typeof inventoryData !== 'undefined' && inventoryData.length > 0) ? inventoryData : (typeof PRODUCTS !== 'undefined' ? PRODUCTS : []);
+          if (list.length > 0) {
+            sel.innerHTML = list.map(function(p) {
+              return '<option value="' + p.id + '">' + p.name + ' (' + (p.cat === 'hombre' ? 'Hombre' : 'Mujer') + ') — Stock actual: ' + (p.stock || 0) + ' pares</option>';
+            }).join('');
+          }
+        }
+        var qtyInp = document.getElementById('stockQty') || document.getElementById('addStockQty');
+        if (qtyInp && (!qtyInp.value || parseInt(qtyInp.value) <= 0)) qtyInp.value = 10;
+        window.openModal('addStockModal');
+      }
+    };
+
+    window.openQuickBillingModal = function(initialMode) {
+      if (typeof window._adminOpenQuickBillingModal === 'function') {
+        window._adminOpenQuickBillingModal(initialMode);
+      } else {
+        var sel = document.getElementById('qbillProduct');
+        if (sel && (sel.options.length === 0 || !sel.innerHTML.trim())) {
+          var list = (typeof PRODUCTS !== 'undefined') ? PRODUCTS : [];
+          if (list.length > 0) {
+            sel.innerHTML = list.map(function(p) {
+              var cost = p.cost || Math.round(p.price * 0.5);
+              return '<option value="' + p.id + '" data-price="' + p.price + '" data-cost="' + cost + '" data-name="' + p.name + '" data-cat="' + p.cat + '">' +
+                p.name + ' (' + (p.cat === 'hombre' ? 'Hombre' : 'Mujer') + ') — $' + Math.round(p.price).toLocaleString('es-CO') + ' [Stock: ' + (p.stock || 0) + ']' +
+              '</option>';
+            }).join('');
+          }
+        }
+        if (typeof setQuickBillPayMode === 'function') setQuickBillPayMode(initialMode || 'contado');
+        if (typeof onQuickBillProductChange === 'function') onQuickBillProductChange();
+        window.openModal('quickBillingModal');
+      }
+    };
+
     function checkAuth() {
       var ok = sessionStorage.getItem('stepstyle_admin') || localStorage.getItem('stepstyle_admin');
       if (ok === 'true') {
