@@ -2026,7 +2026,10 @@ async function loadProductsFromSupabaseIfAvailable() {
 }
 
 if (typeof window !== 'undefined') {
-  window.addEventListener('load', () => {
-    loadProductsFromSupabaseIfAvailable();
-  });
+  loadProductsFromSupabaseIfAvailable();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadProductsFromSupabaseIfAvailable);
+  }
+  window.addEventListener('load', loadProductsFromSupabaseIfAvailable);
+  window.addEventListener('focus', loadProductsFromSupabaseIfAvailable);
 }

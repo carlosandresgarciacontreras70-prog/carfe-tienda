@@ -80,11 +80,7 @@ function saveExpensesToStorage() {
   try { localStorage.setItem('carfe_expenses', JSON.stringify(expensesData)); } catch(e) {}
 }
 
-const DEMO_CLIENT_NAMES = [
-  'camila torres', 'pedro ramírez', 'luis rodríguez', 'diego sánchez',
-  'carlos lópez', 'maría garcía', 'juan pérez', 'ana martínez',
-  'sofía torres', 'lucía flores', 'roberto méndez', 'carlos mendoza'
-];
+const DEMO_CLIENT_NAMES = [];
 
 function purgeAllDemoData() {
   try {
@@ -131,6 +127,18 @@ function purgeAllDemoData() {
 
   saveSalesToStorage();
   saveInvoicesToStorage();
+
+  // Guardar factura y cliente automáticamente en Supabase PostgreSQL
+  if (typeof CarfeSupabase !== 'undefined' && CarfeSupabase.isConfigured()) {
+    CarfeSupabase.saveInvoice(newInvoice).catch(e => console.warn('[Supabase] Error guardando factura:', e));
+    CarfeSupabase.saveCustomer({
+      name: clientName,
+      phone: phone,
+      doc: doc,
+      address: address,
+      totalSpent: subtotal
+    }).catch(e => console.warn('[Supabase] Error guardando cliente en CRM:', e));
+  }
   saveCarteraToStorage();
   saveCrmToStorage();
 
@@ -3376,6 +3384,18 @@ function submitQuickBilling() {
   saveSalesToStorage();
   saveInvoicesToStorage();
 
+  // Guardar factura y cliente automáticamente en Supabase PostgreSQL
+  if (typeof CarfeSupabase !== 'undefined' && CarfeSupabase.isConfigured()) {
+    CarfeSupabase.saveInvoice(newInvoice).catch(e => console.warn('[Supabase] Error guardando factura:', e));
+    CarfeSupabase.saveCustomer({
+      name: clientName,
+      phone: phone,
+      doc: doc,
+      address: address,
+      totalSpent: subtotal
+    }).catch(e => console.warn('[Supabase] Error guardando cliente en CRM:', e));
+  }
+
   // Sincronizar cliente inmediatamente con el CRM
   syncOrderToCRM({
     client: clientName,
@@ -4143,7 +4163,7 @@ function updateEditFinancialPreview() {
   if (marginEl) marginEl.textContent = `${margin}%`;
 }
 
-function saveEditProduct() {
+async function saveEditProduct() {
   const idStr = document.getElementById('editProdId')?.value;
   if (!idStr) return;
   const id = isNaN(idStr) ? idStr : Number(idStr);
@@ -4155,12 +4175,20 @@ function saveEditProduct() {
   const cost = parseFloat(document.getElementById('editProdCost')?.value);
   const price = parseFloat(document.getElementById('editProdPrice')?.value);
   const desc = document.getElementById('editProdDesc')?.value.trim() || 'Calzado exclusivo Carfe® en cuero 100% legítimo.';
-  const photo = window.editProductPhotoData || null;
+  let photo = window.editProductPhotoData || null;
 
   if (!name) return toast('⚠️', 'Nombre requerido', 'Ingresa el nombre del calzado');
   if (isNaN(stock) || stock < 0) return toast('⚠️', 'Stock inválido', 'Ingresa una cantidad de pares válida');
   if (isNaN(cost) || cost < 0) return toast('⚠️', 'Costo inválido', 'Ingresa el costo del producto en COP');
   if (isNaN(price) || price <= 0) return toast('⚠️', 'Precio inválido', 'Ingresa un precio de venta mayor a 0');
+
+  // Si la foto es un base64, subir a Supabase Storage
+  if (photo && photo.startsWith('data:image') && typeof CarfeSupabase !== 'undefined') {
+    try {
+      const up = await CarfeSupabase.compressAndUploadImage(photo);
+      if (up) photo = up;
+    } catch(e) {}
+  }
 
   // 1. Actualizar en PRODUCTS
   const p = PRODUCTS.find(x => x.id === id || String(x.id) === String(id));
@@ -4315,13 +4343,21 @@ function onPhotoUrlChange(url) {
   if (placeholder) placeholder.classList.add('hidden');
 }
 
-function saveNewProductPhoto() {
+async function saveNewProductPhoto() {
   const idStr = document.getElementById('changePhotoProdId')?.value;
   const id = isNaN(idStr) ? idStr : Number(idStr);
-  const newPhoto = tempNewPhotoData || document.getElementById('changePhotoUrlInput')?.value?.trim();
+  let newPhoto = tempNewPhotoData || document.getElementById('changePhotoUrlInput')?.value?.trim();
 
   if (!newPhoto) {
     return toast('⚠️', 'Sin Foto', 'Selecciona o sube una imagen antes de guardar');
+  }
+
+  // Si la foto es un base64, subir a Supabase Storage
+  if (newPhoto.startsWith('data:image') && typeof CarfeSupabase !== 'undefined') {
+    try {
+      const up = await CarfeSupabase.compressAndUploadImage(newPhoto);
+      if (up) newPhoto = up;
+    } catch(e) {}
   }
 
   const p = PRODUCTS.find(x => x.id === id || String(x.id) === String(id));
@@ -5048,7 +5084,7 @@ function enhanceExistingProductAI(id) {
   img.src = photoUrl;
 }
 
-function saveProduct() {
+async function saveProduct() {
   const nameInput = document.getElementById('newProdName');
   let name = (nameInput?.value || '').trim();
   if (!name) {
@@ -5092,7 +5128,17 @@ function saveProduct() {
   const defaultPhoto = cat === 'mujer'
     ? 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=600&auto=format&fit=crop&q=80'
     : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=80';
-  const finalPhoto = productPhotoData || defaultPhoto;
+  let finalPhoto = productPhotoData || defaultPhoto;
+
+  // Si la foto es un base64 grande, optimizar y subir a Supabase Storage
+  if (finalPhoto && finalPhoto.startsWith('data:image') && typeof CarfeSupabase !== 'undefined') {
+    try {
+      const uploadedUrl = await CarfeSupabase.compressAndUploadImage(finalPhoto);
+      if (uploadedUrl) finalPhoto = uploadedUrl;
+    } catch(err) {
+      console.warn('[Storage] Error subiendo imagen:', err);
+    }
+  }
 
   const newProd = {
     id: Date.now(),
@@ -8190,6 +8236,82 @@ async function loadAdminProductsFromSupabase() {
   }
 }
 
+async function loadAdminInvoicesFromSupabase() {
+  if (typeof CarfeSupabase === 'undefined' || !CarfeSupabase.isConfigured()) return;
+  try {
+    const cloudInvoices = await CarfeSupabase.getInvoices();
+    if (cloudInvoices && cloudInvoices.length > 0) {
+      const mapped = cloudInvoices.map(f => {
+        const itemData = f.items || {};
+        return {
+          id: f.invoice_number,
+          saleId: itemData.saleId || f.invoice_number,
+          client: f.customer_name,
+          phone: f.customer_phone,
+          doc: f.customer_doc || '',
+          address: f.customer_address || '',
+          product: f.product_name || 'Calzado Carfe®',
+          talla: f.size || 40,
+          qty: f.quantity || 1,
+          unitPrice: Number(f.total) / (f.quantity || 1),
+          subtotal: Number(f.total),
+          tax: Math.round(Number(f.total) * 0.19),
+          total: Number(f.total),
+          date: f.created_at ? f.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+          status: f.status === 'pagada' ? 'pagada' : (f.quota2_paid ? 'pagada' : 'pendiente'),
+          payMethod: f.mode === 'credito' ? 'Crédito 2 Cuotas' : 'Contado',
+          isCredit: f.mode === 'credito',
+          deposit: Number(f.quota1_amount),
+          pendingQuota: Number(f.quota2_amount),
+          dueDate: f.quota2_date ? f.quota2_date.split('T')[0] : null,
+          email: itemData.email || 'cliente@carfe.com'
+        };
+      });
+
+      invoicesData = mapped;
+      filteredInvoices = [...invoicesData];
+      saveInvoicesToStorage();
+      renderInvoicesTable();
+      updateCarteraKPIs();
+      renderCarteraTable();
+      console.log('[Admin] ✅ ' + invoicesData.length + ' facturas cargadas desde Supabase PostgreSQL.');
+    }
+  } catch(e) {
+    console.warn('[Admin] Error cargando facturas de Supabase:', e);
+  }
+}
+
+async function loadAdminCrmFromSupabase() {
+  if (typeof CarfeSupabase === 'undefined' || !CarfeSupabase.isConfigured()) return;
+  try {
+    const cloudCustomers = await CarfeSupabase.getCustomers();
+    if (cloudCustomers && cloudCustomers.length > 0) {
+      crmClientsData = cloudCustomers.map(c => ({
+        id: c.id,
+        name: c.name,
+        phone: c.phone,
+        email: c.email || '',
+        city: c.city || 'Colombia',
+        address: c.address || '',
+        doc: c.doc || '',
+        totalSpent: Number(c.total_spent) || 0,
+        ordersCount: c.total_orders || 1,
+        lastOrderDate: c.updated_at ? c.updated_at.split('T')[0] : new Date().toISOString().split('T')[0],
+        status: 'activo'
+      }));
+
+      try {
+        localStorage.setItem('carfe_crm_clients', JSON.stringify(crmClientsData));
+      } catch(e) {}
+      updateCrmKPIs();
+      renderCrmTable();
+      console.log('[Admin] ✅ ' + crmClientsData.length + ' clientes CRM sincronizados desde Supabase.');
+    }
+  } catch(e) {
+    console.warn('[Admin] Error cargando clientes CRM de Supabase:', e);
+  }
+}
+
 function initSupabaseAdmin() {
   if (typeof CarfeSupabase === 'undefined') return;
   const cfg = CarfeSupabase.getConfig();
@@ -8199,14 +8321,18 @@ function initSupabaseAdmin() {
   if (keyInp && cfg.anonKey) keyInp.value = cfg.anonKey;
   updateSupabaseStatusUI();
 
-  // Cargar catálogo de Supabase inmediatamente al iniciar
+  // Cargar catálogo, facturas y CRM de Supabase inmediatamente al iniciar
   loadAdminProductsFromSupabase();
+  loadAdminInvoicesFromSupabase();
+  loadAdminCrmFromSupabase();
 
   // Suscribirse a cambios en tiempo real de Supabase
   try {
     CarfeSupabase.subscribeToProducts((payload) => {
       console.log('[Supabase Realtime] Evento recibido en admin:', payload);
       loadAdminProductsFromSupabase();
+    loadAdminInvoicesFromSupabase();
+    loadAdminCrmFromSupabase();
     });
   } catch(e) {}
 }
@@ -8244,6 +8370,8 @@ async function testAndSaveSupabaseConnection() {
     updateSupabaseStatusUI();
     toast('⚡', '¡Supabase Conectado!', 'La conexión con la base de datos PostgreSQL fue exitosa.');
     loadAdminProductsFromSupabase();
+    loadAdminInvoicesFromSupabase();
+    loadAdminCrmFromSupabase();
     broadcastAdminUpdate('supabase_connected', { url });
   } else {
     toast('❌', 'Error al Conectar', res.error || 'Verifica la URL y la Anon Key de Supabase.');
@@ -8291,10 +8419,16 @@ function copySupabaseSql() {
   });
 }
 
-// Iniciar al cargar
+// Iniciar inmediatamente sin esperar
 if (typeof window !== 'undefined') {
-  window.addEventListener('load', () => {
-    initSupabaseAdmin();
+  initSupabaseAdmin();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSupabaseAdmin);
+  }
+  window.addEventListener('load', initSupabaseAdmin);
+  window.addEventListener('focus', () => {
+    loadAdminProductsFromSupabase();
+    loadAdminInvoicesFromSupabase();
   });
 }
 
@@ -8305,6 +8439,8 @@ window.syncAllCarfeToSupabase = syncAllCarfeToSupabase;
 window.openSupabaseSqlModal = openSupabaseSqlModal;
 window.copySupabaseSql = copySupabaseSql;
 window.loadAdminProductsFromSupabase = loadAdminProductsFromSupabase;
+window.loadAdminInvoicesFromSupabase = loadAdminInvoicesFromSupabase;
+window.loadAdminCrmFromSupabase = loadAdminCrmFromSupabase;
 window._adminSaveProduct = saveProduct;
 window._adminSaveEditProduct = saveEditProduct;
 window._adminDeleteProduct = deleteProduct;

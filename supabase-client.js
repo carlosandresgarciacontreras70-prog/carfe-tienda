@@ -9,22 +9,23 @@ const CarfeSupabase = {
   realtimeSubscription: null,
 
   getConfig() {
+    const OFFICIAL_CONFIG = {
+      url: 'https://eyecwrkqwgsmbgkcxqoe.supabase.co',
+      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5ZWN3cmtxd2dzbWJna2N4cW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1NjUxMDYsImV4cCI6MjEwODE0MTEwNn0.Rf0NcSG7ufxA0Bza-QlVquTX1u9ekcUX5Nrp5wyYttM',
+      enabled: true,
+      autoSync: true
+    };
     try {
       const raw = localStorage.getItem(this.STORAGE_KEY);
-      if (raw) return JSON.parse(raw);
-      return {
-        url: 'https://eyecwrkqwgsmbgkcxqoe.supabase.co',
-        anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5ZWN3cmtxd2dzbWJna2N4cW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1NjUxMDYsImV4cCI6MjEwODE0MTEwNn0.Rf0NcSG7ufxA0Bza-QlVquTX1u9ekcUX5Nrp5wyYttM',
-        enabled: true,
-        autoSync: true
-      };
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.url && parsed.anonKey && parsed.enabled) {
+          return parsed;
+        }
+      }
+      return OFFICIAL_CONFIG;
     } catch(e) {
-      return {
-        url: 'https://eyecwrkqwgsmbgkcxqoe.supabase.co',
-        anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5ZWN3cmtxd2dzbWJna2N4cW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1NjUxMDYsImV4cCI6MjEwODE0MTEwNn0.Rf0NcSG7ufxA0Bza-QlVquTX1u9ekcUX5Nrp5wyYttM',
-        enabled: true,
-        autoSync: true
-      };
+      return OFFICIAL_CONFIG;
     }
   },
 
@@ -170,24 +171,77 @@ const CarfeSupabase = {
     }
   },
 
-  /* ───────── STORAGE: SUBIDA DE FOTOS Y VIDEOS ───────── */
-  async uploadProductImage(file) {
-    const client = this.init();
-    if (!client || !file) return null;
-    try {
-      const ext = file.name ? file.name.split('.').pop() : 'jpg';
-      const fileName = `prod_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${ext}`;
-      const { data, error } = await client.storage
-        .from('product-images')
-        .upload(fileName, file, { cacheControl: '3600', upsert: true });
+  /* ───────── STORAGE & OPTIMIZACIÓN DE IMÁGENES ───────── */
+  async compressAndUploadImage(fileOrDataUrl) {
+    if (!fileOrDataUrl) return null;
 
-      if (error) throw error;
-      const { data: pubData } = client.storage.from('product-images').getPublicUrl(fileName);
-      return pubData.publicUrl;
-    } catch(e) {
-      console.warn('[CARFE Supabase] Error subiendo imagen:', e);
-      return null;
+    // Si ya es una URL en la nube (HTTP), no necesita compresión
+    if (typeof fileOrDataUrl === 'string' && fileOrDataUrl.startsWith('http')) {
+      return fileOrDataUrl;
     }
+
+    try {
+      // 1. Convertir a HTML5 Image y comprimir en Canvas a max 800px (calidad 82%)
+      const compressedBlob = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 800;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          canvas.toBlob((blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error('Canvas toBlob failed'));
+          }, 'image/jpeg', 0.82);
+        };
+        img.onerror = reject;
+        img.src = typeof fileOrDataUrl === 'string' ? fileOrDataUrl : URL.createObjectURL(fileOrDataUrl);
+      });
+
+      // 2. Si Supabase Storage está disponible, subir el Blob a bucket 'product-images'
+      const client = this.init();
+      if (client) {
+        const fileName = `calzado_${Date.now()}_${Math.random().toString(36).substring(2, 6)}.jpg`;
+        const { data, error } = await client.storage
+          .from('product-images')
+          .upload(fileName, compressedBlob, { contentType: 'image/jpeg', upsert: true });
+
+        if (!error) {
+          const { data: pubData } = client.storage.from('product-images').getPublicUrl(fileName);
+          if (pubData && pubData.publicUrl) {
+            console.log('[CARFE Supabase] ✅ Imagen optimizada y alojada en Storage:', pubData.publicUrl);
+            return pubData.publicUrl;
+          }
+        }
+      }
+
+      // 3. Fallback: Data URL comprimido ligero (< 70KB)
+      return await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(compressedBlob);
+      });
+    } catch(err) {
+      console.warn('[CARFE Supabase] Error optimizando imagen, usando original:', err);
+      return typeof fileOrDataUrl === 'string' ? fileOrDataUrl : null;
+    }
+  },
+
+  async uploadProductImage(file) {
+    return this.compressAndUploadImage(file);
   },
 
   async uploadHeroVideo(file) {
@@ -206,6 +260,114 @@ const CarfeSupabase = {
     } catch(e) {
       console.warn('[CARFE Supabase] Error subiendo video:', e);
       return null;
+    }
+  },
+
+  /* ───────── FACTURAS & CARTERA EN SUPABASE ───────── */
+  async saveInvoice(inv) {
+    const client = this.init();
+    if (!client || !inv) return null;
+    try {
+      const payload = {
+        invoice_number: inv.id || ('FAC-' + Date.now()),
+        customer_name: inv.client || 'Cliente General',
+        customer_phone: inv.phone || '',
+        customer_doc: inv.doc || '',
+        customer_address: inv.address || '',
+        product_name: inv.product || 'Calzado Carfe®',
+        size: parseInt(inv.talla) || 40,
+        quantity: inv.qty || 1,
+        total: Number(inv.total) || 0,
+        mode: inv.isCredit ? 'credito' : 'contado',
+        quota1_amount: Number(inv.deposit) || Number(inv.total) || 0,
+        quota1_paid: true,
+        quota1_date: new Date().toISOString(),
+        quota2_amount: Number(inv.pendingQuota) || 0,
+        quota2_paid: !(inv.pendingQuota > 0),
+        quota2_date: inv.dueDate ? new Date(inv.dueDate).toISOString() : null,
+        status: inv.status || 'al_dia',
+        items: inv
+      };
+
+      const { data, error } = await client
+        .from('invoices')
+        .upsert(payload, { onConflict: 'invoice_number' })
+        .select()
+        .single();
+
+      if (error) throw error;
+      console.log('[CARFE Supabase] ✅ Factura guardada en PostgreSQL:', payload.invoice_number);
+      return data;
+    } catch(err) {
+      console.warn('[CARFE Supabase] Error guardando factura:', err);
+      return null;
+    }
+  },
+
+  async getInvoices() {
+    const client = this.init();
+    if (!client) return [];
+    try {
+      const { data, error } = await client
+        .from('invoices')
+        .select('*')
+        .order('id', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    } catch(err) {
+      console.warn('[CARFE Supabase] Error obteniendo facturas:', err);
+      return [];
+    }
+  },
+
+  /* ───────── CLIENTES & CRM EN SUPABASE ───────── */
+  async saveCustomer(cust) {
+    const client = this.init();
+    if (!client || !cust) return null;
+    try {
+      const phone = (cust.phone || '').trim();
+      if (!phone) return null;
+
+      const payload = {
+        name: cust.name || cust.client || 'Cliente Carfe',
+        phone: phone,
+        email: cust.email || null,
+        address: cust.address || null,
+        city: cust.city || 'Colombia',
+        doc: cust.doc || null,
+        total_orders: cust.ordersCount || 1,
+        total_spent: Number(cust.totalSpent || cust.total || 0),
+        updated_at: new Date().toISOString()
+      };
+
+      const { data, error } = await client
+        .from('customers')
+        .upsert(payload, { onConflict: 'phone' })
+        .select()
+        .single();
+
+      if (error) throw error;
+      console.log('[CARFE Supabase] ✅ Cliente guardado en CRM PostgreSQL:', payload.name);
+      return data;
+    } catch(err) {
+      console.warn('[CARFE Supabase] Error guardando cliente CRM:', err);
+      return null;
+    }
+  },
+
+  async getCustomers() {
+    const client = this.init();
+    if (!client) return [];
+    try {
+      const { data, error } = await client
+        .from('customers')
+        .select('*')
+        .order('updated_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    } catch(err) {
+      console.warn('[CARFE Supabase] Error obteniendo clientes CRM:', err);
+      return [];
     }
   },
 
