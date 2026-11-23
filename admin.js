@@ -8063,3 +8063,107 @@ function publishHeroVideoUrl() {
 
 window.broadcastAdminUpdate = broadcastAdminUpdate;
 window.publishHeroVideoUrl = publishHeroVideoUrl;
+
+/* ───────── INTEGRACIÓN SUPABASE EN PANEL ADMIN ───────── */
+function initSupabaseAdmin() {
+  if (typeof CarfeSupabase === 'undefined') return;
+  const cfg = CarfeSupabase.getConfig();
+  const urlInp = document.getElementById('supabase_url');
+  const keyInp = document.getElementById('supabase_anonKey');
+  if (urlInp && cfg.url) urlInp.value = cfg.url;
+  if (keyInp && cfg.anonKey) keyInp.value = cfg.anonKey;
+  updateSupabaseStatusUI();
+}
+
+function updateSupabaseStatusUI() {
+  const badge = document.getElementById('supabaseStatusBadge');
+  const dot = document.getElementById('supabaseStatusDot');
+  const text = document.getElementById('supabaseStatusText');
+  if (!badge || !dot || !text) return;
+
+  const isConfig = (typeof CarfeSupabase !== 'undefined') && CarfeSupabase.isConfigured();
+  if (isConfig) {
+    badge.className = 'px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1.5 shadow-sm';
+    dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse';
+    text.textContent = 'Supabase Conectado';
+  } else {
+    badge.className = 'px-3 py-1 rounded-full text-xs font-black bg-zinc-100 text-zinc-600 border border-zinc-300 flex items-center gap-1.5 shadow-sm';
+    dot.className = 'w-2.5 h-2.5 rounded-full bg-zinc-400';
+    text.textContent = 'Pendiente de Conectar';
+  }
+}
+
+async function testAndSaveSupabaseConnection() {
+  const url = document.getElementById('supabase_url')?.value?.trim();
+  const anonKey = document.getElementById('supabase_anonKey')?.value?.trim();
+
+  if (!url || !anonKey) {
+    return toast('⚠️', 'Campos Requeridos', 'Por favor ingresa la Project URL y la Anon Key de Supabase.');
+  }
+
+  toast('⏳', 'Verificando Supabase...', 'Probando conexión con PostgreSQL...');
+  const res = await CarfeSupabase.testConnection(url, anonKey);
+  if (res.ok) {
+    CarfeSupabase.saveConfig({ url, anonKey, enabled: true });
+    updateSupabaseStatusUI();
+    toast('⚡', '¡Supabase Conectado!', 'La conexión con la base de datos PostgreSQL fue exitosa.');
+    broadcastAdminUpdate('supabase_connected', { url });
+  } else {
+    toast('❌', 'Error al Conectar', res.error || 'Verifica la URL y la Anon Key de Supabase.');
+  }
+}
+
+async function syncAllCarfeToSupabase() {
+  if (!CarfeSupabase.isConfigured()) {
+    return toast('⚠️', 'Configura Supabase', 'Primero ingresa tu URL y Anon Key y haz clic en "Probar Conexión".');
+  }
+
+  toast('🚀', 'Exportando Catálogo...', 'Subiendo productos a PostgreSQL en Supabase...');
+  const res = await CarfeSupabase.syncLocalCatalogToSupabase(PRODUCTS);
+  if (res.ok) {
+    toast('✅', 'Catálogo Sincronizado', `Se guardaron ${res.count} calzados en la tabla products de Supabase.`);
+  } else {
+    toast('⚠️', 'Error al Sincronizar', res.error || 'Revisa que la tabla products esté creada en Supabase.');
+  }
+}
+
+function openSupabaseSqlModal() {
+  const sqlArea = document.getElementById('supabaseSqlContent');
+  if (sqlArea) {
+    fetch('supabase-schema.sql')
+      .then(res => res.text())
+      .then(text => { sqlArea.value = text; })
+      .catch(() => {
+        sqlArea.value = `-- Ejecuta el archivo supabase-schema.sql en el SQL Editor de tu Dashboard de Supabase.`;
+      });
+  }
+  openModal('supabaseSqlModal');
+}
+
+function copySupabaseSql() {
+  const sqlArea = document.getElementById('supabaseSqlContent');
+  if (!sqlArea) return;
+  sqlArea.select();
+  navigator.clipboard.writeText(sqlArea.value).then(() => {
+    const btn = document.getElementById('btnCopySql');
+    if (btn) btn.innerHTML = '<i class="fas fa-check text-green-300"></i> ¡Copiado!';
+    toast('📋', 'Código Copiado', 'Pégalo en el SQL Editor de tu consola Supabase.');
+    setTimeout(() => {
+      if (btn) btn.innerHTML = '<i class="fas fa-copy"></i> Copiar Código SQL';
+    }, 2500);
+  });
+}
+
+// Iniciar al cargar
+if (typeof window !== 'undefined') {
+  window.addEventListener('load', () => {
+    initSupabaseAdmin();
+  });
+}
+
+window.initSupabaseAdmin = initSupabaseAdmin;
+window.updateSupabaseStatusUI = updateSupabaseStatusUI;
+window.testAndSaveSupabaseConnection = testAndSaveSupabaseConnection;
+window.syncAllCarfeToSupabase = syncAllCarfeToSupabase;
+window.openSupabaseSqlModal = openSupabaseSqlModal;
+window.copySupabaseSql = copySupabaseSql;

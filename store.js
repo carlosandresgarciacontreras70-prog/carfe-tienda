@@ -1983,3 +1983,50 @@ function loadFooterInfo() {
     }
   } catch(e) {}
 }
+
+// Sincronización con Supabase PostgreSQL si está activo
+async function loadProductsFromSupabaseIfAvailable() {
+  if (typeof CarfeSupabase !== 'undefined' && CarfeSupabase.isConfigured()) {
+    try {
+      const cloudProds = await CarfeSupabase.getProducts();
+      if (cloudProds && cloudProds.length > 0) {
+        PRODUCTS = cloudProds.map(p => ({
+          id: p.id,
+          name: p.name,
+          brand: p.brand || 'Carfe®',
+          cat: p.category,
+          cost: Number(p.cost) || 0,
+          price: Number(p.price) || 0,
+          oldPrice: p.old_price ? Number(p.old_price) : null,
+          stock: p.stock,
+          badge: p.badge || 'new',
+          colors: p.colors || ['Negro', 'Café'],
+          sizes: p.sizes || [38, 39, 40, 41, 42, 43],
+          img: p.image_url,
+          photoData: p.image_url,
+          desc: p.description,
+          rating: Number(p.rating) || 5.0,
+          reviews: p.reviews_count || 1
+        }));
+        if (typeof filterProducts === 'function') filterProducts();
+        else if (typeof renderProducts === 'function') {
+          visibleProducts = [...PRODUCTS];
+          renderProducts();
+        }
+      }
+
+      // Suscribirse a Realtime WebSockets
+      CarfeSupabase.subscribeToProducts(() => {
+        loadProductsFromSupabaseIfAvailable();
+      });
+    } catch(e) {
+      console.warn('Error cargando desde Supabase:', e);
+    }
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('load', () => {
+    loadProductsFromSupabaseIfAvailable();
+  });
+}
