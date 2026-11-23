@@ -846,6 +846,7 @@
     };
 
     window.saveEditProduct = function() {
+      if (typeof window._adminSaveEditProduct === 'function') return window._adminSaveEditProduct();
       var idStr = document.getElementById('editProdId') ? document.getElementById('editProdId').value : null;
       if (!idStr) return;
       var id = isNaN(idStr) ? idStr : Number(idStr);
@@ -905,6 +906,7 @@
     };
 
     window.deleteProduct = function(id) {
+      if (typeof window._adminDeleteProduct === 'function') return window._adminDeleteProduct(id);
       var list = (typeof PRODUCTS !== 'undefined') ? PRODUCTS : [];
       var p = list.find(function(x) { return x.id === id || String(x.id) === String(id); });
       var name = p ? p.name : 'este calzado';

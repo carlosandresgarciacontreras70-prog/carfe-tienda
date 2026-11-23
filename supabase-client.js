@@ -110,31 +110,42 @@ const CarfeSupabase = {
         name: product.name,
         brand: product.brand || 'Carfe®',
         category: product.cat || product.category || 'hombre',
-        cost: product.cost || 0,
-        price: product.price || 0,
-        old_price: product.oldPrice || product.old_price || null,
-        stock: product.stock !== undefined ? product.stock : 12,
+        cost: Number(product.cost) || 0,
+        price: Number(product.price) || 0,
+        old_price: (product.oldPrice || product.old_price) ? Number(product.oldPrice || product.old_price) : null,
+        stock: product.stock !== undefined ? Number(product.stock) : 12,
         badge: product.badge || 'new',
-        colors: product.colors || ['Negro', 'Café'],
-        sizes: product.sizes || [38, 39, 40, 41, 42, 43],
-        image_url: product.img || product.image_url || product.photoData,
-        description: product.desc || product.description || 'Calzado exclusivo Carfe® en cuero 100% legítimo.',
+        colors: Array.isArray(product.colors) ? product.colors : ['Negro', 'Café'],
+        sizes: Array.isArray(product.sizes) ? product.sizes : [38, 39, 40, 41, 42, 43],
+        image_url: product.img || product.image_url || product.photoData || null,
+        description: product.desc || product.description || 'Calzado exclusivo Carfe® en cuero 100% legítimo con suela ergonómica.',
         is_active: true,
         updated_at: new Date().toISOString()
       };
 
-      if (product.id && !String(product.id).startsWith('local_')) {
-        payload.id = product.id;
+      const numId = Number(product.id);
+      // Si tiene ID real existente en Postgres (< 1000000000), actualizarlo
+      if (numId && !isNaN(numId) && numId < 1000000000) {
+        payload.id = numId;
+        const { data, error } = await client
+          .from('products')
+          .upsert(payload, { onConflict: 'id' })
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      } else {
+        // Es un producto nuevo: insertar para que Postgres asigne el ID automáticamente con su secuencia
+        const { data, error } = await client
+          .from('products')
+          .insert(payload)
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
       }
-
-      const { data, error } = await client
-        .from('products')
-        .upsert(payload)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
     } catch(e) {
       console.warn('[CARFE Supabase] Error guardando producto:', e);
       return null;
@@ -145,11 +156,12 @@ const CarfeSupabase = {
     const client = this.init();
     if (!client) return false;
     try {
-      // Borrado lógico o físico
+      const numId = Number(id);
+      if (!numId || isNaN(numId)) return false;
       const { error } = await client
         .from('products')
         .update({ is_active: false })
-        .eq('id', id);
+        .eq('id', numId);
       if (error) throw error;
       return true;
     } catch(e) {

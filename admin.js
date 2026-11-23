@@ -4017,6 +4017,18 @@ function saveStockOverride(id, stock) {
     overrides[id] = Object.assign(overrides[id] || {}, { stock });
     localStorage.setItem('ss_product_overrides', JSON.stringify(overrides));
   } catch(e) {}
+
+  if (typeof CarfeSupabase !== 'undefined' && CarfeSupabase.isConfigured()) {
+    const client = CarfeSupabase.init();
+    if (client) {
+      const numId = Number(id);
+      if (numId && !isNaN(numId) && numId < 1000000000) {
+        client.from('products').update({ stock: Number(stock) }).eq('id', numId).then(() => {
+          console.log('[Supabase Sync] ✅ Stock actualizado en PostgreSQL:', id, stock);
+        }).catch(e => console.warn(e));
+      }
+    }
+  }
 }
 
 function quickAddStock(id) {
@@ -4224,6 +4236,15 @@ function saveEditProduct() {
   closeModal('editProductModal');
   broadcastAdminUpdate('product_updated', { id, name, price, stock, photo });
   toast('✅', 'Producto Actualizado', `${name}: Stock ${stock} pares, Venta ${formatCOP(price)}`);
+
+  // Sincronización automática de edición en Supabase
+  if (typeof CarfeSupabase !== 'undefined' && CarfeSupabase.isConfigured()) {
+    CarfeSupabase.upsertProduct({
+      id, name, brand, cat, stock, cost, price, desc, img: photo || p?.img
+    }).then(() => {
+      console.log('[Supabase Sync] ✅ Producto actualizado en PostgreSQL:', id);
+    }).catch(err => console.warn('[Supabase Sync] Error al actualizar:', err));
+  }
 }
 
 
@@ -4339,6 +4360,13 @@ function saveNewProductPhoto() {
 
   broadcastAdminUpdate('photo_updated', { id, newPhoto });
   toast('📸', 'Foto Guardada', `La foto de "${p ? p.name : 'calzado'}" se actualizó con éxito.`);
+
+  // Sincronización automática de foto en Supabase
+  if (typeof CarfeSupabase !== 'undefined' && CarfeSupabase.isConfigured() && p) {
+    CarfeSupabase.upsertProduct(p).then(() => {
+      console.log('[Supabase Sync] ✅ Foto actualizada en PostgreSQL para ID:', id);
+    }).catch(err => console.warn('[Supabase Sync] Error actualizando foto:', err));
+  }
 }
 
 function applyDirectPhoto(inputDataUrl) {
@@ -4475,6 +4503,13 @@ function executeDeleteProduct(id, name) {
 
   broadcastAdminUpdate('product_deleted', { id, name });
   toast('🗑️', 'Producto Eliminado', `"${name}" fue retirado del inventario y catálogo`);
+
+  // Sincronización automática de eliminación en Supabase
+  if (typeof CarfeSupabase !== 'undefined' && CarfeSupabase.isConfigured()) {
+    CarfeSupabase.deleteProduct(id).then(() => {
+      console.log('[Supabase Sync] ✅ Producto #' + id + ' desactivado en PostgreSQL.');
+    }).catch(err => console.warn('[Supabase Sync] Error al eliminar:', err));
+  }
 }
 
 function checkStockAlerts() {
@@ -4532,6 +4567,13 @@ function addStock() {
     if (typeof renderProductsTable === 'function') renderProductsTable();
     closeModal('addStockModal');
     toast('✅', 'Stock Agregado', `+${qty} pares agregados a ${p.name} (Total disponible: ${p.stock})`);
+
+    // Sincronización automática de stock en Supabase
+    if (typeof CarfeSupabase !== 'undefined' && CarfeSupabase.isConfigured() && p) {
+      CarfeSupabase.upsertProduct(p).then(() => {
+        console.log('[Supabase Sync] ✅ Stock actualizado en PostgreSQL para ID:', p.id, p.stock);
+      }).catch(err => console.warn('[Supabase Sync] Error actualizando stock:', err));
+    }
   } else {
     toast('⚠️', 'Error', 'No se encontró el calzado seleccionado');
   }
@@ -5110,6 +5152,31 @@ function saveProduct() {
   addNotification('📦', 'Calzado Creado', `${name} — Venta: ${formatCOP(price)} | Ganancia: +${formatCOP(profitUnit)}`, 'product');
   toast('🎉', '¡Calzado Guardado con Éxito!', `"${name}" se ha añadido a tu inventario con ${stock} pares.`);
   safeText('allProdCount', PRODUCTS.length + ' Zapatos');
+
+  // Sincronización automática directa con Supabase PostgreSQL
+  if (typeof CarfeSupabase !== 'undefined' && CarfeSupabase.isConfigured()) {
+    CarfeSupabase.upsertProduct(newProd).then(saved => {
+      if (saved && saved.id) {
+        const oldId = newProd.id;
+        newProd.id = saved.id;
+        const p = PRODUCTS.find(x => x.id === oldId);
+        if (p) p.id = saved.id;
+        const inv = inventoryData.find(x => x.id === oldId);
+        if (inv) inv.id = saved.id;
+        try {
+          localStorage.setItem('carfe_inventory_data', JSON.stringify(inventoryData));
+        } catch(e) {}
+        if (typeof renderAllProductsGrid === 'function') renderAllProductsGrid();
+        if (typeof renderInventoryTable === 'function') renderInventoryTable();
+        toast('☁️', 'Sincronizado con Supabase', `"${name}" respaldado en base de datos PostgreSQL (ID #${saved.id}).`);
+        broadcastAdminUpdate('product_created', { id: saved.id, name });
+      }
+    }).catch(err => {
+      console.warn('[Supabase Sync] Error al guardar producto en nube:', err);
+    });
+  } else {
+    broadcastAdminUpdate('product_created', { id: newProd.id, name });
+  }
 
   // Reset form
   if (nameInput) nameInput.value = '';
@@ -8065,6 +8132,64 @@ window.broadcastAdminUpdate = broadcastAdminUpdate;
 window.publishHeroVideoUrl = publishHeroVideoUrl;
 
 /* ───────── INTEGRACIÓN SUPABASE EN PANEL ADMIN ───────── */
+async function loadAdminProductsFromSupabase() {
+  if (typeof CarfeSupabase === 'undefined' || !CarfeSupabase.isConfigured()) return;
+  try {
+    const cloudProds = await CarfeSupabase.getProducts();
+    if (cloudProds && cloudProds.length > 0) {
+      const mapped = cloudProds.map(p => ({
+        id: p.id,
+        name: p.name,
+        brand: p.brand || 'Carfe®',
+        cat: p.category,
+        cost: Number(p.cost) || 0,
+        price: Number(p.price) || 0,
+        oldPrice: p.old_price ? Number(p.old_price) : null,
+        stock: Number(p.stock) || 0,
+        badge: p.badge || 'new',
+        colors: Array.isArray(p.colors) ? p.colors : ['Negro', 'Café'],
+        sizes: Array.isArray(p.sizes) ? p.sizes : (p.category === 'mujer' ? [35, 36, 37, 38, 39, 40] : [38, 39, 40, 41, 42, 43]),
+        img: p.image_url,
+        photoData: p.image_url,
+        desc: p.description,
+        rating: Number(p.rating) || 5.0,
+        reviews: p.reviews_count || 1
+      }));
+
+      // Respetar eliminaciones locales temporales si las hubiera
+      const deletedIds = JSON.parse(localStorage.getItem('ss_deleted_products') || '[]');
+      PRODUCTS = mapped.filter(p => !deletedIds.includes(p.id) && !deletedIds.includes(String(p.id)));
+
+      // Sincronizar inventoryData
+      inventoryData = PRODUCTS.map(p => ({
+        id: p.id,
+        name: p.name,
+        brand: p.brand,
+        cat: p.cat,
+        cost: p.cost,
+        price: p.price,
+        stock: p.stock,
+        minStock: 8,
+        img: p.img
+      }));
+
+      try {
+        localStorage.setItem('carfe_inventory_data', JSON.stringify(inventoryData));
+      } catch(e) {}
+
+      updateInvKPIs();
+      renderInventoryTable();
+      if (typeof renderAllProductsGrid === 'function') renderAllProductsGrid();
+      if (typeof renderCatalogGrid === 'function') renderCatalogGrid();
+      if (typeof renderProductsTable === 'function') renderProductsTable();
+      safeText('allProdCount', PRODUCTS.length + ' Zapatos');
+      console.log('[Admin] ✅ Sincronizados ' + PRODUCTS.length + ' productos directamente desde Supabase PostgreSQL.');
+    }
+  } catch(e) {
+    console.warn('[Admin] Error cargando desde Supabase:', e);
+  }
+}
+
 function initSupabaseAdmin() {
   if (typeof CarfeSupabase === 'undefined') return;
   const cfg = CarfeSupabase.getConfig();
@@ -8073,6 +8198,17 @@ function initSupabaseAdmin() {
   if (urlInp && cfg.url) urlInp.value = cfg.url;
   if (keyInp && cfg.anonKey) keyInp.value = cfg.anonKey;
   updateSupabaseStatusUI();
+
+  // Cargar catálogo de Supabase inmediatamente al iniciar
+  loadAdminProductsFromSupabase();
+
+  // Suscribirse a cambios en tiempo real de Supabase
+  try {
+    CarfeSupabase.subscribeToProducts((payload) => {
+      console.log('[Supabase Realtime] Evento recibido en admin:', payload);
+      loadAdminProductsFromSupabase();
+    });
+  } catch(e) {}
 }
 
 function updateSupabaseStatusUI() {
@@ -8107,6 +8243,7 @@ async function testAndSaveSupabaseConnection() {
     CarfeSupabase.saveConfig({ url, anonKey, enabled: true });
     updateSupabaseStatusUI();
     toast('⚡', '¡Supabase Conectado!', 'La conexión con la base de datos PostgreSQL fue exitosa.');
+    loadAdminProductsFromSupabase();
     broadcastAdminUpdate('supabase_connected', { url });
   } else {
     toast('❌', 'Error al Conectar', res.error || 'Verifica la URL y la Anon Key de Supabase.');
@@ -8167,3 +8304,9 @@ window.testAndSaveSupabaseConnection = testAndSaveSupabaseConnection;
 window.syncAllCarfeToSupabase = syncAllCarfeToSupabase;
 window.openSupabaseSqlModal = openSupabaseSqlModal;
 window.copySupabaseSql = copySupabaseSql;
+window.loadAdminProductsFromSupabase = loadAdminProductsFromSupabase;
+window._adminSaveProduct = saveProduct;
+window._adminSaveEditProduct = saveEditProduct;
+window._adminDeleteProduct = deleteProduct;
+window._adminExecuteDeleteProduct = executeDeleteProduct;
+window._adminAddStock = addStock;
