@@ -317,6 +317,14 @@ function openProduct(id) {
       <button onclick="openWAOrderModal(${p.id})" class="w-full bg-[#10B981] hover:bg-[#059669] text-black font-black h-14 rounded-xl flex items-center justify-center gap-2 text-base shadow-lg shadow-emerald-500/25 transition-all hover:scale-[1.01] active:scale-[0.99]">
         <i class="fab fa-whatsapp text-2xl"></i> Comprar y Pagar por WhatsApp
       </button>
+      <div class="flex gap-2 mt-2">
+        <button onclick="shareStoreProduct(${p.id})" class="flex-1 bg-[#18181D] hover:bg-[#25252D] text-gray-300 hover:text-white font-bold h-11 rounded-xl text-xs flex items-center justify-center gap-1.5 border border-[#272730] transition-all">
+          <i class="fas fa-share-nodes text-[#D4FF00]"></i> Compartir Ficha
+        </button>
+        <a href="product.html?id=${p.id}" class="flex-1 bg-[#18181D] hover:bg-[#25252D] text-gray-300 hover:text-white font-bold h-11 rounded-xl text-xs flex items-center justify-center gap-1.5 border border-[#272730] transition-all">
+          <i class="fas fa-arrow-up-right-from-square text-[#D4FF00]"></i> Página Completa
+        </a>
+      </div>
     </div>
   `;
   const modal = document.getElementById('productModal');
@@ -2013,6 +2021,18 @@ async function loadProductsFromSupabaseIfAvailable() {
           visibleProducts = [...PRODUCTS];
           renderProducts();
         }
+
+        // Si se abrió la página con ?id=XX o ?product=XX, abrir su ficha automáticamente
+        try {
+          const urlParams = new URLSearchParams(window.location.search);
+          const targetId = urlParams.get('id') || urlParams.get('product');
+          if (targetId && typeof openProduct === 'function') {
+            const numId = Number(targetId);
+            if (PRODUCTS.some(p => p.id === numId)) {
+              setTimeout(() => openProduct(numId), 400);
+            }
+          }
+        } catch(e) {}
       }
 
       // Suscribirse a Realtime WebSockets
@@ -2023,6 +2043,35 @@ async function loadProductsFromSupabaseIfAvailable() {
       console.warn('Error cargando desde Supabase:', e);
     }
   }
+}
+
+function shareStoreProduct(id) {
+  const origin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : 'https://carfe-tienda.vercel.app';
+  const url = `${origin}/product.html?id=${id}`;
+  const p = PRODUCTS.find(x => x.id === id);
+  if (navigator.share) {
+    navigator.share({
+      title: p ? p.name : 'Calzado Carfe®',
+      text: `Descubre ${p ? p.name : 'este calzado'} en Carfe® Calzado:`,
+      url: url
+    }).catch(() => copyToClipboard(url));
+  } else {
+    copyToClipboard(url);
+  }
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    toast('🔗', '¡Enlace Copiado!', 'El enlace siempre mostrará el precio y stock en tiempo real.');
+  }).catch(() => {
+    const temp = document.createElement('input');
+    temp.value = text;
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand('copy');
+    document.body.removeChild(temp);
+    toast('🔗', '¡Enlace Copiado!', 'Pégalo donde gustes.');
+  });
 }
 
 if (typeof window !== 'undefined') {

@@ -103,6 +103,27 @@ const CarfeSupabase = {
     }
   },
 
+  // Nuevo método: obtener un producto por su ID
+  async getProductById(id) {
+    const client = this.init();
+    if (!client) return null;
+    const numId = Number(id);
+    if (!numId || isNaN(numId)) return null;
+    try {
+      const { data, error } = await client
+        .from('products')
+        .select('*')
+        .eq('id', numId)
+        .eq('is_active', true)
+        .single();
+      if (error) throw error;
+      return data;
+    } catch(e) {
+      console.warn('[CARFE Supabase] Error obteniendo producto por ID:', e);
+      return null;
+    }
+  },
+
   async upsertProduct(product) {
     const client = this.init();
     if (!client) return null;

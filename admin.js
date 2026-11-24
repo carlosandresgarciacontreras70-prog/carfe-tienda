@@ -4016,6 +4016,12 @@ function renderInventoryTable() {
         </td>
         <td class="px-4 py-3.5 text-center">
           <div class="inline-flex items-center gap-1.5 justify-center">
+            <button onclick="sendSingleProductWA(${p.id})" class="bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all border border-emerald-200" title="Compartir enlace dinámico de WhatsApp">
+              <i class="fab fa-whatsapp"></i>
+            </button>
+            <button onclick="copyProductDirectLink(${p.id})" class="bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-700 px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all border border-blue-200" title="Copiar link oficial actualizado">
+              <i class="fas fa-link"></i>
+            </button>
             <button onclick="openEditProductModal(${p.id})" class="bg-purple-600 hover:bg-purple-700 text-white px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1" title="Modificar Stock, Precio y Costo">
               <i class="fas fa-edit"></i> Editar
             </button>
@@ -5264,8 +5270,16 @@ function renderAllProductsGrid() {
           </div>
         </div>
       </div>
-      <!-- BOTONES DE ACCIÓN: MODIFICAR, CAMBIAR FOTO, BORRAR -->
-      <div class="p-2.5 pt-0 grid grid-cols-3 gap-1.5 border-t border-gray-100 mt-2">
+      <!-- BOTONES DE COMPARTIR Y ACCIÓN -->
+      <div class="px-2.5 pb-2 flex gap-1">
+        <button onclick="sendSingleProductWA(${p.id})" class="flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold py-1 px-1.5 rounded-lg text-[10px] flex items-center justify-center gap-1 border border-emerald-200 transition-colors" title="Compartir enlace dinámico de WhatsApp">
+          <i class="fab fa-whatsapp text-emerald-600"></i> WhatsApp
+        </button>
+        <button onclick="copyProductDirectLink(${p.id})" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold py-1 px-1.5 rounded-lg text-[10px] flex items-center justify-center gap-1 border border-blue-200 transition-colors" title="Copiar enlace oficial actualizado">
+          <i class="fas fa-link text-blue-600"></i> Copiar Link
+        </button>
+      </div>
+      <div class="p-2.5 pt-0 grid grid-cols-3 gap-1.5 border-t border-gray-100 mt-1">
         <button onclick="openEditProductModal(${p.id})" class="bg-purple-600 hover:bg-purple-700 text-white font-black py-2 px-1 rounded-xl text-[11px] flex flex-col items-center justify-center gap-1 transition-all shadow-sm" title="Modificar todos los datos del producto">
           <i class="fas fa-edit text-xs"></i> <span>Editar</span>
         </button>
@@ -5820,12 +5834,15 @@ function renderCatalogGrid() {
           <button onclick="buyCatalogProductWA(${p.id})" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black py-2 px-2 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md shadow-green-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
             <i class="fab fa-whatsapp text-sm"></i> Comprar y Pagar
           </button>
-          <div class="flex gap-1">
-            <button onclick="sendSingleProductWA(${p.id})" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-1.5 px-1.5 rounded-lg text-[10px] flex items-center justify-center gap-1 transition-colors" title="Compartir ficha con foto y enlace">
-              <i class="fas fa-share-alt text-green-600"></i> Compartir
+          <div class="grid grid-cols-2 gap-1">
+            <button onclick="sendSingleProductWA(${p.id})" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold py-1.5 px-1 rounded-lg text-[10px] flex items-center justify-center gap-1 border border-emerald-200 transition-colors" title="Compartir enlace dinámico por WhatsApp">
+              <i class="fab fa-whatsapp text-emerald-600"></i> WhatsApp
             </button>
-            ${photo ? `<button onclick="window.open('${photo}','_blank')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-1.5 px-2 rounded-lg text-[10px] flex items-center justify-center gap-1 transition-colors" title="Ver Foto HD de Estudio"><i class="fas fa-eye text-purple-600"></i> Ver HD</button>` : ''}
+            <button onclick="copyProductDirectLink(${p.id})" class="bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold py-1.5 px-1 rounded-lg text-[10px] flex items-center justify-center gap-1 border border-blue-200 transition-colors" title="Copiar enlace oficial actualizado">
+              <i class="fas fa-link text-blue-600"></i> Copiar Link
+            </button>
           </div>
+          ${photo ? `<button onclick="window.open('${photo}','_blank')" class="w-full bg-gray-50 hover:bg-gray-100 text-gray-600 font-bold py-1 px-2 rounded-lg text-[9px] flex items-center justify-center gap-1 border border-gray-100 transition-colors" title="Ver Foto HD de Estudio"><i class="fas fa-eye text-purple-600"></i> Ver Foto Original HD</button>` : ''}
         </div>
       </div>
     `;
@@ -5906,22 +5923,46 @@ Por favor facilítenme los datos de cuenta o confirmación de despacho para real
   toast('🛍️', 'WhatsApp Abierto', `Generando compra y pago para ${p.name}`);
 }
 
+function getStoreBaseUrl() {
+  if (typeof window !== 'undefined' && window.location && window.location.origin && window.location.origin.startsWith('http')) {
+    return window.location.origin;
+  }
+  return 'https://carfe-tienda.vercel.app';
+}
+
+function getProductShareUrl(id) {
+  const origin = getStoreBaseUrl();
+  return `${origin}/product.html?id=${id}`;
+}
+
+function copyProductDirectLink(id) {
+  const p = PRODUCTS.find(x => x.id === id || String(x.id) === String(id));
+  const shareUrl = getProductShareUrl(id);
+  navigator.clipboard.writeText(shareUrl).then(() => {
+    toast('🔗', 'Enlace Copiado', `El link de "${p ? p.name : 'calzado'}" siempre mostrará los datos y precio actualizados.`);
+  }).catch(() => {
+    const temp = document.createElement('input');
+    temp.value = shareUrl;
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand('copy');
+    document.body.removeChild(temp);
+    toast('🔗', 'Enlace Copiado', `Link copiado: ${shareUrl}`);
+  });
+}
+
 function prepareWAMessage(mode = catalogMsgMode) {
   catalogMsgMode = mode;
   const products = catalogFilter === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.cat === catalogFilter);
-  const storePhone = getAdminStoreWAPhone();
+  const storeBaseUrl = getStoreBaseUrl();
 
   let msg = '';
   if (mode === 'photos') {
     const lines = products.map((p, idx) => {
-      const photo = p.img || p.photoData || 'https://carfe.com/catalogo';
-      const buyText = encodeURIComponent(`👋 Hola Carfe®, quiero comprar y pagar el modelo *${p.name}* (${formatCOP(p.price)}). Por favor envíenme los datos de cuenta (Nequi / Daviplata / Bancolombia).`);
-      const buyLink = `https://wa.me/${storePhone}?text=${buyText}`;
+      const pUrl = getProductShareUrl(p.id);
       return `${idx + 1}️⃣ *${p.name.toUpperCase()}*\n` +
              `   • Colección: ${p.cat === 'hombre' ? 'Hombre' : 'Mujer'}\n` +
-             `   • Precio: ${formatCOP(p.price)}\n` +
-             `   • 📸 Ver Foto: ${photo}\n` +
-             `   • 💳 Comprar y Pagar: ${buyLink}`;
+             `   • 🔗 Ver Fotos, Tallas y Precio en Vivo: ${pUrl}`;
     }).join('\n\n');
 
     msg = `✨ *CATÁLOGO OFICIAL CARFE® 2026* ✨\n` +
@@ -5929,19 +5970,20 @@ function prepareWAMessage(mode = catalogMsgMode) {
           `━━━━━━━━━━━━━━━━━━━━\n\n` +
           `${lines}\n\n` +
           `━━━━━━━━━━━━━━━━━━━━\n` +
+          `🛍️ *Catálogo Completo en Tienda Web:* ${storeBaseUrl}/\n` +
           `📦 *Envíos a todo el país* • Pagos seguros por Nequi, Daviplata y Bancolombia\n` +
-          `📲 *Toca el enlace de "Comprar y Pagar" de cualquier calzado para generar tu compra y pago directo por WhatsApp.*`;
+          `📲 *Toca cualquier enlace para ver la información actualizada en tiempo real.*`;
   } else {
     const lines = products.map(p => {
-      const buyText = encodeURIComponent(`👋 Hola Carfe®, quiero comprar y pagar el modelo *${p.name}* (${formatCOP(p.price)})`);
-      const buyLink = `https://wa.me/${storePhone}?text=${buyText}`;
-      return `• *${p.name}* (${p.cat === 'hombre' ? 'Hombre' : 'Mujer'}): ${formatCOP(p.price)} → 💳 Comprar: ${buyLink}`;
+      const pUrl = getProductShareUrl(p.id);
+      return `• *${p.name}* (${p.cat === 'hombre' ? 'Hombre' : 'Mujer'}): 👉 ${pUrl}`;
     }).join('\n');
     msg = `*Catálogo Oficial Carfe® Calzado*\n\n` +
-          `Conoce nuestra colección 2026 en cuero y materiales de alto confort:\n\n` +
+          `Conoce nuestra colección 2026 con precios y stock en tiempo real:\n\n` +
           `${lines}\n\n` +
+          `🛍️ Catálogo completo: ${storeBaseUrl}/\n` +
           `📦 Envíos a todo el país • Pagos seguros (Nequi, Daviplata, Bancolombia)\n` +
-          `📱 Escríbenos para pedidos y compras directas.`;
+          `📱 Abre cualquier enlace para ver tallas y ordenar directamente.`;
   }
 
   const el = document.getElementById('waMessage');
@@ -5956,31 +5998,25 @@ function sendCatalogWA() {
     ? `https://wa.me/${code}${phone}?text=${encodeURIComponent(msg)}`
     : `https://wa.me/?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
-  toast('📱', 'WhatsApp abierto', 'Enviando catálogo con fotos y enlaces...');
+  toast('📱', 'WhatsApp abierto', 'Enviando catálogo con enlaces sincronizados en vivo...');
 }
 
 function sendSingleProductWA(id) {
   const p = PRODUCTS.find(x => x.id === id || String(x.id) === String(id));
   if (!p) return;
-  const storePhone = getAdminStoreWAPhone();
-  const photo = p.img || p.photoData || 'https://carfe.com';
-  const buyText = encodeURIComponent(`👋 Hola Carfe®, quiero comprar y pagar el calzado *${p.name}* (${formatCOP(p.price)}). ¿Me facilitan los datos de Nequi / Daviplata / Bancolombia?`);
-  const buyLink = `https://wa.me/${storePhone}?text=${buyText}`;
+  const shareUrl = getProductShareUrl(p.id);
 
   const msg = 
-`👟 *CARFE® CALZADO — FICHA OFICIAL DE COMPRA*
+`👟 *CARFE® CALZADO — FICHA EN VIVO*
 ━━━━━━━━━━━━━━━━━━━━
 ✨ *Modelo:* ${p.name}
 🏷️ *Colección:* ${p.cat === 'hombre' ? 'Hombre' : 'Mujer'}
-💰 *Precio Oficial:* ${formatCOP(p.price)}
-📸 *Foto HD del Calzado:* ${photo}
-━━━━━━━━━━━━━━━━━━━━
-💳 *MÉTODOS DE PAGO DISPONIBLES:*
-• Nequi / Daviplata / Bancolombia
-• Transferencia Inmediata / PSE
 
-👉 *TOCA AQUÍ PARA COMPRAR Y PAGAR POR WHATSAPP:*
-${buyLink}`;
+🔗 *Toca el enlace para ver fotos HD, tallas disponibles y el precio oficial actualizado en tiempo real:*
+👉 ${shareUrl}
+━━━━━━━━━━━━━━━━━━━━
+📦 *Envíos a todo el país* • Pagos seguros por Nequi, Daviplata y Bancolombia
+📲 *Toca el link para consultar disponibilidad y pedir directamente.*`;
 
   const code = document.getElementById('waCountryCode')?.value || '57';
   const phone = document.getElementById('waPhone')?.value.replace(/\D/g, '');
@@ -5989,7 +6025,7 @@ ${buyLink}`;
     : `https://wa.me/?text=${encodeURIComponent(msg)}`;
 
   window.open(url, '_blank');
-  toast('📱', 'Ficha enviada a WhatsApp', `${p.name} con botón de compra y pago.`);
+  toast('📱', 'Ficha enviada a WhatsApp', `${p.name} con enlace sincronizado en tiempo real.`);
 }
 
 function sendWATemplate(type) {
@@ -8202,9 +8238,8 @@ async function loadAdminProductsFromSupabase() {
         reviews: p.reviews_count || 1
       }));
 
-      // Respetar eliminaciones locales temporales si las hubiera
-      const deletedIds = JSON.parse(localStorage.getItem('ss_deleted_products') || '[]');
-      PRODUCTS = mapped.filter(p => !deletedIds.includes(p.id) && !deletedIds.includes(String(p.id)));
+      // Supabase PostgreSQL es la única fuente de verdad oficial
+      PRODUCTS = mapped;
 
       // Sincronizar inventoryData
       inventoryData = PRODUCTS.map(p => ({

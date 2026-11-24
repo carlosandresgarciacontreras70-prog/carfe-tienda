@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="pageTitle">Cargando Calzado... — CARFE® Drop 2026</title>
+  <link rel="icon" type="image/jpeg" href="assets/logo.jpg">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0A0A0C">
+  
+  <!-- Open Graph / Meta Compartir -->
+  <meta property="og:type" content="product">
+  <meta property="og:title" id="ogTitle" content="Calzado Exclusivo CARFE® 2026">
+  <meta property="og:description" id="ogDesc" content="Calzado en cuero 100% legítimo con suela ergonómica. Envíos a todo el país.">
+  <meta property="og:image" id="ogImage" content="assets/logo.jpg">
+
+  <!-- Tipografías y Estilos -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif; background-color: #0A0A0C; color: #F4F3EF; }
+    .badge-volt { background: #D4FF00; color: #000; font-family: 'JetBrains Mono', monospace; font-weight: 800; }
+    .sz-btn.active { border-color: #D4FF00; background: #D4FF00; color: #000; box-shadow: 0 0 15px rgba(212,255,0,0.3); }
+    .clr-btn.active { border-color: #D4FF00; background: rgba(212,255,0,0.15); color: #D4FF00; }
+    @keyframes pulseLive { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.15); } }
+    .live-dot { animation: pulseLive 2s infinite ease-in-out; }
+    @keyframes toastFade { 0% { opacity: 0; transform: translateY(15px); } 100% { opacity: 1; transform: translateY(0); } }
+    .toast-anim { animation: toastFade 0.3s ease-out forwards; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#0A0A0C] text-[#F4F3EF]">
+
+  <!-- Top Live Header Ticker -->
+  <div class="bg-[#050507] border-b border-[#1E1E24] text-[#A1A1AA] text-[11px] font-mono py-2 px-4 tracking-wider flex items-center justify-between uppercase">
+    <div class="flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full bg-[#10B981] live-dot shadow-[0_0_8px_#10B981]"></span>
+      <span class="text-white font-bold">SINCRONIZACIÓN EN VIVO SUPABASE</span>
+      <span class="hidden sm:inline text-[#52525B]">• PRECIOS Y STOCK OFICIALES</span>
+    </div>
+    <div class="text-[10px] text-[#A1A1AA]">
+      <a href="index.html" class="hover:text-[#D4FF00] transition-colors flex items-center gap-1">
+        <i class="fas fa-store"></i> Ver Catálogo Completo →
+      </a>
+    </div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="bg-[#0D0D11]/90 backdrop-blur-md border-b border-[#22222A] sticky top-0 z-40 px-4 sm:px-8 py-3.5 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2 group">
+      <div class="w-8 h-8 rounded-lg bg-[#D4FF00] flex items-center justify-center text-black font-black text-sm group-hover:scale-105 transition-transform">
+        C
+      </div>
+      <div>
+        <span class="text-base font-black tracking-wider text-white">CARFE<span class="text-[#D4FF00]">®</span></span>
+        <span class="text-[9px] font-mono block text-[#71717A] -mt-1 tracking-widest">CALZADO OFICIAL</span>
+      </div>
+    </a>
+
+    <div class="flex items-center gap-3">
+      <button onclick="shareCurrentProduct()" class="bg-[#18181E] hover:bg-[#252530] text-gray-200 border border-[#2E2E3A] px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95">
+        <i class="fas fa-share-nodes text-[#D4FF00]"></i>
+        <span class="hidden sm:inline">Compartir</span>
+      </button>
+      <a href="index.html" class="bg-[#D4FF00] hover:bg-[#e0ff33] text-black px-4 py-1.5 rounded-xl text-xs font-black tracking-wide transition-all shadow-md active:scale-95">
+        Ir a Tienda
+      </a>
+    </div>
+  </nav>
+
+  <!-- Notification Banner for Live Updates -->
+  <div id="liveAlertBanner" class="hidden bg-emerald-950/80 border-b border-emerald-500/30 text-emerald-300 text-xs py-2 px-4 text-center font-mono font-medium">
+    ⚡ <span id="liveAlertText">Información actualizada en tiempo real con Supabase.</span>
+  </div>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 md:p-8">
+    
+    <!-- Loading State -->
+    <div id="loadingState" class="py-20 flex flex-col items-center justify-center text-center">
+      <div class="w-14 h-14 border-4 border-[#22222A] border-t-[#D4FF00] rounded-full animate-spin mb-4"></div>
+      <p class="font-mono text-sm text-gray-400">Consultando información oficial en Supabase...</p>
+    </div>
+
+    <!-- Error / Not Found State -->
+    <div id="notFoundState" class="hidden py-16 text-center max-w-md mx-auto">
+      <div class="w-16 h-16 bg-red-900/20 border border-red-500/30 text-red-400 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
+        <i class="fas fa-shoe-prints"></i>
+      </div>
+      <h2 class="text-xl font-black text-white mb-2">Calzado Fuera de Catálogo</h2>
+      <p class="text-sm text-gray-400 mb-6">El modelo que buscas fue vendido, actualizado o retirado de la colección activa.</p>
+      <a href="index.html" class="inline-flex items-center gap-2 bg-[#D4FF00] text-black font-black px-6 py-3 rounded-xl text-xs uppercase tracking-wider hover:bg-[#cbf700] transition-all">
+        <i class="fas fa-arrow-left"></i> Explorar Catálogo Disponible
+      </a>
+    </div>
+
+    <!-- Product View -->
+    <div id="productView" class="hidden">
+      <!-- Breadcrumb -->
+      <div class="text-[11px] font-mono text-gray-500 mb-6 flex items-center gap-2 flex-wrap">
+        <a href="index.html" class="hover:text-[#D4FF00]">Inicio</a>
+        <span>/</span>
+        <a href="index.html" class="hover:text-[#D4FF00]" id="breadCat">Catálogo</a>
+        <span>/</span>
+        <span class="text-gray-300" id="breadName">Calzado</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+        
+        <!-- Left Column: Image Showcase -->
+        <div class="lg:col-span-7 flex flex-col gap-4">
+          <div class="relative w-full aspect-square sm:aspect-[4/3] bg-[#141419] rounded-3xl border border-[#23232C] overflow-hidden flex items-center justify-center shadow-2xl p-4 sm:p-8">
+            <span id="productBadge" class="absolute top-4 left-4 badge-volt text-[11px] px-3 py-1 rounded-md uppercase tracking-wider shadow-lg">NUEVO</span>
+            <span id="productStockBadge" class="absolute top-4 right-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 live-dot"></span>
+              <span id="productStockText">EN STOCK</span>
+            </span>
+
+            <img id="productImage" src="assets/logo.jpg" alt="Calzado Carfe" class="max-w-full max-h-full object-contain drop-shadow-2xl transition-transform duration-300 hover:scale-105 select-none">
+          </div>
+
+          <!-- Feature Trust Badges -->
+          <div class="grid grid-cols-3 gap-2.5 sm:gap-3 text-center">
+            <div class="bg-[#121217] border border-[#22222B] rounded-2xl p-3">
+              <i class="fas fa-truck-fast text-[#D4FF00] text-base mb-1"></i>
+              <div class="text-[11px] font-bold text-white">Envíos Colombia</div>
+              <div class="text-[9px] text-gray-500 font-mono">2 a 4 días hábiles</div>
+            </div>
+            <div class="bg-[#121217] border border-[#22222B] rounded-2xl p-3">
+              <i class="fas fa-shield-halved text-emerald-400 text-base mb-1"></i>
+              <div class="text-[11px] font-bold text-white">100% Cuero Legítimo</div>
+              <div class="text-[9px] text-gray-500 font-mono">Garantía de Fábrica</div>
+            </div>
+            <div class="bg-[#121217] border border-[#22222B] rounded-2xl p-3">
+              <i class="fas fa-wallet text-amber-400 text-base mb-1"></i>
+              <div class="text-[11px] font-bold text-white">Pagos Seguros</div>
+              <div class="text-[9px] text-gray-500 font-mono">Nequi / Daviplata / PSE</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Product Info & Purchase Action -->
+        <div class="lg:col-span-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span id="productBrand" class="text-xs font-mono font-bold text-[#D4FF00] uppercase tracking-wider">CARFE®</span>
+              <span class="text-gray-600">•</span>
+              <span id="productCategory" class="text-xs font-mono text-gray-400 uppercase tracking-wider">HOMBRE</span>
+            </div>
+
+            <h1 id="productName" class="text-2xl sm:text-3xl font-black text-white tracking-tight leading-snug mb-3">Air Runner Pro</h1>
+
+            <!-- Price Box -->
+            <div class="bg-[#141419] border border-[#24242F] rounded-2xl p-4 mb-6">
+              <div class="text-[10px] font-mono text-gray-400 uppercase tracking-wider mb-1">PRECIO OFICIAL EN TIEMPO REAL:</div>
+              <div class="flex items-baseline gap-3 flex-wrap">
+                <span id="productPrice" class="text-3xl font-black text-white font-mono tracking-tight">$0</span>
+                <span id="productOldPrice" class="text-sm font-mono text-gray-500 line-through hidden">$0</span>
+                <span id="savingsBadge" class="hidden text-[10px] font-mono font-bold bg-[#FF1E40]/20 text-[#FF6B6B] border border-[#FF1E40]/30 px-2 py-0.5 rounded">OFERTA</span>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-6">
+              <h3 class="text-xs font-mono font-bold text-gray-400 uppercase tracking-wider mb-2">DESCRIPCIÓN DEL MODELO:</h3>
+              <p id="productDesc" class="text-sm text-gray-300 leading-relaxed bg-[#111116] p-4 rounded-xl border border-[#1F1F28]">
+                Calzado exclusivo Carfe® en cuero 100% legítimo con suela ergonómica de alto confort.
+              </p>
+            </div>
+
+            <!-- Color Selector -->
+            <div class="mb-5" id="colorSection">
+              <label class="text-xs font-mono font-bold text-gray-400 uppercase tracking-wider mb-2 block">COLORWAY DISPONIBLE:</label>
+              <div class="flex gap-2 flex-wrap" id="colorContainer"></div>
+            </div>
+
+            <!-- Size Selector -->
+            <div class="mb-6" id="sizeSection">
+              <div class="flex items-center justify-between mb-2">
+                <label class="text-xs font-mono font-bold text-gray-400 uppercase tracking-wider">TALLA (COL / EUR):</label>
+                <span class="text-[10px] font-mono text-gray-500">Horma exacta nacional</span>
+              </div>
+              <div class="flex gap-2 flex-wrap" id="sizeContainer"></div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="space-y-3 pt-4 border-t border-[#202028]">
+            <button onclick="orderViaWhatsApp()" class="w-full bg-[#10B981] hover:bg-[#0da06f] text-black font-black py-4 px-6 rounded-2xl text-sm flex items-center justify-center gap-2.5 transition-all shadow-xl shadow-emerald-500/20 active:scale-98">
+              <i class="fab fa-whatsapp text-2xl"></i>
+              <span>COMPRAR AHORA POR WHATSAPP</span>
+            </button>
+
+            <button onclick="copyProductLink()" class="w-full bg-[#17171E] hover:bg-[#20202A] text-gray-300 hover:text-white font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 border border-[#2A2A36] transition-all">
+              <i class="fas fa-link text-[#D4FF00]"></i>
+              <span>Copiar Enlace Sincronizado</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Other Products Showcase -->
+      <div class="mt-16 pt-12 border-t border-[#1F1F27]">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-lg font-black text-white tracking-wide">MÁS MODELOS DE LA COLECCIÓN</h2>
+          <a href="index.html" class="text-xs font-mono text-[#D4FF00] hover:underline">Ver Todos →</a>
+        </div>
+        <div id="otherProductsGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-[#070709] border-t border-[#1C1C22] py-8 text-center text-xs text-gray-500 font-mono mt-auto">
+    <div class="max-w-4xl mx-auto px-4 space-y-2">
+      <div class="text-gray-300 font-black">CARFE® CALZADO COLOMBIANO</div>
+      <p class="text-[11px]">Todos los derechos reservados © 2026. Conexión directa y persistente a base de datos en tiempo real.</p>
+    </div>
+  </footer>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="hidden fixed bottom-6 right-6 z-50 bg-[#16161D] text-white border border-[#2D2D3B] px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 toast-anim">
+    <div id="toastIcon" class="text-xl">✅</div>
+    <div>
+      <div id="toastTitle" class="text-xs font-bold font-mono">Notificación</div>
+      <div id="toastMsg" class="text-xs text-gray-400">Acción completada</div>
+    </div>
+  </div>
+
+  <script>
+    let currentProduct = null;
+    let selectedColor = '';
+    let selectedSize = '';
+    const STORE_PHONE = '573232692578'; // WhatsApp Oficial Carfe®
+
+    function formatCOP(v) {
+      return '$' + Math.round(v || 0).toLocaleString('es-CO');
+    }
+
+    function showToast(icon, title, msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toastIcon').textContent = icon;
+      document.getElementById('toastTitle').textContent = title;
+      document.getElementById('toastMsg').textContent = msg;
+      t.classList.remove('hidden');
+      setTimeout(() => { t.classList.add('hidden'); }, 3500);
+    }
+
+    function getParam(param) {
+      return new URLSearchParams(window.location.search).get(param);
+    }
+
+    async function initProductPage() {
+      const prodId = getParam('id') || getParam('product');
+      if (!prodId) {
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('notFoundState').classList.remove('hidden');
+        return;
+      }
+
+      await loadProductData(prodId);
+
+      // Suscribirse a Supabase Realtime para reflejar cualquier cambio en vivo
+      if (typeof CarfeSupabase !== 'undefined' && CarfeSupabase.isConfigured()) {
+        CarfeSupabase.subscribeToProducts((payload) => {
+          console.log('[Product Realtime] Evento recibido:', payload);
+          if (payload && payload.new && String(payload.new.id) === String(prodId)) {
+            // Producto actualizado
+            if (payload.new.is_active === false) {
+              document.getElementById('productView').classList.add('hidden');
+              document.getElementById('notFoundState').classList.remove('hidden');
+              showLiveAlert('Este producto acaba de ser retirado del catálogo.');
+            } else {
+              renderProduct(payload.new);
+              showLiveAlert('¡El precio o disponibilidad de este calzado se actualizó en vivo!');
+            }
+          } else if (payload && payload.eventType === 'DELETE' && String(payload.old?.id) === String(prodId)) {
+            document.getElementById('productView').classList.add('hidden');
+            document.getElementById('notFoundState').classList.remove('hidden');
+            showLiveAlert('Este producto fue eliminado del inventario.');
+          }
+        });
+      }
+    }
+
+    function showLiveAlert(text) {
+      const banner = document.getElementById('liveAlertBanner');
+      const bannerText = document.getElementById('liveAlertText');
+      if (banner && bannerText) {
+        bannerText.textContent = text;
+        banner.classList.remove('hidden');
+        setTimeout(() => banner.classList.add('hidden'), 5000);
+      }
+    }
+
+    async function loadProductData(id) {
+      let prod = null;
+
+      // 1. Intentar cargar desde Supabase PostgreSQL
+      if (typeof CarfeSupabase !== 'undefined' && CarfeSupabase.isConfigured()) {
+        try {
+          prod = await CarfeSupabase.getProductById(id);
+        } catch(e) {
+          console.warn('[ProductPage] Error consultando Supabase:', e);
+        }
+      }
+
+      // 2. Si falló, intentar fallback a localStorage si existe
+      if (!prod) {
+        try {
+          const localList = JSON.parse(localStorage.getItem('carfe_inventory_data') || '[]');
+          prod = localList.find(p => String(p.id) === String(id));
+        } catch(e) {}
+      }
+
+      document.getElementById('loadingState').classList.add('hidden');
+
+      if (!prod || prod.is_active === false) {
+        document.getElementById('notFoundState').classList.remove('hidden');
+        return;
+      }
+
+      renderProduct(prod);
+      loadOtherProducts(id);
+    }
+
+    function renderProduct(p) {
+      currentProduct = p;
+      document.getElementById('productView').classList.remove('hidden');
+
+      // Título & Metadata
+      const name = p.name || 'Calzado Carfe®';
+      document.title = `${name} — CARFE® Drop 2026`;
+      document.getElementById('pageTitle').textContent = `${name} — CARFE® Drop 2026`;
+      document.getElementById('productName').textContent = name;
+      document.getElementById('breadName').textContent = name;
+
+      const catText = (p.category || p.cat || 'hombre').toUpperCase();
+      document.getElementById('productCategory').textContent = catText;
+      document.getElementById('breadCat').textContent = catText;
+      document.getElementById('productBrand').textContent = (p.brand || 'CARFE®').toUpperCase();
+
+      // Precios
+      const price = Number(p.price) || 0;
+      const oldPrice = p.old_price || p.oldPrice;
+      document.getElementById('productPrice').textContent = formatCOP(price);
+
+      if (oldPrice && Number(oldPrice) > price) {
+        const oldEl = document.getElementById('productOldPrice');
+        oldEl.textContent = formatCOP(Number(oldPrice));
+        oldEl.classList.remove('hidden');
+        document.getElementById('savingsBadge').classList.remove('hidden');
+      } else {
+        document.getElementById('productOldPrice').classList.add('hidden');
+        document.getElementById('savingsBadge').classList.add('hidden');
+      }
+
+      // Stock
+      const stock = Number(p.stock !== undefined ? p.stock : 12);
+      const stockEl = document.getElementById('productStockText');
+      if (stock <= 0) {
+        stockEl.textContent = 'AGOTADO';
+        stockEl.parentElement.className = 'absolute top-4 right-4 bg-red-500/10 border border-red-500/30 text-red-400 text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg flex items-center gap-1.5';
+      } else if (stock <= 5) {
+        stockEl.textContent = `¡ÚLTIMOS ${stock} PARES!`;
+        stockEl.parentElement.className = 'absolute top-4 right-4 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg flex items-center gap-1.5';
+      } else {
+        stockEl.textContent = 'DISPONIBLE EN BODEGA';
+        stockEl.parentElement.className = 'absolute top-4 right-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg flex items-center gap-1.5';
+      }
+
+      // Imagen
+      const img = p.image_url || p.img || p.photoData || 'assets/logo.jpg';
+      document.getElementById('productImage').src = img;
+
+      // Badge
+      const badge = p.badge || 'new';
+      const badgeEl = document.getElementById('productBadge');
+      badgeEl.textContent = badge.toUpperCase();
+
+      // Descripción
+      const desc = p.description || p.desc || 'Calzado exclusivo Carfe® en cuero 100% legítimo con suela ergonómica de alto confort.';
+      document.getElementById('productDesc').textContent = desc;
+
+      // Colores
+      const colors = Array.isArray(p.colors) && p.colors.length ? p.colors : ['Negro', 'Café'];
+      selectedColor = colors[0];
+      const clrContainer = document.getElementById('colorContainer');
+      clrContainer.innerHTML = colors.map((c, i) => `
+        <button onclick="selectColor('${c}', this)" class="clr-btn px-4 py-2 rounded-xl border text-xs font-bold transition-all ${i === 0 ? 'active' : 'border-[#272733] bg-[#16161D] text-gray-300 hover:border-gray-500'}">
+          ${c}
+        </button>
+      `).join('');
+
+      // Tallas
+      const defaultSizes = (p.category === 'mujer' || p.cat === 'mujer') ? [35, 36, 37, 38, 39, 40] : [38, 39, 40, 41, 42, 43];
+      const sizes = Array.isArray(p.sizes) && p.sizes.length ? p.sizes : defaultSizes;
+      selectedSize = sizes[0];
+      const szContainer = document.getElementById('sizeContainer');
+      szContainer.innerHTML = sizes.map((s, i) => `
+        <button onclick="selectSize('${s}', this)" class="sz-btn w-12 h-12 rounded-xl border text-sm font-mono font-black transition-all ${i === 0 ? 'active' : 'border-[#272733] bg-[#16161D] text-gray-200 hover:border-[#D4FF00]'}">
+          ${s}
+        </button>
+      `).join('');
+    }
+
+    function selectColor(clr, btn) {
+      selectedColor = clr;
+      document.querySelectorAll('.clr-btn').forEach(b => {
+        b.className = 'clr-btn px-4 py-2 rounded-xl border text-xs font-bold transition-all border-[#272733] bg-[#16161D] text-gray-300 hover:border-gray-500';
+      });
+      btn.className = 'clr-btn px-4 py-2 rounded-xl border text-xs font-bold transition-all active';
+    }
+
+    function selectSize(sz, btn) {
+      selectedSize = sz;
+      document.querySelectorAll('.sz-btn').forEach(b => {
+        b.className = 'sz-btn w-12 h-12 rounded-xl border text-sm font-mono font-black transition-all border-[#272733] bg-[#16161D] text-gray-200 hover:border-[#D4FF00]';
+      });
+      btn.className = 'sz-btn w-12 h-12 rounded-xl border text-sm font-mono font-black transition-all active';
+    }
+
+    function orderViaWhatsApp() {
+      if (!currentProduct) return;
+      const name = currentProduct.name;
+      const price = formatCOP(currentProduct.price);
+      const url = window.location.href;
+
+      const msg = `👋 ¡Hola Carfe®! Quiero comprar el modelo:\n\n` +
+                  `👟 *${name.toUpperCase()}*\n` +
+                  `💰 *Precio:* ${price}\n` +
+                  `🎨 *Color:* ${selectedColor}\n` +
+                  `📏 *Talla:* ${selectedSize}\n\n` +
+                  `🔗 *Ficha Oficial:* ${url}\n\n` +
+                  `¿Por favor me confirman disponibilidad de despacho y los datos de pago (Nequi / Daviplata / Bancolombia)?`;
+
+      const waUrl = `https://wa.me/${STORE_PHONE}?text=${encodeURIComponent(msg)}`;
+      window.open(waUrl, '_blank');
+    }
+
+    function shareCurrentProduct() {
+      const url = window.location.href;
+      if (navigator.share) {
+        navigator.share({
+          title: currentProduct ? currentProduct.name : 'Calzado Carfe®',
+          text: `Mira este modelo exclusivo de Carfe®: ${currentProduct ? currentProduct.name : ''}`,
+          url: url
+        }).catch(() => copyProductLink());
+      } else {
+        copyProductLink();
+      }
+    }
+
+    function copyProductLink() {
+      const url = window.location.href;
+      navigator.clipboard.writeText(url).then(() => {
+        showToast('🔗', '¡Enlace Copiado!', 'El link siempre mostrará los datos y precio actualizados.');
+      }).catch(() => {
+        const temp = document.createElement('input');
+        temp.value = url;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        showToast('🔗', '¡Enlace Copiado!', 'Pégalo en WhatsApp o donde desees.');
+      });
+    }
+
+    async function loadOtherProducts(excludeId) {
+      if (typeof CarfeSupabase === 'undefined' || !CarfeSupabase.isConfigured()) return;
+      try {
+        const all = await CarfeSupabase.getProducts();
+        if (!all || !all.length) return;
+        const others = all.filter(p => String(p.id) !== String(excludeId)).slice(0, 4);
+        const grid = document.getElementById('otherProductsGrid');
+        if (!grid || !others.length) return;
+
+        grid.innerHTML = others.map(p => `
+          <a href="product.html?id=${p.id}" class="group bg-[#121217] hover:bg-[#16161E] border border-[#23232C] hover:border-[#D4FF00] rounded-2xl p-3 flex flex-col justify-between transition-all">
+            <div class="aspect-square rounded-xl bg-[#191921] overflow-hidden mb-2.5 flex items-center justify-center p-2">
+              <img src="${p.image_url || 'assets/logo.jpg'}" alt="${p.name}" class="w-full h-full object-contain group-hover:scale-105 transition-transform">
+            </div>
+            <div>
+              <div class="text-[9px] font-mono text-[#D4FF00] uppercase font-bold">${p.category || 'Hombre'}</div>
+              <div class="text-xs font-bold text-white group-hover:text-[#D4FF00] truncate transition-colors">${p.name}</div>
+              <div class="text-xs font-mono font-black text-gray-300 mt-1">${formatCOP(p.price)}</div>
+            </div>
+          </a>
+        `).join('');
+      } catch(e) {}
+    }
+
+    window.addEventListener('DOMContentLoaded', initProductPage);
+  </script>
+</body>
+</html>
